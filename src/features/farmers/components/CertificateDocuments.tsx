@@ -1,0 +1,123 @@
+"use client";
+
+import { useRef, useState, type ChangeEvent, type DragEvent, type RefObject } from "react";
+import { cn } from "@/lib/utils";
+import { CERTIFICATE_BADGE, certificateFromFile, type Certificate } from "../qualifications";
+
+interface CertificateDocumentsProps {
+  certificates: Certificate[];
+  /** Called with the new pending records for every file dropped or browsed. */
+  onAdd: (added: Certificate[]) => void;
+  /** Pass a ref to open the file picker from outside (e.g. a header "Upload certificate" button). */
+  inputRef?: RefObject<HTMLInputElement | null>;
+  className?: string;
+}
+
+// Certificates list + compact drop bar; uploads are added as pending until a supervisor verifies them.
+export function CertificateDocuments({ certificates, onAdd, inputRef, className }: CertificateDocumentsProps) {
+  const localRef = useRef<HTMLInputElement>(null);
+  const fileInput = inputRef ?? localRef;
+  const [isDragging, setIsDragging] = useState(false);
+
+  const addFiles = (files: FileList | null) => {
+    if (!files?.length) return;
+    onAdd(Array.from(files).map(certificateFromFile));
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    addFiles(e.target.files);
+    e.target.value = "";
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    addFiles(e.dataTransfer.files);
+  };
+
+  return (
+    <div className={cn("flex flex-col gap-3", className)}>
+      <div>
+        <h3 className="text-[15px] font-semibold text-[#1a2b3c]">Certificates &amp; documents</h3>
+        <p className="mt-1 text-[13px] text-[#4a5568]">
+          Agrilearn certificates appear automatically. Upload external certificates for supervisor verification.
+        </p>
+      </div>
+
+      <ul className="overflow-hidden rounded-lg border border-[#E5E7EB]">
+        {certificates.map((cert) => {
+          const badge = CERTIFICATE_BADGE[cert.status];
+          return (
+            <li key={cert.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[#E5E7EB] bg-[#FAFBFC] px-3 py-3 last:border-b-0">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#E6F5F0] text-brand-green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                  <path d="M14 2v6h6" />
+                </svg>
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className="text-[14px] font-semibold text-[#1a2b3c]">{cert.title}</span>
+                  <span className={cn("rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide", badge.className)}>
+                    {badge.label}
+                  </span>
+                </div>
+                <p className="mt-1 truncate text-[12.5px] text-[#4a5568]">{cert.issuer}</p>
+              </div>
+
+              <div className="flex w-full items-center justify-between gap-3 pl-[52px] text-[13px] sm:w-auto sm:shrink-0 sm:flex-col sm:items-end sm:gap-1 sm:pl-0">
+                <span className="text-[#4a5568]">{cert.fileMeta ?? "—"}</span>
+                <div className="flex items-center gap-3 font-semibold">
+                  <a
+                    href={cert.url ?? "#"}
+                    target={cert.url ? "_blank" : undefined}
+                    rel="noreferrer"
+                    onClick={(e) => { if (!cert.url) e.preventDefault(); }}
+                    className="text-brand-green hover:underline"
+                  >
+                    View
+                  </a>
+                  <button type="button" onClick={() => fileInput.current?.click()} className="text-[#4a5568] hover:text-[#1a2b3c]">
+                    Replace
+                  </button>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Compact drop bar */}
+      <div
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={handleDrop}
+        className={cn(
+          "flex items-center justify-center gap-2 rounded-lg border-2 border-dashed bg-[#FAFBFC] px-4 py-3.5 text-[13px] text-[#4a5568] transition-colors",
+          isDragging ? "border-brand-green bg-[#E6F5F0]" : "border-[#D1D5DB]"
+        )}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+        </svg>
+        <span>
+          Drag a file here or{" "}
+          <button type="button" onClick={() => fileInput.current?.click()} className="font-semibold text-brand-green hover:underline">
+            browse your computer
+          </button>
+          {" "}· PDF, JPG or PNG · max 5 MB
+        </span>
+      </div>
+
+      <input
+        ref={fileInput}
+        type="file"
+        multiple
+        accept="image/jpeg,image/png,application/pdf"
+        className="hidden"
+        onChange={handleInputChange}
+      />
+    </div>
+  );
+}

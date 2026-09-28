@@ -1,0 +1,188 @@
+import type { FilterFieldConfig } from "@/components/ui/AdvancedFiltersDrawer";
+import type { FilterOption } from "@/components/ui/FilterDropdown";
+import type {
+  EvidenceDocument,
+  PlannerDay,
+  PriorityFarmer,
+  SubmittedOutcome,
+  TodaysVisit,
+  VisitRecord,
+  VisitTimelineEntry,
+} from "./types";
+
+export const TOTAL_VISITS = 8412;
+
+export const VISIT_STATS = {
+  plannedThisWeek: 24,
+  completed: 12,
+  missed: 3,
+  onTimeRate: "82%",
+};
+
+const FARMERS = {
+  lelise: { id: "lelise-gudeta", name: "Lelise Gudeta", email: "lelise.gudeta@oan.gov.et" },
+  chaltu: { id: "chaltu-dinkesa", name: "Chaltu Dinkesa", email: "chaltu.dinkesa@oan.gov.et" },
+  abebe: { id: "abebe-kebede", name: "Abebe Kebede", email: "abebe.kebede@oan.gov.et" },
+  tadesse: { id: "tadesse-alemu", name: "Tadesse Alemu", email: "tadesse.alemu@oan.gov.et", avatar: "/images/tadesse_profile.png" },
+};
+
+const visit = (
+  id: string,
+  date: string,
+  time: string,
+  agent: string,
+  farmer: (typeof FARMERS)[keyof typeof FARMERS],
+  kebele: string,
+  purpose: string,
+  status: VisitRecord["status"],
+): VisitRecord => ({
+  id,
+  date,
+  time,
+  agent,
+  farmerId: farmer.id,
+  farmerName: farmer.name,
+  farmerEmail: farmer.email,
+  farmerAvatar: "avatar" in farmer ? farmer.avatar : undefined,
+  kebele,
+  purpose,
+  status,
+  plotRef: "BT-0472",
+  durationMin: 45,
+});
+
+export const VISITS: VisitRecord[] = [
+  visit("v-1001", "Sep 08, 2026", "14:20", "Almaz W.", FARMERS.lelise, "Bako Tibe", "Crop inspection", "Confirmed"),
+  visit("v-1002", "Sep 08, 2026", "11:30", "Almaz W.", FARMERS.chaltu, "Bako Tibe", "Input advisory", "Planned"),
+  visit("v-1003", "Sep 08, 2026", "09:20", "Bekele N.", FARMERS.abebe, "Koye Feche", "Pest follow-up", "Confirmed"),
+  visit("v-1004", "Sep 09, 2026", "09:20", "Chaltu D.", FARMERS.tadesse, "Dendi", "Registration", "Planned"),
+  visit("v-1005", "Sep 10, 2026", "09:20", "Almaz W.", FARMERS.lelise, "Koye Feche", "Pest follow-up", "Planned"),
+  visit("v-1006", "Sep 12, 2026", "09:20", "Dawit M.", FARMERS.chaltu, "Bako Tibe", "Harvest survey", "Completed"),
+  visit("v-1007", "Sep 12, 2026", "09:20", "Almaz W.", FARMERS.tadesse, "Adea", "Crop inspection", "Missed"),
+  visit("v-1008", "Sep 14, 2026", "09:20", "Bekele N.", FARMERS.abebe, "Bako Tibe", "Input advisory", "Completed"),
+  visit("v-1009", "Sep 15, 2026", "10:00", "Chaltu D.", FARMERS.lelise, "Bako Tibe", "Soil sampling", "Planned"),
+  visit("v-1010", "Sep 16, 2026", "08:45", "Dawit M.", FARMERS.abebe, "Gedo", "Follow-up", "Confirmed"),
+];
+
+export function getVisit(id: string): VisitRecord | undefined {
+  return VISITS.find((v) => v.id === id);
+}
+
+export const VISIT_AGENT_OPTIONS: FilterOption[] = [
+  { value: "Almaz W.", label: "Almaz Wolde", count: 1420 },
+  { value: "Bekele N.", label: "Bekele Negash", count: 1188 },
+  { value: "Chaltu D.", label: "Chaltu Dinkesa", count: 964 },
+  { value: "Dawit M.", label: "Dawit Mekonnen", count: 840 },
+];
+
+export const VISIT_KEBELE_OPTIONS: FilterOption[] = [
+  { value: "Bako Tibe", label: "Bako Tibe", count: 2210 },
+  { value: "Koye Feche", label: "Koye Feche", count: 1560 },
+  { value: "Dendi", label: "Dendi", count: 1204 },
+  { value: "Adea", label: "Adea", count: 980 },
+  { value: "Gedo", label: "Gedo", count: 812 },
+];
+
+export const VISIT_STATUS_OPTIONS: FilterOption[] = [
+  { value: "Confirmed", label: "Confirmed", count: 2318 },
+  { value: "Planned", label: "Planned", count: 3104 },
+  { value: "Completed", label: "Completed", count: 2640 },
+  { value: "Missed", label: "Missed", count: 350 },
+];
+
+// Fields shown in the Advanced Filters drawer on the Visits page.
+export const VISIT_FILTER_FIELDS: FilterFieldConfig[] = [
+  { key: "agent", label: "Agent", allLabel: "All agents", placeholder: "All Agent", options: VISIT_AGENT_OPTIONS },
+  { key: "kebele", label: "kebele", allLabel: "All kebeles", placeholder: "All kebele", options: VISIT_KEBELE_OPTIONS },
+  { key: "status", label: "Status", allLabel: "All Status", placeholder: "All", options: VISIT_STATUS_OPTIONS },
+];
+
+// Status history shown in the visit details modal (mock; same for every visit).
+export const VISIT_TIMELINE: VisitTimelineEntry[] = [
+  { label: "Requested", by: "by Almaz Wolde", when: "Yesterday, 16:20", done: true },
+  { label: "Confirmed", by: "Lelise Gudeta", when: "Yesterday, 18:05", done: true },
+  { label: "Scheduled visit", when: "Today · 09:00", done: false },
+];
+
+export const RESCHEDULE_REASONS = [
+  "Farmer unavailable",
+  "Weather / road access",
+  "Agent schedule conflict",
+  "Inputs not yet delivered",
+  "Other",
+];
+
+// ----- Visit planner -----
+
+export const PLANNER_WEEK = {
+  month: "June 2026",
+  range: "Week of 24-30 June 2024",
+  todayLabel: "Mon 24 June",
+};
+
+export const PLANNER_DAYS: PlannerDay[] = [
+  {
+    label: "MON",
+    dayOfMonth: 24,
+    isToday: true,
+    visits: [
+      { time: "08:30", farmerName: "Lelise Gudeta", kebele: "Bako Tibe", status: "scheduled" },
+      { time: "10:00", farmerName: "Abebe Kebede", kebele: "Gedo", status: "scheduled" },
+    ],
+  },
+  { label: "TUE", dayOfMonth: 25, visits: [] },
+  { label: "WED", dayOfMonth: 26, visits: [{ time: "09:00", farmerName: "Chaltu Dinkesa", kebele: "Lume", status: "completed" }] },
+  { label: "THU", dayOfMonth: 27, visits: [{ time: "14:00", farmerName: "Tadesse Alemu", kebele: "Dendi", status: "overdue" }] },
+  { label: "FRI", dayOfMonth: 28, visits: [] },
+  { label: "SAT", dayOfMonth: 29, visits: [] },
+  { label: "SUN", dayOfMonth: 30, visits: [] },
+];
+
+export const PRIORITY_LIST: PriorityFarmer[] = [
+  { farmerId: "chaltu-dinkesa", name: "Chaltu Dinkesa", issue: "Armyworm infestation", level: "high", visitType: "Crop Survey" },
+  { farmerId: "abebe-kebede", name: "Abebe Kebede", issue: "Soil salinity test", level: "medium", visitType: "Crop Survey" },
+  { farmerId: "tadesse-alemu", name: "Tadesse Alemu", issue: "Irrigation audit", level: "low", visitType: "Services" },
+  { farmerId: "lelise-gudeta", name: "Lelise Gudeta", issue: "Fertilizer delivery delay", level: "medium", visitType: "Follow-up" },
+];
+
+export const TODAYS_VISITS: TodaysVisit[] = [
+  { farmerName: "Lelise Gudeta", plannedArrival: "08:30", state: "done", note: "Confirmed · prefers morning", kebele: "Bako Tibe", parcel: "BT-0472", lat: 9.1236, lng: 37.0521 },
+  { farmerName: "Abebe Kebede", plannedArrival: "10:00", state: "tentative", note: "Tentative · reconfirm by SMS", kebele: "Gedo", parcel: "GD-0318", lat: 9.0164, lng: 37.4553 },
+  { farmerName: "Chaltu Dinkesa", plannedArrival: "13:30", state: "confirmed", note: "Confirmed · after 2 pm", kebele: "Lume", parcel: "LM-1127", lat: 8.7437, lng: 39.1203 },
+];
+
+// ----- Visit outcome -----
+
+export const OUTCOME_DRAFT = {
+  farmerName: "Lelise Gudeta",
+  kebele: "Bako Tibe kebele",
+  dateTime: "24 Jun 08:30",
+  purpose: "Advisory — teff rust management",
+  farmerResponse: "Understood — will apply",
+  observed: "Rust pustules on ~15% of the teff plot; farmer had not yet sprayed. Soil moisture adequate.",
+  advice: "Recommended propiconazole at label rate within 3 days; demonstrated mixing; advised resistant variety next season.",
+  inputs: "Fungicide advisory issued · demo done",
+  nextAction: "Follow-up visit · 12 Aug 2026",
+};
+
+export const EVIDENCE_DOCUMENTS: EvidenceDocument[] = [
+  { title: "Diploma in Plant Science", badge: "VERIFIED", meta: "Jimma University · issued 12 Jul 2018", file: "PDF · 1.2 MB" },
+  { title: "Climate-Smart Agriculture", badge: "AGRILEARN · AUTO", meta: "Agrilearn · completed 03 Jun 2026" },
+  { title: "Integrated Pest Management", badge: "PENDING VERIFICATION", meta: "Ethiopian Agricultural Transformation Institute · issued 18 Feb 2026 · expires 18 Feb 2028", file: "PDF · 842 KB" },
+];
+
+export const ACTIVITY_REPORT = {
+  weekLabel: "week of 24–30 Jun 2026",
+  visitsCompleted: "14 / 16",
+  farmersReached: "128",
+  advisoriesIssued: "2",
+  issuesRaised: "2",
+  followUps: "6",
+};
+
+export const SUBMITTED_OUTCOMES: SubmittedOutcome[] = [
+  { farmerName: "Lelise Gudeta", kebele: "Bako Tibe kebele", purpose: "Advisory — teff rust", summary: "Fungicide advice issued; follow-up 12 Aug", date: "Jun 24, 2016" },
+  { farmerName: "Abebe Kebede", kebele: "Gedo kebele", purpose: "Input check", summary: "Voucher issue logged as grievance", date: "Jun 24, 2016" },
+  { farmerName: "Chaltu Dinkesa", kebele: "Lume kebele", purpose: "Registration", summary: "2 farmers registered; synced", date: "Jun 24, 2016" },
+  { farmerName: "Tadesse Alemu", kebele: "Dendi kebele", purpose: "Advisory — storage", summary: "Advised hermetic bags; farmer to procure", date: "Jun 24, 2016" },
+];

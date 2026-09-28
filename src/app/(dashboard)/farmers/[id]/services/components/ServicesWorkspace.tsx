@@ -1,0 +1,176 @@
+"use client";
+
+import { useState } from "react";
+import { Card } from "@/components/ui/Card";
+import { Pill } from "@/components/ui/Pill";
+import { SegmentTabs } from "@/components/ui/SegmentTabs";
+import { Banner } from "@/components/ui/Banner";
+import { Modal } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
+import { FormField } from "@/components/ui/FormField";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
+import type { Farmer } from "@/features/farmers/types";
+import { cn } from "@/lib/utils";
+
+type Tab = "credit" | "marketplace";
+
+// Access-to-Credit loan-origination stages (FR-05b-iii). Assessment/approval happen at the partner bank.
+const STAGES = ["Submitted", "Document review", "Credit assessment", "Final approval", "Disbursement"] as const;
+const APPLICATION = {
+  ref: "ATC-2026-04471",
+  lender: "Cooperative Bank of Oromia",
+  amount: "ETB 18,000",
+  tenure: "12 months",
+  product: "Seasonal input loan",
+  currentStage: 2,
+  stages: [
+    { at: "02 Sep 2026, 10:15", actor: "Tadesse Alemu (DA)" },
+    { at: "04 Sep 2026, 14:30", actor: "CBO — Bako branch" },
+    { at: "In progress since 08 Sep", actor: "CBO credit desk" },
+    { at: "—", actor: "" },
+    { at: "—", actor: "" },
+  ],
+};
+
+const SERVICE_CATALOGUE = ["Mechanisation — tractor hire", "Veterinary — vaccination", "Input supply — certified seed", "Storage — warehouse receipt", "Transport — market delivery", "Advisory — soil testing"];
+
+export function ServicesWorkspace({ farmer }: { farmer: Farmer }) {
+  const [tab, setTab] = useState<Tab>("credit");
+  const [newCredit, setNewCredit] = useState(false);
+  const [notice, setNotice] = useState<{ tone: "success" | "warning"; text: string } | null>(null);
+  const [credit, setCredit] = useState({ product: "Seasonal input loan", amount: "", tenure: "12", purpose: "", docs: 0 });
+  const [payment, setPayment] = useState({ service: SERVICE_CATALOGUE[0], provider: "", date: "2026-09-17", category: "Mechanisation", payee: "", amount: "", method: "Mobile money", notes: "" });
+
+  const submitCredit = () => {
+    const offline = typeof navigator !== "undefined" && !navigator.onLine;
+    setNewCredit(false);
+    setNotice({ tone: offline ? "warning" : "success", text: offline ? "Application saved on this device (Awaiting sync). It will be submitted to the partner bank when connectivity returns; the reference is assigned then." : `Application submitted for ${farmer.name} — reference will be issued by the partner bank. Status here mirrors the bank's workflow.` });
+  };
+
+  return (
+    <>
+      {notice && <Banner tone={notice.tone} onDismiss={() => setNotice(null)}>{notice.text}</Banner>}
+      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+        <SegmentTabs<Tab> tabs={[{ key: "credit", label: "Credit" }, { key: "marketplace", label: "Marketplace" }]} active={tab} onChange={setTab} />
+
+        {tab === "credit" && (
+          <div className="flex flex-col gap-5 p-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h2 className="flex items-center gap-2 text-[15px] font-semibold text-[#1a2b3c]">Active application <Pill tone="amber" dot>{STAGES[APPLICATION.currentStage]}</Pill></h2>
+                <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1.5 text-[13.5px] sm:grid-cols-5">
+                  {[["Reference", APPLICATION.ref], ["Lender", APPLICATION.lender], ["Amount", APPLICATION.amount], ["Tenure", APPLICATION.tenure], ["Product", APPLICATION.product]].map(([k, v]) => (
+                    <div key={k}><dt className="text-[11.5px] font-semibold uppercase tracking-wider text-[#64748b]">{k}</dt><dd className="text-[#1a2b3c]">{v}</dd></div>
+                  ))}
+                </dl>
+              </div>
+              <Button type="button" variant="brand" size="md" onClick={() => setNewCredit(true)} className="shrink-0">New credit application</Button>
+            </div>
+
+            {/* 5-stage workflow with per-stage timestamp/actor and a current-stage marker */}
+            <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {STAGES.map((s, i) => {
+                const done = i < APPLICATION.currentStage;
+                const current = i === APPLICATION.currentStage;
+                return (
+                  <li key={s} className={cn("rounded-lg border p-3", current ? "border-brand-green bg-[#F0FAF5]" : done ? "border-[#A7E3C7] bg-white" : "border-[#E5E7EB] bg-[#F8FAFC]")}>
+                    <div className="flex items-center gap-2">
+                      <span className={cn("flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-bold", done ? "bg-brand-green text-white" : current ? "border-2 border-brand-green text-brand-green" : "border border-[#CBD5E1] text-[#94A3B8]")}>{done ? "✓" : i + 1}</span>
+                      <span className={cn("text-[13px] font-semibold", current || done ? "text-[#1a2b3c]" : "text-[#94A3B8]")}>{s}</span>
+                    </div>
+                    <p className="mt-2 text-[12px] text-[#64748b]">{APPLICATION.stages[i].at}</p>
+                    {APPLICATION.stages[i].actor && <p className="text-[12px] text-[#4a5568]">{APPLICATION.stages[i].actor}</p>}
+                    {current && <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-brand-green">Current stage</p>}
+                  </li>
+                );
+              })}
+            </ol>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {["Documents (4)", "Add note", "Statement"].map((a) => (
+                <Button key={a} type="button" variant="outline" size="md" onClick={() => setNotice({ tone: "success", text: `${a.replace(/ \(\d+\)/, "")} — opens the bank-mirrored record; nothing is adjudicated here.` })} >{a}</Button>
+              ))}
+            </div>
+            <Banner tone="info">
+              Assessment and approval occur at the partner bank. This view mirrors their status — the registry does not adjudicate credit.
+            </Banner>
+          </div>
+        )}
+
+        {tab === "marketplace" && (
+          <div className="flex flex-col gap-5 p-5">
+            <div>
+              <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Record a service payment</h2>
+              <p className="mt-1 text-[13px] text-[#4a5568]">A payment is recorded against an identified service from the OpenAgriNet service catalogue — not a bare transfer.</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField label="Service being paid for" htmlFor="mk-service" required>
+                <Select id="mk-service" value={payment.service} onChange={(e) => setPayment({ ...payment, service: e.target.value, category: e.target.value.split(" — ")[0] })}>{SERVICE_CATALOGUE.map((s) => <option key={s}>{s}</option>)}</Select>
+              </FormField>
+              <FormField label="Service category" htmlFor="mk-cat" hint="From the OpenAgriNet service catalogue">
+                <Input id="mk-cat" value={payment.category} readOnly className="bg-zinc-50" />
+              </FormField>
+              <FormField label="Provider" htmlFor="mk-provider" required>
+                <Input id="mk-provider" value={payment.provider} onChange={(e) => setPayment({ ...payment, provider: e.target.value })} placeholder="e.g. Bako Mechanisation Cooperative" />
+              </FormField>
+              <FormField label="Service date" htmlFor="mk-date" required>
+                <Input id="mk-date" type="date" value={payment.date} onChange={(e) => setPayment({ ...payment, date: e.target.value })} />
+              </FormField>
+              <FormField label="Payee" htmlFor="mk-payee" required>
+                <Input id="mk-payee" value={payment.payee} onChange={(e) => setPayment({ ...payment, payee: e.target.value })} placeholder="Account / wallet holder" />
+              </FormField>
+              <FormField label="Amount (ETB)" htmlFor="mk-amount" required>
+                <Input id="mk-amount" type="number" value={payment.amount} onChange={(e) => setPayment({ ...payment, amount: e.target.value })} placeholder="0.00" />
+              </FormField>
+              <FormField label="Method" htmlFor="mk-method" required>
+                <Select id="mk-method" value={payment.method} onChange={(e) => setPayment({ ...payment, method: e.target.value })}><option>Mobile money</option><option>Bank transfer</option><option>Cash (receipted)</option></Select>
+              </FormField>
+              <FormField label="Notes" htmlFor="mk-notes" className="md:col-span-2">
+                <Textarea id="mk-notes" rows={2} value={payment.notes} onChange={(e) => setPayment({ ...payment, notes: e.target.value })} />
+              </FormField>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Pill tone="slate">Payment gateway WIP · e-Mandate · QR · IPS · payee management · reconciliation</Pill>
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="md" onClick={() => setNotice({ tone: "success", text: "Payment draft saved on this device." })}>Save draft</Button>
+                <Button type="button" variant="brand" size="md" disabled={!payment.amount || !payment.payee || !payment.provider} onClick={() => setNotice({ tone: "warning", text: "Payment recorded against the service and queued — the gateway is not yet live, so no funds move until it is." })}>Pay</Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* FR-05b-v mobile credit-application capture */}
+      <Modal isOpen={newCredit} onClose={() => setNewCredit(false)} title="New credit application" subtitle={`${farmer.name} · ${farmer.id} · Fayda ${farmer.status}`} size="lg"
+        footer={<><Button variant="outline" onClick={() => setNewCredit(false)}>Cancel</Button><Button variant="brand" disabled={!credit.amount || credit.purpose.trim().length < 3 || farmer.status !== "Verified"} onClick={submitCredit}>Submit application</Button></>}
+      >
+        {farmer.status !== "Verified" && <Banner tone="warning" className="mb-4">This farmer is not Fayda-verified. A credit application requires a verified identity.</Banner>}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField label="Farmer" htmlFor="cr-farmer"><Input id="cr-farmer" value={`${farmer.name} · ${farmer.id}`} readOnly className="bg-zinc-50" /></FormField>
+          <FormField label="Partner bank" htmlFor="cr-bank"><Input id="cr-bank" value="Cooperative Bank of Oromia" readOnly className="bg-zinc-50" /></FormField>
+          <FormField label="Loan product" htmlFor="cr-product" required>
+            <Select id="cr-product" value={credit.product} onChange={(e) => setCredit({ ...credit, product: e.target.value })}><option>Seasonal input loan</option><option>Livestock working capital</option><option>Irrigation equipment</option></Select>
+          </FormField>
+          <FormField label="Amount requested (ETB)" htmlFor="cr-amount" required>
+            <Input id="cr-amount" type="number" value={credit.amount} onChange={(e) => setCredit({ ...credit, amount: e.target.value })} placeholder="e.g. 15000" />
+          </FormField>
+          <FormField label="Tenure (months)" htmlFor="cr-tenure" required>
+            <Select id="cr-tenure" value={credit.tenure} onChange={(e) => setCredit({ ...credit, tenure: e.target.value })}>{["6", "12", "18", "24"].map((t) => <option key={t} value={t}>{t}</option>)}</Select>
+          </FormField>
+          <FormField label="Supporting documents" htmlFor="cr-docs" hint={`${credit.docs} attached`}>
+            <button id="cr-docs" type="button" onClick={() => setCredit({ ...credit, docs: credit.docs + 1 })} className="h-11 w-full rounded-lg border border-dashed border-zinc-300 text-[13.5px] font-medium text-[#334155] hover:border-brand-green">Add document / photo</button>
+          </FormField>
+          <FormField label="Purpose" htmlFor="cr-purpose" required className="sm:col-span-2">
+            <Textarea id="cr-purpose" rows={3} value={credit.purpose} onChange={(e) => setCredit({ ...credit, purpose: e.target.value })} placeholder="What the loan will fund" />
+          </FormField>
+        </div>
+        <Banner tone="info" className="mt-4">
+          <p><span className="font-semibold">Consent:</span> {farmer.name} consented to share identity, holding and credit data with the partner bank (valid to 30 Jun 2027). Consent can be withdrawn from the farmer profile at any time before submission; a withdrawn consent stops this application.</p>
+          <p className="mt-1">If offline, the application is saved on the device and queued (Awaiting sync).</p>
+        </Banner>
+      </Modal>
+    </>
+  );
+}

@@ -1,0 +1,62 @@
+export type FarmerStatus = "Verified" | "Pending" | "Flagged";
+
+export interface Farmer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  avatar?: string;
+  kebele: string;
+  woreda: string;
+  region: string;
+  crop: string;
+  landHa: number;
+  registeredAt: string;
+  registeredTime: string;
+  status: FarmerStatus;
+  /** Why the record is Pending / Flagged (shown on hover); undefined when Verified. */
+  statusReason?: string;
+  totalPlots: number;
+  visits: number;
+  lastVisit: string;
+}
+
+export interface Plot {
+  code: string;
+  crop: string;
+  areaHa: number;
+  soil: string;
+  zone: string;
+  /** Plot centroid (sample GPS until the Land Registry API is available). */
+  lat: number;
+  lng: number;
+  tenure: string;
+}
+
+export type CropOutcome = "Successful" | "Average" | "Below average";
+
+export interface CropRecord {
+  season: string;
+  crop: string;
+  yield: string;
+  status: CropOutcome;
+}
+
+export interface Visit {
+  title: string;
+  summary: string;
+  date: string;
+  time: string;
+}
+
+export interface FarmerDocument {
+  name: string;
+  uploadedAt: string;
+  size: string;
+}
+
+export interface AdvisoryNote {
+  date: string;
+  author: string;
+  text: string;
+}
