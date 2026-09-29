@@ -126,7 +126,7 @@ export function AdvancedFiltersDrawer({ isOpen, onClose, fields, filters, onAppl
       <div
         onClick={onClose}
         className={cn(
-          "absolute inset-0 bg-[#1a2b3c]/30 transition-opacity duration-300",
+          "absolute inset-0 bg-ink/30 transition-opacity duration-300",
           isOpen ? "opacity-100" : "opacity-0",
         )}
       />
@@ -141,9 +141,9 @@ export function AdvancedFiltersDrawer({ isOpen, onClose, fields, filters, onAppl
           isOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-line px-6 py-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F5F0] text-brand-green">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-tint text-brand-green">
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
                 <path d="M4 6h16M4 12h16M4 18h16" />
                 <circle cx="9" cy="6" r="2" fill="white" />
@@ -151,13 +151,13 @@ export function AdvancedFiltersDrawer({ isOpen, onClose, fields, filters, onAppl
                 <circle cx="8" cy="18" r="2" fill="white" />
               </svg>
             </span>
-            <h2 id={`${uid}-title`} className="text-[18px] font-semibold text-[#1a2b3c]">Advanced Filters</h2>
+            <h2 id={`${uid}-title`} className="text-[18px] font-semibold text-ink">Advanced Filters</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close filters"
-            className="rounded-md p-1 text-[#94A3B8] transition-colors hover:bg-zinc-100 hover:text-[#1a2b3c]"
+            className="rounded-md p-1 text-subtle transition-colors hover:bg-zinc-100 hover:text-ink"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -182,10 +182,10 @@ export function AdvancedFiltersDrawer({ isOpen, onClose, fields, filters, onAppl
           ))}
 
           <div className="flex flex-col gap-3">
-            <p className="text-[14px] font-medium text-[#1a2b3c]">Date Range</p>
+            <p className="text-[14px] font-medium text-ink">Date Range</p>
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor={`${uid}-from`} className="text-[12.5px] text-[#94A3B8]">From</label>
+                <label htmlFor={`${uid}-from`} className="text-[12.5px] text-subtle">From</label>
                 <Input
                   id={`${uid}-from`}
                   type="date"
@@ -195,7 +195,7 @@ export function AdvancedFiltersDrawer({ isOpen, onClose, fields, filters, onAppl
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label htmlFor={`${uid}-to`} className="text-[12.5px] text-[#94A3B8]">To</label>
+                <label htmlFor={`${uid}-to`} className="text-[12.5px] text-subtle">To</label>
                 <Input
                   id={`${uid}-to`}
                   type="date"
@@ -216,8 +216,8 @@ export function AdvancedFiltersDrawer({ isOpen, onClose, fields, filters, onAppl
                     className={cn(
                       "rounded-md border px-3 py-1.5 text-[13px] transition-colors",
                       active
-                        ? "border-brand-green bg-[#EBFAF2] font-medium text-brand-green"
-                        : "border-[#E5E7EB] bg-white text-[#64748b] hover:border-[#CBD5E1] hover:text-[#1a2b3c]",
+                        ? "border-brand-green bg-brand-mint font-medium text-brand-green"
+                        : "border-line bg-white text-muted hover:border-slate-300 hover:text-ink",
                     )}
                   >
                     {range.label}
@@ -228,11 +228,11 @@ export function AdvancedFiltersDrawer({ isOpen, onClose, fields, filters, onAppl
           </div>
         </div>
 
-        <div className="flex items-center gap-3 border-t border-[#E5E7EB] bg-[#F8FAFC] px-6 py-5">
+        <div className="flex items-center gap-3 border-t border-line bg-surface px-6 py-5">
           <button
             type="button"
             onClick={reset}
-            className="h-10 shrink-0 whitespace-nowrap rounded-md border border-zinc-200 bg-white px-5 text-[14px] font-semibold text-[#1a2b3c] transition-colors hover:bg-zinc-50"
+            className="h-10 shrink-0 whitespace-nowrap rounded-md border border-zinc-200 bg-white px-5 text-[14px] font-semibold text-ink transition-colors hover:bg-zinc-50"
           >
             Reset Filters
           </button>

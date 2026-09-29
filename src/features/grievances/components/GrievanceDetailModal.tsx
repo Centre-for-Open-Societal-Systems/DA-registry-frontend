@@ -114,7 +114,7 @@ export function GrievanceDetailModal({ grievance, onClose }: GrievanceDetailModa
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-[#1a2b3c]/40 p-3 backdrop-blur-[2px] sm:p-6"
+      className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-ink/40 p-3 backdrop-blur-[2px] sm:p-6"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -126,20 +126,20 @@ export function GrievanceDetailModal({ grievance, onClose }: GrievanceDetailModa
         className="my-auto w-full min-w-0 max-w-[1000px] overflow-hidden rounded-2xl bg-white shadow-2xl"
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 border-b border-[#E5E7EB] px-4 py-4 sm:gap-4 sm:px-6">
+        <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-4 sm:gap-4 sm:px-6">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[13px] font-medium text-[#475569]">{grievance.ticketId}</span>
+              <span className="text-[13px] font-medium text-slate-600">{grievance.ticketId}</span>
               <GrievanceStatusPill status={status} className="px-2.5 py-0.5" />
               <GrievancePriorityPill priority={grievance.priority} className="px-2.5 py-0.5" />
             </div>
-            <h2 id="grievance-title" className="mt-2 text-[17px] font-semibold text-[#1a2b3c]">{grievance.title}</h2>
+            <h2 id="grievance-title" className="mt-2 text-[17px] font-semibold text-ink">{grievance.title}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="mt-1 shrink-0 rounded-md p-1 text-[#94A3B8] transition-colors hover:bg-zinc-100 hover:text-[#1a2b3c]"
+            className="mt-1 shrink-0 rounded-md p-1 text-subtle transition-colors hover:bg-zinc-100 hover:text-ink"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -149,7 +149,7 @@ export function GrievanceDetailModal({ grievance, onClose }: GrievanceDetailModa
 
         {/* Body */}
         {/* min-w-0 on both columns stops long nowrap content from widening the dialog past the viewport on phones */}
-        <div className="grid grid-cols-1 gap-5 bg-[#FAFBFC] px-3 py-4 sm:px-6 sm:py-5 lg:grid-cols-[minmax(0,1fr)_280px] [&>*]:min-w-0">
+        <div className="grid grid-cols-1 gap-5 bg-surface-alt px-3 py-4 sm:px-6 sm:py-5 lg:grid-cols-[minmax(0,1fr)_280px] [&>*]:min-w-0">
           <div className="flex min-w-0 flex-col gap-5">
             <GrievanceThread messages={thread} />
             <GrievanceResponsePanel onSubmitResponse={addDeptResponse} onAddNote={addNote} />

@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { Pill, type PillTone } from "@/components/ui/Pill";
-import { getInitials } from "@/features/farmers/data";
+import { getInitials } from "@/features/farmers";
 import { AddDependentModal, type NewDependent } from "./AddDependentModal";
 
 type DependentStatus = "Verified" | "Pending approval";
@@ -43,10 +43,10 @@ const COLUMNS: Column<Dependent>[] = [
     header: "Name",
     cell: (dep) => (
       <div className="flex items-center gap-2.5">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EEF2FF] text-[11px] font-semibold text-[#4F46E5]">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-[11px] font-semibold text-indigo-600">
           {getInitials(dep.name)}
         </span>
-        <span className="font-medium text-[#1a2b3c]">{dep.name}</span>
+        <span className="font-medium text-ink">{dep.name}</span>
       </div>
     ),
   },
@@ -66,10 +66,10 @@ export function DependentsSection() {
 
   return (
     <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-      <div className="flex flex-col gap-3 border-b border-[#E5E7EB] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-line px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Family members / dependents</h2>
-          <p className="mt-1 text-[12.5px] text-[#4a5568]">Add or update dependents; new entries need approval</p>
+          <h2 className="text-[15px] font-semibold text-ink">Family members / dependents</h2>
+          <p className="mt-1 text-[12.5px] text-ink-soft">Add or update dependents; new entries need approval</p>
         </div>
         <Button type="button" variant="brand" size="md" onClick={() => setIsAdding(true)} className="w-fit shrink-0">
           + Add dependent

@@ -8,9 +8,9 @@ import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import { CURRENT_AGENT } from "@/features/farmers/data";
-import { AttributionCard } from "@/features/farmers/components/AttributionCard";
-import type { Farmer } from "@/features/farmers/types";
+import { CURRENT_AGENT } from "@/features/farmers";
+import { AttributionCard } from "@/features/farmers";
+import type { Farmer } from "@/features/farmers";
 
 interface SuggestCorrectionModalProps {
   farmer: Farmer;
@@ -71,7 +71,7 @@ export function SuggestCorrectionModal({ farmer, isOpen, onClose }: SuggestCorre
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField label="Current value" htmlFor="correction-current">
-            <Input id="correction-current" value={current.value} readOnly className="h-10 border-transparent bg-[#F1F5F9] text-[#475569]" />
+            <Input id="correction-current" value={current.value} readOnly className="h-10 border-transparent bg-slate-100 text-slate-600" />
           </FormField>
           <FormField label="Suggested value" htmlFor="correction-suggested">
             <Input id="correction-suggested" placeholder="Enter corrected value" className="h-10" required />

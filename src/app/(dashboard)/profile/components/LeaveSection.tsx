@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { Pill, type PillTone } from "@/components/ui/Pill";
 import { StatCard } from "@/components/ui/StatCard";
-import { LEAVE_BALANCES, LEAVE_HISTORY, LEAVE_YEAR, type LeaveRecord, type LeaveStatus } from "@/features/farmers/agentProfile";
+import { LEAVE_BALANCES, LEAVE_HISTORY, LEAVE_YEAR, type LeaveRecord, type LeaveStatus } from "@/features/farmers";
 import { RequestLeaveModal } from "./RequestLeaveModal";
 
 const STATUS_TONES: Record<LeaveStatus, PillTone> = {
@@ -17,9 +17,9 @@ const STATUS_TONES: Record<LeaveStatus, PillTone> = {
 
 // Icon tile colours per leave type, matching each balance's accent bar.
 const TILES: Record<string, string> = {
-  "Annual leave": "bg-[#E6F5F0] text-brand-green",
-  "Sick leave": "bg-[#FFF1F1] text-[#DC2626]",
-  "Other / statutory": "bg-[#E6F0FD] text-[#2563EB]",
+  "Annual leave": "bg-brand-tint text-brand-green",
+  "Sick leave": "bg-danger-wash text-danger",
+  "Other / statutory": "bg-info-tint text-blue-600",
 };
 
 const COLUMNS: Column<LeaveRecord>[] = [
@@ -47,10 +47,10 @@ export function LeaveSection() {
 
   return (
     <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-      <div className="flex flex-col gap-3 border-b border-[#E5E7EB] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-line px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-[#1a2b3c]">Leave &amp; absence <Pill tone="slate">Part 2 preview</Pill></h2>
-          <p className="mt-1 text-[12.5px] text-[#4a5568]">
+          <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink">Leave &amp; absence <Pill tone="slate">Part 2 preview</Pill></h2>
+          <p className="mt-1 text-[12.5px] text-ink-soft">
             Your leave entitlement and balance for {LEAVE_YEAR}. Requests are approved by your Woreda supervisor.
           </p>
         </div>
@@ -72,15 +72,15 @@ export function LeaveSection() {
               value={`${remaining} days`}
               hint={`of ${b.entitlement} left · ${b.used} used`}
               accent={b.accent}
-              tile={TILES[b.type] ?? "bg-[#F1F5F9] text-[#475569]"}
+              tile={TILES[b.type] ?? "bg-slate-100 text-slate-600"}
               icon={calendarIcon}
             />
           );
         })}
       </div>
 
-      <div className="border-t border-[#E5E7EB] px-5 py-3.5">
-        <h3 className="text-[14px] font-semibold text-[#1a2b3c]">Leave history &amp; upcoming</h3>
+      <div className="border-t border-line px-5 py-3.5">
+        <h3 className="text-[14px] font-semibold text-ink">Leave history &amp; upcoming</h3>
       </div>
       <DataTable
         columns={COLUMNS}

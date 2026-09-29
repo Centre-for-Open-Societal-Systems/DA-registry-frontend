@@ -14,11 +14,11 @@ export function PageLoader({ label = "Loading…", fullScreen = false }: PageLoa
       aria-live="polite"
       className={cn(
         "flex w-full animate-fade-in flex-col items-center justify-center gap-3",
-        fullScreen ? "h-screen bg-[#F8FAFC]" : "min-h-[60vh]",
+        fullScreen ? "h-screen bg-surface" : "min-h-[60vh]",
       )}
     >
       <span className="h-10 w-10 animate-spin rounded-full border-[3px] border-zinc-200 border-t-brand-green" aria-hidden="true" />
-      <span className="text-[13px] font-medium text-[#64748b]">{label}</span>
+      <span className="text-[13px] font-medium text-muted">{label}</span>
     </div>
   );
 }

@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getFarmer } from "@/features/farmers/data";
+import { getFarmer } from "@/features/farmers";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { ProfileStats } from "./components/ProfileStats";
 import { ProfileTabs } from "./components/ProfileTabs";
+import { ProfileOverview } from "./components/ProfileOverview";
+import { HoldingsSection } from "./components/HoldingsSection";
+import { CropHistorySection } from "./components/CropHistorySection";
+import { VisitHistorySection } from "./components/VisitHistorySection";
+import { DocumentsSection } from "./components/DocumentsSection";
+import { BackLink } from "@/components/ui/BackLink";
 
 export async function generateMetadata(props: PageProps<"/farmers/[id]">): Promise<Metadata> {
   const { id } = await props.params;
@@ -21,19 +26,19 @@ export default async function FarmerProfilePage(props: PageProps<"/farmers/[id]"
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <Link
-        href="/farmers"
-        className="inline-flex w-fit items-center gap-2.5 text-[15px] font-medium text-[#1a2b3c] transition-colors hover:text-brand-green"
-      >
-        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-        Back
-      </Link>
+      <BackLink href="/farmers" />
 
       <ProfileHeader farmer={farmer} />
       <ProfileStats farmer={farmer} />
-      <ProfileTabs />
+      <ProfileTabs
+        panels={{
+          Overview: <ProfileOverview />,
+          Holdings: <HoldingsSection />,
+          "Crop history": <CropHistorySection />,
+          "Visit history": <VisitHistorySection />,
+          Documents: <DocumentsSection />,
+        }}
+      />
     </div>
   );
 }

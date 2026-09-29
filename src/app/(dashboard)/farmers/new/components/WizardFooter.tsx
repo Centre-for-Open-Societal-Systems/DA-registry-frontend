@@ -30,7 +30,7 @@ export function WizardFooter({
         <Button variant="outline" size="md" onClick={onSaveDraft} className="whitespace-nowrap">
           Save Draft
         </Button>
-        <span className="flex items-center gap-2 text-[14px] text-[#4a5568]">
+        <span className="flex items-center gap-2 text-[14px] text-ink-soft">
           {savedAt && (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 6L9 17l-5-5" />

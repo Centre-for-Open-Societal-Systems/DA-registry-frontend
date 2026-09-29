@@ -14,8 +14,8 @@ import { DataTable, type Column } from "@/components/ui/DataTable";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
-import { SmsPreview } from "@/features/communication/components/SmsPreview";
-import { DISPATCHES, SIGNAL_TONE, SIGNALS, type Audience, type Channel, type Dispatch, type SignalSource } from "@/features/communication/data";
+import { SmsPreview } from "@/features/communication";
+import { DISPATCHES, SIGNAL_TONE, SIGNALS, type Audience, type Channel, type Dispatch, type SignalSource } from "@/features/communication";
 import { useAuthStore } from "@/store/useAuthStore";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 
@@ -90,13 +90,13 @@ export function BroadcastWorkspace() {
   };
 
   const columns: Column<Dispatch>[] = [
-    { key: "id", header: "Dispatch", cell: (d) => <span className="font-mono text-[13px] font-medium text-[#1a2b3c]">{d.id}</span> },
-    { key: "msg", header: "Message", cell: (d) => <span className="line-clamp-2 max-w-[360px] text-[13px] text-[#1a2b3c]">{d.message}</span> },
+    { key: "id", header: "Dispatch", cell: (d) => <span className="font-mono text-[13px] font-medium text-ink">{d.id}</span> },
+    { key: "msg", header: "Message", cell: (d) => <span className="line-clamp-2 max-w-[360px] text-[13px] text-ink">{d.message}</span> },
     { key: "src", header: <FilterDropdown label="Source" allLabel="All sources" options={sourceOptions} selected={filters.source} onApply={setFilter("source")} />, cell: (d) => <Pill tone={SIGNAL_TONE[d.source]}>{d.source}</Pill> },
-    { key: "aud", header: <FilterDropdown label="Audience" allLabel="All audiences" options={audienceOptions} selected={filters.audience} onApply={setFilter("audience")} />, cell: (d) => <span>{d.audience}<span className="block text-[12px] text-[#64748b]">{d.recipients} recipients</span></span> },
+    { key: "aud", header: <FilterDropdown label="Audience" allLabel="All audiences" options={audienceOptions} selected={filters.audience} onApply={setFilter("audience")} />, cell: (d) => <span>{d.audience}<span className="block text-[12px] text-muted">{d.recipients} recipients</span></span> },
     { key: "ch", header: <FilterDropdown label="Channels" allLabel="All channels" options={channelOptions} selected={filters.channel} onApply={setFilter("channel")} />, cell: (d) => <div className="flex gap-1">{d.channels.map((c) => <Pill key={c} tone="slate">{c}</Pill>)}</div> },
-    { key: "delivery", header: "Delivery", cell: (d) => <span className="text-[12.5px]"><span className="font-medium text-brand-green">{d.delivery.delivered} ✓</span> · <span className="text-[#DC2626]">{d.delivery.failed} ✗</span> · <span className="text-[#64748b]">{d.delivery.pending} pending</span></span> },
-    { key: "by", header: "Dispatched", cell: (d) => <span className="text-[12.5px] text-[#64748b]">{d.dispatchedBy}<span className="block">{d.dispatchedAt}</span></span> },
+    { key: "delivery", header: "Delivery", cell: (d) => <span className="text-[12.5px]"><span className="font-medium text-brand-green">{d.delivery.delivered} ✓</span> · <span className="text-danger">{d.delivery.failed} ✗</span> · <span className="text-muted">{d.delivery.pending} pending</span></span> },
+    { key: "by", header: "Dispatched", cell: (d) => <span className="text-[12.5px] text-muted">{d.dispatchedBy}<span className="block">{d.dispatchedAt}</span></span> },
   ];
 
   return (
@@ -105,8 +105,8 @@ export function BroadcastWorkspace() {
       {signal && <Banner tone="info" title={`Crafting a response to signal ${signal.id}`}>{signal.title} — received {signal.receivedAt}.</Banner>}
 
       <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Compose</h2>
-        {!canDispatch && <p className="mt-1 text-[12.5px] text-[#64748b]">Only a Communications Officer or Administrator can dispatch. You can preview.</p>}
+        <h2 className="text-[15px] font-semibold text-ink">Compose</h2>
+        {!canDispatch && <p className="mt-1 text-[12.5px] text-muted">Only a Communications Officer or Administrator can dispatch. You can preview.</p>}
         <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -121,15 +121,15 @@ export function BroadcastWorkspace() {
               <Textarea id="bc-message" rows={5} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Write the message farmers or DAs will receive…" />
             </FormField>
             <fieldset>
-              <legend className="text-[14px] font-medium text-[#1a2b3c]">Channels</legend>
+              <legend className="text-[14px] font-medium text-ink">Channels</legend>
               <div className="mt-2 flex gap-5">
                 {(["SMS", "Telegram"] as Channel[]).map((c) => (
-                  <label key={c} className="flex cursor-pointer items-center gap-2 text-[13.5px] text-[#334155]"><Checkbox checked={channels.has(c)} onChange={() => toggle(c)} /> {c}</label>
+                  <label key={c} className="flex cursor-pointer items-center gap-2 text-[13.5px] text-slate-700"><Checkbox checked={channels.has(c)} onChange={() => toggle(c)} /> {c}</label>
                 ))}
               </div>
             </fieldset>
             <div className="flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setMessage("")} className="inline-flex shrink-0 whitespace-nowrap h-10 items-center rounded-md border border-zinc-200 bg-white px-4 text-[14px] font-medium text-[#4a5568] hover:bg-zinc-50">Clear</button>
+              <button type="button" onClick={() => setMessage("")} className="inline-flex shrink-0 whitespace-nowrap h-10 items-center rounded-md border border-zinc-200 bg-white px-4 text-[14px] font-medium text-ink-soft hover:bg-zinc-50">Clear</button>
               <button type="button" disabled={!canDispatch || channels.size === 0 || message.trim().length < 5} onClick={dispatch} className="inline-flex shrink-0 whitespace-nowrap h-10 items-center gap-2 rounded-md bg-brand-green px-4 text-[14px] font-semibold text-white hover:bg-brand-green-dark disabled:opacity-50">
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                 Send to {size}
@@ -143,8 +143,8 @@ export function BroadcastWorkspace() {
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Dispatch history</h2>
-            <p className="mt-0.5 text-[12.5px] text-[#4a5568]">Every dispatch is logged with audience, channels and per-channel delivery outcome.</p>
+            <h2 className="text-[15px] font-semibold text-ink">Dispatch history</h2>
+            <p className="mt-0.5 text-[12.5px] text-ink-soft">Every dispatch is logged with audience, channels and per-channel delivery outcome.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />

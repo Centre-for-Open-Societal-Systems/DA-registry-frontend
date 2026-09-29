@@ -66,7 +66,7 @@ export function ProfilePhotoUpload({ initialPreview = null, showActions = true, 
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <span className="text-[14px] font-medium text-[#1a2b3c]">Profile Photo</span>
+      <span className="text-[14px] font-medium text-ink">Profile Photo</span>
 
       <div
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -89,15 +89,14 @@ export function ProfilePhotoUpload({ initialPreview = null, showActions = true, 
               }
         }
         className={cn(
-          "flex flex-col items-center rounded-xl border-2 border-dashed bg-[#FAFBFC] px-4 py-6 text-center transition-colors",
-          isDragging ? "border-brand-green bg-[#E6F5F0]" : "border-[#E5E7EB]",
+          "flex flex-col items-center rounded-xl border-2 border-dashed bg-surface-alt px-4 py-6 text-center transition-colors",
+          isDragging ? "border-brand-green bg-brand-tint" : "border-line",
           !showActions && "cursor-pointer hover:border-brand-green/50 focus:outline-none focus-visible:border-brand-green"
         )}
       >
         <div className="h-20 w-20 overflow-hidden rounded-full bg-zinc-200">
           {preview ? (
-            // Local blob URL preview — next/image can't optimize these
-            // eslint-disable-next-line @next/next/no-img-element
+            // eslint-disable-next-line @next/next/no-img-element -- local blob URL preview; next/image cannot optimize object URLs
             <img src={preview} alt="Profile preview" className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-zinc-400">
@@ -109,13 +108,13 @@ export function ProfilePhotoUpload({ initialPreview = null, showActions = true, 
           )}
         </div>
 
-        <p className="mt-5 text-[14px] font-semibold text-[#1a2b3c]">Drag &amp; drop your photo here</p>
-        <p className="mt-1.5 text-[12.5px] leading-relaxed text-[#6B7280]">
+        <p className="mt-5 text-[14px] font-semibold text-ink">Drag &amp; drop your photo here</p>
+        <p className="mt-1.5 text-[12.5px] leading-relaxed text-gray-500">
           Supports JPG, PNG up to 5MB.
           <br />
           Minimum 200×200px.
         </p>
-        {error && <p className="mt-2 text-[12.5px] text-[#DC2626]">{error}</p>}
+        {error && <p className="mt-2 text-[12.5px] text-danger">{error}</p>}
 
         {showActions && (
           <div className="mt-4 flex items-center gap-2">
@@ -134,7 +133,7 @@ export function ProfilePhotoUpload({ initialPreview = null, showActions = true, 
               type="button"
               onClick={handleRemove}
               disabled={!preview}
-              className="h-9 rounded-md border border-[#E5E7EB] bg-white px-3.5 text-[13px] font-medium text-[#4a5568] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-9 rounded-md border border-line bg-white px-3.5 text-[13px] font-medium text-ink-soft transition-colors hover:bg-surface disabled:cursor-not-allowed disabled:opacity-60"
             >
               Remove
             </button>

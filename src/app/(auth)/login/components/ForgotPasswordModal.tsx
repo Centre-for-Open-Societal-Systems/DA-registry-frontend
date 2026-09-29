@@ -51,7 +51,7 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
         {/* Body */}
         <div className="px-6 pt-8 pb-10 sm:px-12">
           {sentTo ? (
-            <div className="flex flex-col gap-4 rounded-lg border border-[#A7E3C7] bg-[#EBFAF2] px-5 py-4 text-[14px] text-[#065F46]" role="status">
+            <div className="flex flex-col gap-4 rounded-lg border border-brand-border bg-brand-mint px-5 py-4 text-[14px] text-emerald-800" role="status">
               <p className="font-semibold">Reset link sent</p>
               <p className="leading-relaxed">
                 If an agent account exists for <span className="font-semibold">{sentTo}</span>, a reset link valid for 30 minutes is on its way. Didn&apos;t get it? Your Woreda administrator can

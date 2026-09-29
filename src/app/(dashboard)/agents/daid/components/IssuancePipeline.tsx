@@ -11,8 +11,8 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
-import { ISSUANCE_EVENTS, ISSUANCE_TONE } from "@/features/agents/data";
-import type { IssuanceEvent, IssuanceState } from "@/features/agents/types";
+import { ISSUANCE_EVENTS, ISSUANCE_TONE } from "@/features/agents";
+import type { IssuanceEvent, IssuanceState } from "@/features/agents";
 
 const STATES: IssuanceState[] = ["Generated", "Queued", "Exception", "Failed-retry"];
 const FAYDA_MATCHES = ["Match", "Pending", "Mismatch"];
@@ -64,18 +64,18 @@ export function IssuancePipeline() {
   };
 
   const columns: Column<IssuanceEvent>[] = [
-    { key: "daId", header: "DA-ID / ref", cell: (e) => <span className="font-mono text-[13px] font-medium text-[#1a2b3c]">{e.daId}</span> },
-    { key: "name", header: "Name", cell: (e) => <span className="font-medium text-[#1a2b3c]">{e.fullName}</span> },
+    { key: "daId", header: "DA-ID / ref", cell: (e) => <span className="font-mono text-[13px] font-medium text-ink">{e.daId}</span> },
+    { key: "name", header: "Name", cell: (e) => <span className="font-medium text-ink">{e.fullName}</span> },
     { key: "fayda", header: <FilterDropdown label="Fayda match" allLabel="All Fayda results" options={faydaOptions} selected={filters.fayda} onApply={setFilter("fayda")} />, cell: (e) => <Pill tone={e.faydaMatch === "Match" ? "green" : e.faydaMatch === "Mismatch" ? "red" : "amber"}>{e.faydaMatch}</Pill> },
     { key: "unique", header: <FilterDropdown label="Uniqueness" allLabel="All uniqueness results" options={uniquenessOptions} selected={filters.uniqueness} onApply={setFilter("uniqueness")} />, cell: (e) => <Pill tone={e.uniqueness === "Unique" ? "green" : e.uniqueness === "Duplicate" ? "red" : "amber"}>{e.uniqueness}</Pill> },
     { key: "state", header: <FilterDropdown label="State" allLabel="All states" options={stateOptions} selected={filters.state} onApply={setFilter("state")} />, cell: (e) => <Pill tone={ISSUANCE_TONE[e.state]} dot>{e.state}</Pill> },
-    { key: "reason", header: "Detail", cell: (e) => <span className="text-[13px] text-[#4a5568]">{e.reason ?? "DA-ID minted and recorded"}</span> },
-    { key: "at", header: "Timestamp", cell: (e) => <span className="whitespace-nowrap text-[13px] text-[#64748b]">{e.generatedAt}{e.retryCount > 0 && <span className="block text-[11.5px]">retries: {e.retryCount}</span>}</span> },
+    { key: "reason", header: "Detail", cell: (e) => <span className="text-[13px] text-ink-soft">{e.reason ?? "DA-ID minted and recorded"}</span> },
+    { key: "at", header: "Timestamp", cell: (e) => <span className="whitespace-nowrap text-[13px] text-muted">{e.generatedAt}{e.retryCount > 0 && <span className="block text-[11.5px]">retries: {e.retryCount}</span>}</span> },
     {
       key: "actions", header: "Actions", align: "center",
       cell: (e) => e.state === "Failed-retry" || e.state === "Exception" ? (
         <RowAction icon="retry" onClick={() => retry(e.daId)}>Retry</RowAction>
-      ) : <span className="text-[12.5px] text-[#94A3B8]">—</span>,
+      ) : <span className="text-[12.5px] text-subtle">—</span>,
     },
   ];
 
@@ -84,8 +84,8 @@ export function IssuancePipeline() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Issuance pipeline</h2>
-          <p className="mt-0.5 text-[12.5px] text-[#4a5568]">A DA-ID is minted only after a Fayda match and a uniqueness check; every generation event is timestamped.</p>
+          <h2 className="text-[15px] font-semibold text-ink">Issuance pipeline</h2>
+          <p className="mt-0.5 text-[12.5px] text-ink-soft">A DA-ID is minted only after a Fayda match and a uniqueness check; every generation event is timestamped.</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
           <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
@@ -93,7 +93,7 @@ export function IssuancePipeline() {
           <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
 
           <button type="button" onClick={() => setNotice("Generation run started for all Queued records with a Fayda response — results appear here as each completes.")} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white hover:bg-brand-green-dark">Generate</button>
-          <button type="button" onClick={() => setNotice("Bulk generation queued for import job #205 (0 of 42 processed).")} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green hover:bg-[#F0FAF5]">Bulk</button>
+          <button type="button" onClick={() => setNotice("Bulk generation queued for import job #205 (0 of 42 processed).")} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green hover:bg-brand-wash">Bulk</button>
         </div>
       </div>
       {notice && <Banner tone="success" className="mx-4 mb-3" onDismiss={() => setNotice(null)}>{notice}</Banner>}

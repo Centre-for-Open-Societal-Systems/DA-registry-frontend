@@ -10,18 +10,18 @@ import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { AdvancedFiltersDrawer, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
 import { TablePagination, usePagination } from "@/components/ui/TablePagination";
-import { FarmerAvatar } from "@/features/farmers/components/FarmerAvatar";
-import { VisitStatusPill } from "@/features/visits/components/VisitStatusPill";
-import { VisitDetailsModal } from "@/features/visits/components/VisitDetailsModal";
-import { RescheduleVisitModal } from "@/features/visits/components/RescheduleVisitModal";
+import { FarmerAvatar } from "@/features/farmers";
+import { VisitStatusPill } from "@/features/visits";
+import { VisitDetailsModal } from "@/features/visits";
+import { RescheduleVisitModal } from "@/features/visits";
 import {
   VISIT_AGENT_OPTIONS,
   VISIT_FILTER_FIELDS,
   VISIT_KEBELE_OPTIONS,
   VISIT_STATUS_OPTIONS,
   VISITS,
-} from "@/features/visits/data";
-import type { VisitRecord } from "@/features/visits/types";
+} from "@/features/visits";
+import type { VisitRecord } from "@/features/visits";
 
 const SEARCH_PLACEHOLDER = searchPlaceholder(["Date & time", "Agent", "Farmer", "Kebele", "Purpose", "Status"]);
 
@@ -59,7 +59,7 @@ export function VisitsTable() {
     <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-        <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Visits</h2>
+        <h2 className="text-[15px] font-semibold text-ink">Visits</h2>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
           <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
@@ -72,7 +72,7 @@ export function VisitsTable() {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[980px] border-collapse text-left">
           <thead>
-            <tr className="border-y border-[#E5E7EB] bg-[#F8FAFC] text-[13px] font-medium text-[#334155]">
+            <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
               <th className="whitespace-nowrap px-4 py-3 font-medium">Date &amp; time</th>
               <th className="px-4 py-3 font-medium">
                 <FilterDropdown label="Agent" allLabel="All agents" options={VISIT_AGENT_OPTIONS} selected={filters.agent} onApply={setFilter("agent")} />
@@ -88,26 +88,26 @@ export function VisitsTable() {
               <th className="px-4 py-3 text-center font-medium">Action</th>
             </tr>
           </thead>
-          <tbody className="text-[14px] text-[#334155]">
+          <tbody className="text-[14px] text-slate-700">
             {rows.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-6"><EmptyState title="No visits match the selected filters" hint="Clear a filter or try a different search." /></td>
               </tr>
             )}
             {pageRows.map((v) => (
-              <tr key={v.id} className="border-b border-[#F1F3F4] transition-colors last:border-0 hover:bg-[#F8FAFC]">
+              <tr key={v.id} className="border-b border-line-soft transition-colors last:border-0 hover:bg-surface">
                 <td className="px-4 py-3.5 leading-tight">
                   {v.date}
                   <br />
-                  <span className="text-[#475569]">- {v.time}</span>
+                  <span className="text-slate-600">- {v.time}</span>
                 </td>
                 <td className="px-4 py-3.5">{v.agent}</td>
                 <td className="px-4 py-3.5">
                   <div className="flex items-center gap-2.5">
                     <FarmerAvatar name={v.farmerName} avatar={v.farmerAvatar} />
                     <div className="leading-tight">
-                      <p className="font-medium text-[#1a2b3c]">{v.farmerName}</p>
-                      <p className="mt-0.5 text-[13px] text-[#64748b]">{v.farmerEmail}</p>
+                      <p className="font-medium text-ink">{v.farmerName}</p>
+                      <p className="mt-0.5 text-[13px] text-muted">{v.farmerEmail}</p>
                     </div>
                   </div>
                 </td>

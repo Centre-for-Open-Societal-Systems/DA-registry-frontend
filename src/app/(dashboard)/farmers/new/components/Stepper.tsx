@@ -25,8 +25,8 @@ export function Stepper({ currentStep }: { currentStep: number }) {
                   className={cn(
                     "relative z-10 flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-semibold ring-4",
                     isActive || isDone
-                      ? "bg-brand-green text-white ring-[#E6F5F0]"
-                      : "bg-[#E5E7EB] text-[#6B7280] ring-[#F3F4F6]"
+                      ? "bg-brand-green text-white ring-brand-tint"
+                      : "bg-line text-gray-500 ring-gray-100"
                   )}
                 >
                   {isDone ? (
@@ -38,10 +38,10 @@ export function Stepper({ currentStep }: { currentStep: number }) {
                   )}
                 </div>
 
-                <span className={cn("mt-3 hidden text-[12.5px] font-semibold md:block", isActive ? "text-brand-green" : "text-[#6B7280]")}>
+                <span className={cn("mt-3 hidden text-[12.5px] font-semibold md:block", isActive ? "text-brand-green" : "text-gray-500")}>
                   Step {stepNo}
                 </span>
-                <span className={cn("mt-1 hidden whitespace-nowrap text-[12.5px] md:block", isActive ? "font-semibold text-[#1a2b3c]" : "font-medium text-[#6B7280]")}>
+                <span className={cn("mt-1 hidden whitespace-nowrap text-[12.5px] md:block", isActive ? "font-semibold text-ink" : "font-medium text-gray-500")}>
                   {step.label}
                 </span>
               </li>
@@ -49,7 +49,7 @@ export function Stepper({ currentStep }: { currentStep: number }) {
               {!isLast && (
                 <li
                   aria-hidden
-                  className="mt-[15px] h-0.5 flex-1 bg-[#E5E7EB] md:-mx-[50px]"
+                  className="mt-[15px] h-0.5 flex-1 bg-line md:-mx-[50px]"
                 />
               )}
             </Fragment>

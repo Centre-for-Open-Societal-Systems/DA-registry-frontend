@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
-import { findAccount, type DemoAccount } from "@/features/auth/accounts";
+import { findAccount, type DemoAccount } from "@/features/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
 import { FaydaSignInModal } from "./FaydaSignInModal";
@@ -61,7 +61,7 @@ export function LoginCard() {
         Agent Sign-In
       </div>
 
-      <div className="relative z-10 flex flex-col gap-6 md:gap-8 rounded-[20px] bg-[#FAFAFA] p-6 sm:p-8 md:p-10 shadow-2xl transition-shadow duration-500 ease-out group-hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.3)]">
+      <div className="relative z-10 flex flex-col gap-6 md:gap-8 rounded-[20px] bg-zinc-50 p-6 sm:p-8 md:p-10 shadow-2xl transition-shadow duration-500 ease-out group-hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.3)]">
         {/* LoginCardHeader */}
         <div className="flex flex-col items-center gap-4 md:gap-6 text-center">
           <div className="group flex cursor-default items-center justify-center gap-3">

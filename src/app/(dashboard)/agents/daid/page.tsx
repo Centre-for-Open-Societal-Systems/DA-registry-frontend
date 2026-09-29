@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { ModuleStrip } from "@/features/agents/components/ModuleStrip";
-import { ExceptionsPanel } from "@/features/agents/components/ExceptionsPanel";
+import { ModuleStrip } from "@/features/agents";
+import { ExceptionsPanel } from "@/features/agents";
 import { IssuancePipeline } from "./components/IssuancePipeline";
 
 export const metadata: Metadata = {

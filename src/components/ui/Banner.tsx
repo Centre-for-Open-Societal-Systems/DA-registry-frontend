@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils";
 type BannerTone = "success" | "info" | "warning" | "error";
 
 const TONES: Record<BannerTone, string> = {
-  success: "border-[#A7E3C7] bg-[#EBFAF2] text-[#065F46]",
-  info: "border-[#BFDBFE] bg-[#EFF6FF] text-[#1E3A8A]",
-  warning: "border-[#FCD9A8] bg-[#FFF7EB] text-[#9A3412]",
-  error: "border-[#FCC4C4] bg-[#FFF1F1] text-[#991B1B]",
+  success: "border-brand-border bg-brand-mint text-emerald-800",
+  info: "border-blue-200 bg-blue-50 text-blue-900",
+  warning: "border-warning-border bg-warning-wash text-orange-800",
+  error: "border-danger-border bg-danger-wash text-red-800",
 };
 
 // Inline outcome banner. Submit actions resolve to one of these, naming the offline/sync outcome (NFR).

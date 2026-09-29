@@ -1,11 +1,9 @@
-"use client";
-
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { Textarea } from "@/components/ui/Textarea";
-import { CURRENT_AGENT } from "@/features/farmers/data";
-import { AttributionCard } from "@/features/farmers/components/AttributionCard";
+import { CURRENT_AGENT } from "@/features/farmers";
+import { AttributionCard } from "@/features/farmers";
 
 interface AddAdvisoryNoteModalProps {
   isOpen: boolean;

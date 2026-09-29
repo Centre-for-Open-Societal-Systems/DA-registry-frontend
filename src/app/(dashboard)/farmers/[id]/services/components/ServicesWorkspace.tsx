@@ -11,7 +11,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import type { Farmer } from "@/features/farmers/types";
+import type { Farmer } from "@/features/farmers";
 import { cn } from "@/lib/utils";
 
 type Tab = "credit" | "marketplace";
@@ -59,10 +59,10 @@ export function ServicesWorkspace({ farmer }: { farmer: Farmer }) {
           <div className="flex flex-col gap-5 p-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div>
-                <h2 className="flex items-center gap-2 text-[15px] font-semibold text-[#1a2b3c]">Active application <Pill tone="amber" dot>{STAGES[APPLICATION.currentStage]}</Pill></h2>
+                <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink">Active application <Pill tone="amber" dot>{STAGES[APPLICATION.currentStage]}</Pill></h2>
                 <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1.5 text-[13.5px] sm:grid-cols-5">
                   {[["Reference", APPLICATION.ref], ["Lender", APPLICATION.lender], ["Amount", APPLICATION.amount], ["Tenure", APPLICATION.tenure], ["Product", APPLICATION.product]].map(([k, v]) => (
-                    <div key={k}><dt className="text-[11.5px] font-semibold uppercase tracking-wider text-[#64748b]">{k}</dt><dd className="text-[#1a2b3c]">{v}</dd></div>
+                    <div key={k}><dt className="text-[11.5px] font-semibold uppercase tracking-wider text-muted">{k}</dt><dd className="text-ink">{v}</dd></div>
                   ))}
                 </dl>
               </div>
@@ -75,13 +75,13 @@ export function ServicesWorkspace({ farmer }: { farmer: Farmer }) {
                 const done = i < APPLICATION.currentStage;
                 const current = i === APPLICATION.currentStage;
                 return (
-                  <li key={s} className={cn("rounded-lg border p-3", current ? "border-brand-green bg-[#F0FAF5]" : done ? "border-[#A7E3C7] bg-white" : "border-[#E5E7EB] bg-[#F8FAFC]")}>
+                  <li key={s} className={cn("rounded-lg border p-3", current ? "border-brand-green bg-brand-wash" : done ? "border-brand-border bg-white" : "border-line bg-surface")}>
                     <div className="flex items-center gap-2">
-                      <span className={cn("flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-bold", done ? "bg-brand-green text-white" : current ? "border-2 border-brand-green text-brand-green" : "border border-[#CBD5E1] text-[#94A3B8]")}>{done ? "✓" : i + 1}</span>
-                      <span className={cn("text-[13px] font-semibold", current || done ? "text-[#1a2b3c]" : "text-[#94A3B8]")}>{s}</span>
+                      <span className={cn("flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-bold", done ? "bg-brand-green text-white" : current ? "border-2 border-brand-green text-brand-green" : "border border-slate-300 text-subtle")}>{done ? "✓" : i + 1}</span>
+                      <span className={cn("text-[13px] font-semibold", current || done ? "text-ink" : "text-subtle")}>{s}</span>
                     </div>
-                    <p className="mt-2 text-[12px] text-[#64748b]">{APPLICATION.stages[i].at}</p>
-                    {APPLICATION.stages[i].actor && <p className="text-[12px] text-[#4a5568]">{APPLICATION.stages[i].actor}</p>}
+                    <p className="mt-2 text-[12px] text-muted">{APPLICATION.stages[i].at}</p>
+                    {APPLICATION.stages[i].actor && <p className="text-[12px] text-ink-soft">{APPLICATION.stages[i].actor}</p>}
                     {current && <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-brand-green">Current stage</p>}
                   </li>
                 );
@@ -102,8 +102,8 @@ export function ServicesWorkspace({ farmer }: { farmer: Farmer }) {
         {tab === "marketplace" && (
           <div className="flex flex-col gap-5 p-5">
             <div>
-              <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Record a service payment</h2>
-              <p className="mt-1 text-[13px] text-[#4a5568]">A payment is recorded against an identified service from the OpenAgriNet service catalogue — not a bare transfer.</p>
+              <h2 className="text-[15px] font-semibold text-ink">Record a service payment</h2>
+              <p className="mt-1 text-[13px] text-ink-soft">A payment is recorded against an identified service from the OpenAgriNet service catalogue — not a bare transfer.</p>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField label="Service being paid for" htmlFor="mk-service" required>
@@ -160,7 +160,7 @@ export function ServicesWorkspace({ farmer }: { farmer: Farmer }) {
             <Select id="cr-tenure" value={credit.tenure} onChange={(e) => setCredit({ ...credit, tenure: e.target.value })}>{["6", "12", "18", "24"].map((t) => <option key={t} value={t}>{t}</option>)}</Select>
           </FormField>
           <FormField label="Supporting documents" htmlFor="cr-docs" hint={`${credit.docs} attached`}>
-            <button id="cr-docs" type="button" onClick={() => setCredit({ ...credit, docs: credit.docs + 1 })} className="h-11 w-full rounded-lg border border-dashed border-zinc-300 text-[13.5px] font-medium text-[#334155] hover:border-brand-green">Add document / photo</button>
+            <button id="cr-docs" type="button" onClick={() => setCredit({ ...credit, docs: credit.docs + 1 })} className="h-11 w-full rounded-lg border border-dashed border-zinc-300 text-[13.5px] font-medium text-slate-700 hover:border-brand-green">Add document / photo</button>
           </FormField>
           <FormField label="Purpose" htmlFor="cr-purpose" required className="sm:col-span-2">
             <Textarea id="cr-purpose" rows={3} value={credit.purpose} onChange={(e) => setCredit({ ...credit, purpose: e.target.value })} placeholder="What the loan will fund" />

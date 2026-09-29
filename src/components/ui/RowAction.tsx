@@ -7,12 +7,12 @@ export type RowActionIcon = "view" | "edit" | "retry" | "check" | "remove" | "ca
 
 const TONES: Record<RowActionTone, string> = {
   // The default table action (View, Review, Edit) — green outline pill.
-  brand: "border-brand-green bg-[#EBFAF2] text-brand-green hover:bg-brand-green hover:text-white",
+  brand: "border-brand-green bg-brand-mint text-brand-green hover:bg-brand-green hover:text-white",
   // The row's main forward action (Assign, Collect, Resolve).
   solid: "border-brand-green bg-brand-green text-white hover:bg-brand-green-dark hover:border-brand-green-dark",
-  neutral: "border-zinc-200 bg-white text-[#1a2b3c] hover:bg-zinc-50",
-  danger: "border-[#FCC4C4] bg-white text-[#DC2626] hover:bg-[#FFF1F1]",
-  warning: "border-[#DDD6FE] bg-[#F5F3FF] text-[#6D28D9] hover:bg-[#6D28D9] hover:text-white",
+  neutral: "border-zinc-200 bg-white text-ink hover:bg-zinc-50",
+  danger: "border-danger-border bg-white text-danger hover:bg-danger-wash",
+  warning: "border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-700 hover:text-white",
 };
 
 const ICONS: Record<Exclude<RowActionIcon, "none">, ReactNode> = {

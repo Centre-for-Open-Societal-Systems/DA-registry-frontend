@@ -17,7 +17,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { useAuthStore } from "@/store/useAuthStore";
-import { FARMERS } from "@/features/farmers/data";
+import { FARMERS } from "@/features/farmers";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { cn } from "@/lib/utils";
 
@@ -138,15 +138,15 @@ export function BeneficiariesWorkspace() {
   };
 
   const columns: Column<Beneficiary>[] = [
-    { key: "name", header: "Farmer", cell: (b) => <Link href={`/farmers/${b.id}`} className="font-medium text-[#1a2b3c] hover:text-brand-green">{b.name}</Link> },
+    { key: "name", header: "Farmer", cell: (b) => <Link href={`/farmers/${b.id}`} className="font-medium text-ink hover:text-brand-green">{b.name}</Link> },
     { key: "kebele", header: <FilterDropdown label="Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setFilter("kebele")} />, cell: (b) => b.kebele },
     { key: "crop", header: <FilterDropdown label="Primary crop" allLabel="All crops" options={cropOptions} selected={filters.crop} onApply={setFilter("crop")} />, cell: (b) => b.crop },
     { key: "segment", header: <FilterDropdown label="Segment" allLabel="All segments" options={segmentOptions} selected={filters.segment} onApply={setFilter("segment")} />, cell: (b) => { const s = SEGMENTS.find((x) => x.id === b.segmentId)!; return <Pill tone={s.tone}>{s.name}</Pill>; } },
     { key: "status", header: <FilterDropdown label="Status" allLabel="All Status" options={statusOptions} selected={filters.status} onApply={setFilter("status")} />, cell: (b) => <Pill tone={b.status === "Enrolled" ? "green" : "amber"} dot>{b.status}</Pill> },
-    { key: "linked", header: "Linked", cell: (b) => <span className="text-[13px] text-[#64748b]">{b.linkedAt}</span> },
+    { key: "linked", header: "Linked", cell: (b) => <span className="text-[13px] text-muted">{b.linkedAt}</span> },
     {
       key: "actions", header: "Actions", align: "center",
-      cell: (b) => canEditRules ? <RowAction tone="danger" icon="remove" onClick={() => setRemoving(b)}>Remove link</RowAction> : <span className="text-[12.5px] text-[#94A3B8]">—</span>,
+      cell: (b) => canEditRules ? <RowAction tone="danger" icon="remove" onClick={() => setRemoving(b)}>Remove link</RowAction> : <span className="text-[12.5px] text-subtle">—</span>,
     },
   ];
 
@@ -157,13 +157,13 @@ export function BeneficiariesWorkspace() {
         {SEGMENTS.map((s) => {
           const active = singleSegment === s.id;
           return (
-            <button key={s.id} type="button" aria-pressed={active} onClick={() => toggleSegment(s.id)} className={cn("rounded-xl border bg-white p-4 text-left shadow-[0px_1px_3px_rgba(0,0,0,0.04)] transition-colors", active ? "border-brand-green bg-[#F0FAF5]" : "border-[#E5E7EB] hover:border-brand-green/60")}>
+            <button key={s.id} type="button" aria-pressed={active} onClick={() => toggleSegment(s.id)} className={cn("rounded-xl border bg-white p-4 text-left shadow-[0px_1px_3px_rgba(0,0,0,0.04)] transition-colors", active ? "border-brand-green bg-brand-wash" : "border-line hover:border-brand-green/60")}>
               <div className="flex items-start justify-between gap-2">
-                <p className="text-[14px] font-semibold text-[#1a2b3c]">{s.name}</p>
+                <p className="text-[14px] font-semibold text-ink">{s.name}</p>
                 <Pill tone={s.tone}>{s.members}</Pill>
               </div>
-              <p className="mt-1.5 font-mono text-[11.5px] text-[#4a5568]">{s.rule}</p>
-              <p className="mt-2 text-[12.5px] text-[#64748b]">{s.scheme}</p>
+              <p className="mt-1.5 font-mono text-[11.5px] text-ink-soft">{s.rule}</p>
+              <p className="mt-2 text-[12.5px] text-muted">{s.scheme}</p>
               {canEditRules && <span className="mt-2 inline-block text-[12px] font-semibold text-brand-green">Edit rule</span>}
             </button>
           );
@@ -174,7 +174,7 @@ export function BeneficiariesWorkspace() {
 
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <h2 className="text-[15px] font-semibold text-[#1a2b3c]">{singleSegment ? segmentName(singleSegment) : "All beneficiaries"} <span className="ml-1 text-[13px] font-normal text-[#64748b]">{visible.length}</span></h2>
+          <h2 className="text-[15px] font-semibold text-ink">{singleSegment ? segmentName(singleSegment) : "All beneficiaries"} <span className="ml-1 text-[13px] font-normal text-muted">{visible.length}</span></h2>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
 
@@ -216,9 +216,9 @@ export function BeneficiariesWorkspace() {
 
       {removing && (
         <Modal isOpen onClose={() => setRemoving(null)} title="Remove beneficiary link?" subtitle={removing.name}
-          footer={<><Button variant="outline" onClick={() => setRemoving(null)}>Cancel</Button><Button className="bg-[#DC2626] text-white hover:bg-[#B91C1C]" onClick={remove}>Remove link</Button></>}
+          footer={<><Button variant="outline" onClick={() => setRemoving(null)}>Cancel</Button><Button className="bg-danger text-white hover:bg-red-700" onClick={remove}>Remove link</Button></>}
         >
-          <p className="text-[14px] leading-relaxed text-[#4a5568]">This detaches the farmer from the segment and its scheme. It never deletes the farmer&apos;s master record — that lives in the Farmer Registry.</p>
+          <p className="text-[14px] leading-relaxed text-ink-soft">This detaches the farmer from the segment and its scheme. It never deletes the farmer&apos;s master record — that lives in the Farmer Registry.</p>
         </Modal>
       )}
     </>

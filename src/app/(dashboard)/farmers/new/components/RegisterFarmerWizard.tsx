@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { BackLink } from "@/components/ui/BackLink";
 import { Banner } from "@/components/ui/Banner";
+import { readDraft, removeDraft, writeDraft } from "@/lib/drafts";
 import { REGISTRATION_STEPS, TOTAL_STEPS } from "../steps";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Stepper } from "./Stepper";
@@ -21,8 +22,8 @@ function generateTicketNumber() {
   return `AMHA-SD-${month}-${serial}`;
 }
 
-// Draft kept in this browser only until a drafts API exists. Every step's named fields are captured.
-const DRAFT_KEY = "oan:farmer-registration-draft";
+// Draft kept for this browser session only (see lib/drafts). Every step's named fields are captured.
+const DRAFT_KEY = "farmer-registration";
 
 interface WizardDraft {
   step: number;
@@ -31,36 +32,14 @@ interface WizardDraft {
   savedAt: string;
 }
 
-const BACK_CLASS = "inline-flex w-fit items-center gap-2.5 text-[15px] font-medium text-[#1a2b3c] transition-colors hover:text-brand-green";
-const BACK_ICON = (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 12H5M12 19l-7-7 7-7" />
-  </svg>
-);
-
-type FieldEl =HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+type FieldEl = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 const fieldsIn = (root: HTMLElement | null) =>
   Array.from(root?.querySelectorAll<FieldEl>("input[name], select[name], textarea[name]") ?? []).filter((el) => el.type !== "file" && el.type !== "checkbox");
 
 const formatTime = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
-function readDraft(): WizardDraft | null {
-  try {
-    const raw = localStorage.getItem(DRAFT_KEY);
-    return raw ? (JSON.parse(raw) as WizardDraft) : null;
-  } catch {
-    return null;
-  }
-}
-
-function clearDraft() {
-  try {
-    localStorage.removeItem(DRAFT_KEY);
-  } catch {
-    // storage unavailable — nothing to clear
-  }
-}
+const clearDraft = () => removeDraft(DRAFT_KEY);
 
 export function RegisterFarmerWizard() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -95,7 +74,7 @@ export function RegisterFarmerWizard() {
   // Restore a saved draft on load (deferred a tick so the server render and first client render match).
   useEffect(() => {
     const t = setTimeout(() => {
-      const draft = readDraft();
+      const draft = readDraft<WizardDraft>(DRAFT_KEY);
       if (!draft) return;
       fieldsRef.current = draft.fields ?? {};
       setFieldsSnapshot({ ...fieldsRef.current });
@@ -116,9 +95,9 @@ export function RegisterFarmerWizard() {
     captureStep();
     const draft: WizardDraft = { step: currentStep, confirmed, fields: fieldsRef.current, savedAt: new Date().toISOString() };
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      writeDraft(DRAFT_KEY, draft);
       setSavedAt(draft.savedAt);
-      setNotice({ tone: "success", text: `Draft saved on this device at ${formatTime(draft.savedAt)}. It will reopen on step ${currentStep} next time you start a registration.` });
+      setNotice({ tone: "success", text: `Draft saved for this session at ${formatTime(draft.savedAt)}. It will reopen on step ${currentStep} next time you start a registration.` });
     } catch {
       setNotice({ tone: "error", text: "Couldn't save the draft — browser storage is unavailable (private mode or storage full)." });
     }
@@ -173,17 +152,7 @@ export function RegisterFarmerWizard() {
   return (
     <div className="flex w-full flex-col gap-4">
       {/* Step 1 leaves the wizard for the farmers list; later steps go back one step */}
-      {currentStep > 1 ? (
-        <button type="button" onClick={goBack} className={BACK_CLASS}>
-          {BACK_ICON}
-          Back
-        </button>
-      ) : (
-        <Link href="/farmers" className={BACK_CLASS}>
-          {BACK_ICON}
-          Back
-        </Link>
-      )}
+      {currentStep > 1 ? <BackLink onClick={goBack} /> : <BackLink href="/farmers" />}
 
       <PageHeader title="Register a farmer" description={`Step ${currentStep} of ${TOTAL_STEPS} - ${stepLabel}`} />
       <Stepper currentStep={currentStep} />

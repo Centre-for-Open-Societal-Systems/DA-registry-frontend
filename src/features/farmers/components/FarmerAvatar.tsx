@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getInitials } from "../data";
 
@@ -13,10 +14,11 @@ export function FarmerAvatar({ name, avatar, size = "sm", className }: FarmerAva
 
   if (avatar) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={avatar}
         alt={name}
+        width={80}
+        height={80}
         className={cn("shrink-0 rounded-full object-cover", sizeClasses, className)}
       />
     );
@@ -26,7 +28,7 @@ export function FarmerAvatar({ name, avatar, size = "sm", className }: FarmerAva
     <div
       className={cn(
         "flex shrink-0 items-center justify-center rounded-full font-semibold",
-        size === "lg" ? "bg-brand-green text-white" : "bg-[#E6F5F0] text-brand-green",
+        size === "lg" ? "bg-brand-green text-white" : "bg-brand-tint text-brand-green",
         sizeClasses,
         className,
       )}

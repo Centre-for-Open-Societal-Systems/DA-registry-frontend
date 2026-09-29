@@ -63,10 +63,10 @@ export function SendToFarmersModal({ article, isOpen, onClose }: { article: Arti
               </FormField>
             </div>
             <fieldset>
-              <legend className="text-[14px] font-medium text-[#1a2b3c]">Channels</legend>
+              <legend className="text-[14px] font-medium text-ink">Channels</legend>
               <div className="mt-2 flex gap-5">
                 {(["SMS", "Telegram"] as Channel[]).map((c) => (
-                  <label key={c} className="flex cursor-pointer items-center gap-2 text-[13.5px] text-[#334155]">
+                  <label key={c} className="flex cursor-pointer items-center gap-2 text-[13.5px] text-slate-700">
                     <Checkbox checked={channels.has(c)} onChange={() => toggle(c)} /> {c}
                   </label>
                 ))}

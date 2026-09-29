@@ -65,21 +65,21 @@ export function TablePagination({ page, pageSize, total, itemLabel, onPageChange
   if (total <= PAGE_SIZES[0]) return null;
 
   return (
-    <div className="flex flex-col gap-3 border-t border-[#E5E7EB] px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between">
-      <div className="flex items-center gap-2.5 text-[14px] text-[#475569]">
+    <div className="flex flex-col gap-3 border-t border-line px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between">
+      <div className="flex items-center gap-2.5 text-[14px] text-slate-600">
         <span>Showing</span>
         <span className="relative">
           <select
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
             aria-label="Rows per page"
-            className="h-8 appearance-none rounded-md border border-zinc-200 bg-white pl-2.5 pr-7 text-[13px] text-[#334155] focus:border-brand-green focus:outline-none"
+            className="h-8 appearance-none rounded-md border border-zinc-200 bg-white pl-2.5 pr-7 text-[13px] text-slate-700 focus:border-brand-green focus:outline-none"
           >
             {PAGE_SIZES.map((size) => (
               <option key={size} value={size}>{size}</option>
             ))}
           </select>
-          <svg className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#94A3B8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-subtle" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M6 9l6 6 6-6" />
           </svg>
         </span>
@@ -91,7 +91,7 @@ export function TablePagination({ page, pageSize, total, itemLabel, onPageChange
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={page === 1}
-          className={cn(BOX, "gap-1.5 border-zinc-200 bg-white px-3 text-[#334155] hover:bg-zinc-50 disabled:cursor-not-allowed disabled:border-[#EEF2F6] disabled:text-[#94A3B8] disabled:hover:bg-white")}
+          className={cn(BOX, "gap-1.5 border-zinc-200 bg-white px-3 text-slate-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:border-line-soft disabled:text-subtle disabled:hover:bg-white")}
         >
           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M15 18l-6-6 6-6" />
@@ -101,7 +101,7 @@ export function TablePagination({ page, pageSize, total, itemLabel, onPageChange
 
         {pageItems(page, totalPages).map((item, i) =>
           item === "gap" ? (
-            <span key={`gap-${i}`} className={cn(BOX, "border-zinc-200 bg-white text-[#334155]")} aria-hidden="true">…</span>
+            <span key={`gap-${i}`} className={cn(BOX, "border-zinc-200 bg-white text-slate-700")} aria-hidden="true">…</span>
           ) : (
             <button
               key={item}
@@ -111,7 +111,7 @@ export function TablePagination({ page, pageSize, total, itemLabel, onPageChange
               aria-label={`Page ${item}`}
               className={cn(
                 BOX,
-                page === item ? "border-brand-green bg-brand-green text-white" : "border-zinc-200 bg-white text-[#334155] hover:bg-zinc-50",
+                page === item ? "border-brand-green bg-brand-green text-white" : "border-zinc-200 bg-white text-slate-700 hover:bg-zinc-50",
               )}
             >
               {item}
@@ -123,7 +123,7 @@ export function TablePagination({ page, pageSize, total, itemLabel, onPageChange
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={page === totalPages}
-          className={cn(BOX, "gap-1.5 border-zinc-200 bg-white px-3 text-[#1a2b3c] hover:bg-zinc-50 disabled:cursor-not-allowed disabled:border-[#EEF2F6] disabled:text-[#94A3B8] disabled:hover:bg-white")}
+          className={cn(BOX, "gap-1.5 border-zinc-200 bg-white px-3 text-ink hover:bg-zinc-50 disabled:cursor-not-allowed disabled:border-line-soft disabled:text-subtle disabled:hover:bg-white")}
         >
           <span className="hidden sm:inline">Next</span>
           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

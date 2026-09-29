@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { Farmer } from "@/features/farmers/types";
-import { PlanVisitModal } from "@/features/farmers/components/PlanVisitModal";
-import { ConsentWithdrawalModal } from "@/features/farmers/components/ConsentWithdrawalModal";
-import { RaiseGrievanceModal } from "@/features/grievances/components/RaiseGrievanceModal";
+import type { Farmer } from "@/features/farmers";
+import { PlanVisitModal } from "@/features/farmers";
+import { ConsentWithdrawalModal } from "@/features/farmers";
+import { RaiseGrievanceModal } from "@/features/grievances";
 import { cn } from "@/lib/utils";
 import { SuggestCorrectionModal } from "./SuggestCorrectionModal";
 
@@ -40,11 +40,11 @@ export function ProfileActionStrip({ farmer }: { farmer: Farmer }) {
   const close = () => setOpenModal(null);
 
   const cell =
-    "group flex items-center gap-3 border-[#E5E7EB] px-4 py-3 text-left transition-colors border-b last:border-b-0 sm:even:border-r lg:border-b-0 lg:border-r lg:last:border-r-0";
+    "group flex items-center gap-3 border-line px-4 py-3 text-left transition-colors border-b last:border-b-0 sm:even:border-r lg:border-b-0 lg:border-r lg:last:border-r-0";
 
   return (
     <>
-      <div className="grid grid-cols-1 border-t border-[#E5E7EB] bg-[#FBFCFD] sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 border-t border-line bg-surface-alt sm:grid-cols-2 lg:grid-cols-5">
         {/* Plan visit leads the strip (FR-05b-i). It reads like the other cells and is highlighted only while active. */}
         {(() => {
           const active = openModal === "visit";
@@ -54,38 +54,38 @@ export function ProfileActionStrip({ farmer }: { farmer: Farmer }) {
               onClick={() => setOpenModal("visit")}
               aria-pressed={active}
               className={cn(
-                "group flex items-center gap-3 border-b border-[#E5E7EB] px-4 py-3 text-left transition-colors sm:border-r lg:border-b-0",
-                active ? "bg-gradient-to-r from-[#0B7A57] to-brand-green text-white" : "hover:bg-[#F0FAF5]",
+                "group flex items-center gap-3 border-b border-line px-4 py-3 text-left transition-colors sm:border-r lg:border-b-0",
+                active ? "bg-gradient-to-r from-brand-green-bright to-brand-green text-white" : "hover:bg-brand-wash",
               )}
             >
-              <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110", active ? "bg-white/20" : "bg-[#E6F5F0] text-brand-green")}>
+              <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110", active ? "bg-white/20" : "bg-brand-tint text-brand-green")}>
                 <Icon d={ICONS.calendar} className="h-[18px] w-[18px]" />
               </span>
               <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                <span className={cn("text-[13.5px] font-semibold", !active && "text-[#1a2b3c]")}>Plan visit</span>
-                <span className={cn("text-[11.5px]", active ? "text-white/75" : "text-[#64748b]")}>Schedule a field visit</span>
+                <span className={cn("text-[13.5px] font-semibold", !active && "text-ink")}>Plan visit</span>
+                <span className={cn("text-[11.5px]", active ? "text-white/75" : "text-muted")}>Schedule a field visit</span>
               </span>
-              <Icon d={ICONS.arrow} className={cn("h-4 w-4 transition-all group-hover:translate-x-0.5", active ? "text-white/70" : "text-[#CBD5E1] group-hover:text-brand-green")} />
+              <Icon d={ICONS.arrow} className={cn("h-4 w-4 transition-all group-hover:translate-x-0.5", active ? "text-white/70" : "text-slate-300 group-hover:text-brand-green")} />
             </button>
           );
         })()}
         {SECONDARY.map((a) => {
           const inner = (
             <>
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#E6F5F0] text-brand-green transition-transform group-hover:scale-110">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-tint text-brand-green transition-transform group-hover:scale-110">
                 <Icon d={a.icon} className="h-[18px] w-[18px]" />
               </span>
               <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                <span className="text-[13.5px] font-semibold text-[#1a2b3c]">{a.label}</span>
-                <span className="text-[11.5px] text-[#64748b]">{a.hint}</span>
+                <span className="text-[13.5px] font-semibold text-ink">{a.label}</span>
+                <span className="text-[11.5px] text-muted">{a.hint}</span>
               </span>
-              <Icon d={ICONS.arrow} className="h-4 w-4 text-[#CBD5E1] transition-all group-hover:translate-x-0.5 group-hover:text-brand-green" />
+              <Icon d={ICONS.arrow} className="h-4 w-4 text-slate-300 transition-all group-hover:translate-x-0.5 group-hover:text-brand-green" />
             </>
           );
           return a.key === "services" ? (
-            <Link key={a.key} href={`/farmers/${farmer.id}/services`} className={cn(cell, "hover:bg-[#F0FAF5]")}>{inner}</Link>
+            <Link key={a.key} href={`/farmers/${farmer.id}/services`} className={cn(cell, "hover:bg-brand-wash")}>{inner}</Link>
           ) : (
-            <button key={a.key} type="button" aria-pressed={openModal === a.key} onClick={() => setOpenModal(a.key === "services" ? null : a.key)} className={cn(cell, "hover:bg-[#F0FAF5]", openModal === a.key && "bg-[#F0FAF5]")}>{inner}</button>
+            <button key={a.key} type="button" aria-pressed={openModal === a.key} onClick={() => setOpenModal(a.key === "services" ? null : a.key)} className={cn(cell, "hover:bg-brand-wash", openModal === a.key && "bg-brand-wash")}>{inner}</button>
           );
         })}
       </div>

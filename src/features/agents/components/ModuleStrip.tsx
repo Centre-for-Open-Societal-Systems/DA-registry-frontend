@@ -20,14 +20,14 @@ export function ModuleStrip({ activeHref }: { activeHref?: string }) {
             href={m.href}
             className={cn(
               "flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] transition-colors",
-              active ? "border-brand-green bg-[#F0FAF5]" : "border-[#E5E7EB] hover:border-brand-green/60",
+              active ? "border-brand-green bg-brand-wash" : "border-line hover:border-brand-green/60",
             )}
           >
             <div className="min-w-0">
-              <p className="text-[13.5px] font-semibold text-[#1a2b3c]">{m.title}</p>
-              <p className="mt-0.5 truncate text-[12px] text-[#64748b]">{m.stat}</p>
+              <p className="text-[13.5px] font-semibold text-ink">{m.title}</p>
+              <p className="mt-0.5 truncate text-[12px] text-muted">{m.stat}</p>
             </div>
-            <svg className="h-4 w-4 shrink-0 text-[#94A3B8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+            <svg className="h-4 w-4 shrink-0 text-subtle" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
           </Link>
         );
       })}

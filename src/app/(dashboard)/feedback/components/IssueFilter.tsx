@@ -61,19 +61,19 @@ export function IssueFilter({ selected, onChange }: IssueFilterProps) {
 
   return (
     <div ref={rootRef} className="relative flex items-center gap-3">
-      <span className="text-[13.5px] font-medium text-[#1a2b3c]">Filter</span>
+      <span className="text-[13.5px] font-medium text-ink">Filter</span>
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         className={cn(
-          "flex h-9 min-w-[86px] items-center justify-between gap-2 rounded-lg border bg-white px-3 text-[13.5px] text-[#1a2b3c] transition-colors",
+          "flex h-9 min-w-[86px] items-center justify-between gap-2 rounded-lg border bg-white px-3 text-[13.5px] text-ink transition-colors",
           isOpen ? "border-brand-green ring-1 ring-brand-green" : "border-zinc-200 hover:bg-zinc-50"
         )}
       >
         <span className="truncate">{summary}</span>
-        <svg className={cn("h-4 w-4 shrink-0 text-[#1a2b3c] transition-transform", isOpen && "rotate-180")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+        <svg className={cn("h-4 w-4 shrink-0 text-ink transition-transform", isOpen && "rotate-180")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
@@ -82,19 +82,19 @@ export function IssueFilter({ selected, onChange }: IssueFilterProps) {
         <ul
           role="listbox"
           aria-multiselectable
-          className="absolute left-0 top-full z-30 mt-1.5 w-[190px] overflow-hidden rounded-lg sm:left-auto sm:right-0 border border-[#E5E7EB] bg-white text-[14px] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)]"
+          className="absolute left-0 top-full z-30 mt-1.5 w-[190px] overflow-hidden rounded-lg sm:left-auto sm:right-0 border border-line bg-white text-[14px] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)]"
         >
-          <li className="border-b border-[#F1F3F4]">
-            <label className="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[#F8FAFC]">
+          <li className="border-b border-line-soft">
+            <label className="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-surface">
               <Checkbox checked={allSelected} onChange={() => onChange(new Set())} aria-label="All" />
-              <span className="text-[#4a5568]">All</span>
+              <span className="text-ink-soft">All</span>
             </label>
           </li>
           {FILTER_OPTIONS.map((option) => (
-            <li key={option} className="border-b border-[#F1F3F4] last:border-0">
-              <label className="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[#F8FAFC]">
+            <li key={option} className="border-b border-line-soft last:border-0">
+              <label className="flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-surface">
                 <Checkbox checked={selected.has(option)} onChange={() => toggle(option)} aria-label={option} />
-                <span className="text-[#4a5568]">{option}</span>
+                <span className="text-ink-soft">{option}</span>
               </label>
             </li>
           ))}

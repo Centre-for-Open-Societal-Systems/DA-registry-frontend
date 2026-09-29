@@ -1,4 +1,4 @@
-import type { TrendPoint } from "@/features/dashboard/admin";
+import type { TrendPoint } from "@/features/dashboard";
 
 const W = 640;
 const H = 260;
@@ -28,32 +28,32 @@ export function RegistrationsTrendChart({ points, seriesLabel }: { points: Trend
       <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`${seriesLabel}: ${points.map((p) => `${p.label} ${p.value}`).join(", ")}`}>
         <defs>
           <linearGradient id="registrations-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#037957" stopOpacity={0.22} />
-            <stop offset="100%" stopColor="#037957" stopOpacity={0} />
+            <stop offset="0%" className="[stop-color:var(--color-brand-green)]" stopOpacity={0.22} />
+            <stop offset="100%" className="[stop-color:var(--color-brand-green)]" stopOpacity={0} />
           </linearGradient>
         </defs>
         {gridYs.map((gy) => (
-          <line key={gy} x1={PAD_X} x2={W - PAD_X} y1={gy} y2={gy} stroke="#E5E7EB" strokeWidth={1} />
+          <line key={gy} x1={PAD_X} x2={W - PAD_X} y1={gy} y2={gy} className="stroke-line" strokeWidth={1} />
         ))}
         <path d={area} fill="url(#registrations-fill)" />
-        <path d={line} fill="none" stroke="#037957" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+        <path d={line} fill="none" className="stroke-brand-green" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
         {points.map((p, i) => {
           const isLast = i === points.length - 1;
           return (
-            <circle key={p.label} cx={x(i)} cy={y(p.value)} r={isLast ? 5.5 : 4.5} fill={isLast ? "#037957" : "#fff"} stroke={isLast ? "#fff" : "#037957"} strokeWidth={isLast ? 2 : 2}>
+            <circle key={p.label} cx={x(i)} cy={y(p.value)} r={isLast ? 5.5 : 4.5} className={isLast ? "fill-brand-green stroke-white" : "fill-white stroke-brand-green"} strokeWidth={2}>
               <title>{`${p.label}: ${p.value.toLocaleString()} new farmers`}</title>
             </circle>
           );
         })}
       </svg>
 
-      <div className="flex justify-between text-[12px] text-[#4a5568]">
+      <div className="flex justify-between text-[12px] text-ink-soft">
         {points.map((p) => (
           <span key={p.label}>{p.label}</span>
         ))}
       </div>
 
-      <figcaption className="mt-3 flex items-center justify-center gap-2 text-[12px] text-[#4a5568]">
+      <figcaption className="mt-3 flex items-center justify-center gap-2 text-[12px] text-ink-soft">
         <span className="h-2 w-2 rounded-full bg-brand-green" aria-hidden="true" />
         {seriesLabel}
       </figcaption>

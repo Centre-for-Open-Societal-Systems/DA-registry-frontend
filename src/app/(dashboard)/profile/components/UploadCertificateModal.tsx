@@ -8,7 +8,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
-import { CERTIFICATE_TYPES, fileMeta, formatFileSize, type Certificate } from "@/features/farmers/qualifications";
+import { CERTIFICATE_TYPES, fileMeta, formatFileSize, type Certificate } from "@/features/farmers";
 import { Banner } from "@/components/ui/Banner";
 
 type Source = "external" | "agrilearn";
@@ -134,7 +134,7 @@ export function UploadCertificateModal({ isOpen, onClose, onSubmit }: UploadCert
       <form id={FORM_ID} className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {/* Source */}
         <div className="flex flex-col gap-2">
-          <p className="text-[14px] font-medium text-[#1a2b3c]">Certificate source</p>
+          <p className="text-[14px] font-medium text-ink">Certificate source</p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {SOURCES.map((s) => {
               const active = s.value === source;
@@ -147,21 +147,21 @@ export function UploadCertificateModal({ isOpen, onClose, onSubmit }: UploadCert
                   onClick={() => setSource(s.value)}
                   className={cn(
                     "flex items-start gap-3 rounded-lg border px-3.5 py-3 text-left transition-colors",
-                    active ? "border-brand-green bg-[#EBFAF2]" : "border-[#E5E7EB] bg-white hover:border-[#CBD5E1]",
+                    active ? "border-brand-green bg-brand-mint" : "border-line bg-white hover:border-slate-300",
                   )}
                 >
                   <span
                     className={cn(
                       "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
-                      active ? "border-brand-green" : "border-[#CBD5E1]",
+                      active ? "border-brand-green" : "border-slate-300",
                     )}
                     aria-hidden="true"
                   >
                     {active && <span className="h-2 w-2 rounded-full bg-brand-green" />}
                   </span>
                   <span>
-                    <span className={cn("block text-[13.5px] font-semibold", active ? "text-brand-green" : "text-[#1a2b3c]")}>{s.label}</span>
-                    <span className={cn("mt-0.5 block text-[12.5px]", active ? "text-brand-green" : "text-[#64748b]")}>{s.hint}</span>
+                    <span className={cn("block text-[13.5px] font-semibold", active ? "text-brand-green" : "text-ink")}>{s.label}</span>
+                    <span className={cn("mt-0.5 block text-[12.5px]", active ? "text-brand-green" : "text-muted")}>{s.hint}</span>
                   </span>
                 </button>
               );
@@ -172,8 +172,8 @@ export function UploadCertificateModal({ isOpen, onClose, onSubmit }: UploadCert
         {/* File */}
         {isExternal && (
           <div className="flex flex-col gap-2">
-            <p className="text-[14px] font-medium text-[#1a2b3c]">
-              Certificate file <span className="text-[#DC2626]">*</span>
+            <p className="text-[14px] font-medium text-ink">
+              Certificate file <span className="text-danger">*</span>
             </p>
             <div
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -181,36 +181,36 @@ export function UploadCertificateModal({ isOpen, onClose, onSubmit }: UploadCert
               onDrop={handleDrop}
               onClick={() => inputRef.current?.click()}
               className={cn(
-                "flex cursor-pointer flex-col items-center rounded-lg border-2 border-dashed bg-[#FAFBFC] px-4 py-6 text-center transition-colors hover:border-brand-green/50",
-                isDragging ? "border-brand-green bg-[#E6F5F0]" : "border-[#D1D5DB]",
+                "flex cursor-pointer flex-col items-center rounded-lg border-2 border-dashed bg-surface-alt px-4 py-6 text-center transition-colors hover:border-brand-green/50",
+                isDragging ? "border-brand-green bg-brand-tint" : "border-gray-300",
               )}
             >
-              <svg className="h-5 w-5 text-[#64748b]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg className="h-5 w-5 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
               </svg>
-              <p className="mt-2.5 text-[13.5px] font-semibold text-[#1a2b3c]">
+              <p className="mt-2.5 text-[13.5px] font-semibold text-ink">
                 {file ? "Choose a different file from your computer" : "Choose a file from your computer"}
               </p>
-              <p className="mt-1 text-[12.5px] text-[#64748b]">PDF, JPG, PNG · max 5 MB</p>
+              <p className="mt-1 text-[12.5px] text-muted">PDF, JPG, PNG · max 5 MB</p>
             </div>
 
             {file && (
-              <div className="flex items-center gap-3 rounded-lg border border-[#A7E3C7] bg-[#EBFAF2] px-3.5 py-3">
+              <div className="flex items-center gap-3 rounded-lg border border-brand-border bg-brand-mint px-3.5 py-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white text-brand-green">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path d="M14 2v6h6" />
                   </svg>
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13.5px] font-semibold text-[#1a2b3c]">{file.name}</p>
-                  <p className="mt-0.5 text-[12.5px] text-[#4a5568]">{formatFileSize(file.size)} · selected from this computer</p>
+                  <p className="truncate text-[13.5px] font-semibold text-ink">{file.name}</p>
+                  <p className="mt-0.5 text-[12.5px] text-ink-soft">{formatFileSize(file.size)} · selected from this computer</p>
                 </div>
                 <RowAction tone="danger" icon="remove" onClick={() => setFile(null)}>
                   Remove
                 </RowAction>
               </div>
             )}
-            {fileError && <p className="text-[12.5px] text-[#DC2626]">{fileError}</p>}
+            {fileError && <p className="text-[12.5px] text-danger">{fileError}</p>}
 
             <input ref={inputRef} type="file" accept="application/pdf,image/jpeg,image/png" className="hidden" onChange={handleInputChange} />
           </div>

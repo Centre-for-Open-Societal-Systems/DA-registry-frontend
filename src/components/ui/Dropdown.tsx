@@ -226,7 +226,7 @@ export function Dropdown({
         <div
           ref={menuRef}
           className={cn(
-            "fixed z-[110] flex animate-dropdown-in flex-col overflow-hidden rounded-lg border border-[#E5E7EB] bg-white text-[14px] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)]",
+            "fixed z-[110] flex animate-dropdown-in flex-col overflow-hidden rounded-lg border border-line bg-white text-[14px] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)]",
             searchable ? "max-w-[calc(100vw-2rem)]" : "w-max max-w-[min(440px,calc(100vw-2rem))]"
           )}
           // A searchable menu keeps the field's width so it does not jump around while results filter
@@ -244,17 +244,17 @@ export function Dropdown({
                   onMouseEnter={() => setHighlight(i)}
                   onClick={() => choose(option)}
                   className={cn(
-                    "cursor-pointer border-b border-[#F1F3F4] px-4 py-3 text-[#334155] transition-colors last:border-b-0",
-                    isHighlighted && "bg-[#F8FAFC]",
-                    isSelected && "bg-[#EBFAF2] font-medium text-brand-green"
+                    "cursor-pointer border-b border-line-soft px-4 py-3 text-slate-700 transition-colors last:border-b-0",
+                    isHighlighted && "bg-surface",
+                    isSelected && "bg-brand-mint font-medium text-brand-green"
                   )}
                 >
                   <span className={cn("block", searchable ? "truncate" : "whitespace-nowrap")}>{option.label}</span>
-                  {option.description && <span className={cn("mt-0.5 block text-[12.5px] text-[#64748b]", searchable ? "truncate" : "whitespace-nowrap")}>{option.description}</span>}
+                  {option.description && <span className={cn("mt-0.5 block text-[12.5px] text-muted", searchable ? "truncate" : "whitespace-nowrap")}>{option.description}</span>}
                 </li>
               );
             })}
-            {visible.length === 0 && <li className="px-4 py-6 text-center text-[13.5px] text-[#64748b]">{noResultsText}</li>}
+            {visible.length === 0 && <li className="px-4 py-6 text-center text-[13.5px] text-muted">{noResultsText}</li>}
           </ul>
         </div>,
         document.body,

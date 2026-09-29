@@ -12,8 +12,8 @@ const PLANS = [
 export function TodayPlanListSection() {
   return (
     <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-      <div className="flex items-center justify-between border-b border-[#E5E7EB] px-5 py-3.5">
-        <h3 className="text-[15px] font-semibold text-[#1a2b3c]">Today&apos;s Plan</h3>
+      <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+        <h3 className="text-[15px] font-semibold text-ink">Today&apos;s Plan</h3>
         <Link href="/visits/v-1001" className="flex items-center gap-1 text-[13px] font-semibold text-brand-green transition-all hover:underline">
           View calendar <span aria-hidden="true">&rarr;</span>
         </Link>
@@ -23,25 +23,25 @@ export function TodayPlanListSection() {
           <Link
             key={plan.time}
             href={plan.href}
-            className="group flex items-center border-b border-[#F1F3F4] px-5 py-2.5 transition-colors last:border-0 hover:bg-[#F8FAFC]"
+            className="group flex items-center border-b border-line-soft px-5 py-2.5 transition-colors last:border-0 hover:bg-surface"
           >
             <div className="w-[68px] shrink-0">
-              <span className="rounded-md bg-[#F1F5F9] px-2.5 py-1 text-[12.5px] font-medium text-[#475569]">
+              <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[12.5px] font-medium text-slate-600">
                 {plan.time}
               </span>
             </div>
 
             <div className="flex-1 pr-4">
-              <p className="text-[14px] font-medium text-[#1a2b3c] transition-colors group-hover:text-brand-green">{plan.title}</p>
-              <p className="mt-0.5 text-[13px] text-[#718096]">{plan.desc}</p>
+              <p className="text-[14px] font-medium text-ink transition-colors group-hover:text-brand-green">{plan.title}</p>
+              <p className="mt-0.5 text-[13px] text-muted">{plan.desc}</p>
             </div>
 
             {plan.status === "UPCOMING" ? (
-              <span className="rounded-full bg-[#E0EFFF] px-3 py-1.5 text-[11px] font-semibold tracking-wide text-[#2563EB]">
+              <span className="rounded-full bg-blue-100 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-blue-600">
                 {plan.status}
               </span>
             ) : (
-              <span className="rounded-full bg-[#FEF3C7] px-3 py-1.5 text-[11px] font-semibold tracking-wide text-[#B45309]">
+              <span className="rounded-full bg-amber-100 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-amber-700">
                 {plan.status}
               </span>
             )}

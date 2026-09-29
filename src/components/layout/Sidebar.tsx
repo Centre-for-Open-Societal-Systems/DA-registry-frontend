@@ -110,7 +110,7 @@ function IdentityFooter({ expanded }: { expanded: boolean }) {
   return (
     <div className={cn("shrink-0 border-t border-black/20 bg-black/10 transition-[padding] duration-300", expanded ? "px-4 py-3" : "px-4 py-3 lg:px-[14px]")}>
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-gold text-[13px] font-bold text-[#05392A]" title={`${name} · ${ROLE_LABELS[role]}`}>{initials}</div>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-gold text-[13px] font-bold text-brand-green-deep" title={`${name} · ${ROLE_LABELS[role]}`}>{initials}</div>
         <div className={cn("min-w-0 flex-1 overflow-hidden whitespace-nowrap transition-all duration-300", expanded ? "max-w-[170px] opacity-100" : "max-w-[170px] opacity-100 lg:max-w-0 lg:opacity-0")}>
           <p className="truncate text-[13px] font-semibold text-white">{name}</p>
           <p className="truncate text-[11px] text-white/70">{ROLE_SCOPES[role]}</p>
@@ -167,8 +167,8 @@ export function Sidebar() {
           className="pointer-events-none fixed left-16 z-[90] hidden -translate-y-1/2 items-center lg:flex"
           style={{ top: tooltip.top }}
         >
-          <span className="h-0 w-0 border-y-[6px] border-r-[6px] border-y-transparent border-r-[#05392A]" />
-          <span className="whitespace-nowrap rounded-md bg-[#05392A] px-3 py-1.5 text-[13px] font-medium text-white shadow-lg">
+          <span className="h-0 w-0 border-y-[6px] border-r-[6px] border-y-transparent border-r-brand-green-deep" />
+          <span className="whitespace-nowrap rounded-md bg-brand-green-deep px-3 py-1.5 text-[13px] font-medium text-white shadow-lg">
             {tooltip.title}
           </span>
         </div>
@@ -179,14 +179,14 @@ export function Sidebar() {
         aria-hidden="true"
         onClick={closeMobile}
         className={cn(
-          "fixed inset-0 z-[70] bg-[#1a2b3c]/50 backdrop-blur-[1px] transition-opacity duration-300 lg:hidden",
+          "fixed inset-0 z-[70] bg-ink/50 backdrop-blur-[1px] transition-opacity duration-300 lg:hidden",
           isMobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
         )}
       />
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-[80] flex h-full w-60 shrink-0 flex-col bg-gradient-to-b from-[#0B7A57] to-[#05392A] text-white shadow-2xl transition-[transform,width] duration-300 ease-in-out",
+          "fixed inset-y-0 left-0 z-[80] flex h-full w-60 shrink-0 flex-col bg-gradient-to-b from-brand-green-bright to-brand-green-deep text-white shadow-2xl transition-[transform,width] duration-300 ease-in-out",
           "lg:static lg:translate-x-0 lg:shadow-none",
           isMobileOpen ? "translate-x-0" : "-translate-x-full",
           isOpen ? "lg:w-60" : "lg:w-16"

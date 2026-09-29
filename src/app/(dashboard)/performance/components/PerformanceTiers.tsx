@@ -14,13 +14,13 @@ import {
   type PerformanceTier,
   type TierCode,
   type TierThresholds,
-} from "@/features/performance/supervisorData";
+} from "@/features/performance";
 
 const TONES: Record<PerformanceTier["tone"], { chip: string; link: string }> = {
-  green: { chip: "bg-[#EBFAF2] text-brand-green", link: "text-brand-green" },
-  blue: { chip: "bg-[#EFF6FF] text-[#1D4ED8]", link: "text-[#1D4ED8]" },
-  amber: { chip: "bg-[#FFF7EB] text-[#C2410C]", link: "text-[#C2410C]" },
-  red: { chip: "bg-[#FFF1F1] text-[#DC2626]", link: "text-[#DC2626]" },
+  green: { chip: "bg-brand-mint text-brand-green", link: "text-brand-green" },
+  blue: { chip: "bg-blue-50 text-blue-700", link: "text-blue-700" },
+  amber: { chip: "bg-warning-wash text-orange-700", link: "text-orange-700" },
+  red: { chip: "bg-danger-wash text-danger", link: "text-danger" },
 };
 
 // The editable thresholds, grouped by the tier whose rule they define.
@@ -80,14 +80,14 @@ export function PerformanceTiers({ onViewTier }: { onViewTier?: (tier: TierCode)
     <Card className="px-4 py-4 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Performance tiers</h2>
-          <p className="mt-1 text-[12.5px] text-[#4a5568]">
+          <h2 className="text-[15px] font-semibold text-ink">Performance tiers</h2>
+          <p className="mt-1 text-[12.5px] text-ink-soft">
             Auto-assigned from KPIs by the aggregation engine (backend) — rule-based, recomputed each period. Proposed 4-tier scheme.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <span className="rounded-md bg-[#EFF6FF] px-2 py-1 text-[12px] font-medium text-[#1D4ED8]">Backend · KPI engine</span>
-          <button type="button" onClick={openConfig} className="rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[12px] font-medium text-[#1a2b3c] transition-colors hover:bg-zinc-50">
+          <span className="rounded-md bg-blue-50 px-2 py-1 text-[12px] font-medium text-blue-700">Backend · KPI engine</span>
+          <button type="button" onClick={openConfig} className="rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[12px] font-medium text-ink transition-colors hover:bg-zinc-50">
             Configure tiers
           </button>
         </div>
@@ -99,20 +99,20 @@ export function PerformanceTiers({ onViewTier }: { onViewTier?: (tier: TierCode)
         {PERFORMANCE_TIERS.map((tier) => {
           const tone = TONES[tier.tone];
           return (
-            <div key={tier.code} className="flex flex-col rounded-xl border border-[#E5E7EB] p-3.5 transition-all hover:border-brand-green/30 hover:shadow-sm">
+            <div key={tier.code} className="flex flex-col rounded-xl border border-line p-3.5 transition-all hover:border-brand-green/30 hover:shadow-sm">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className={cn("rounded px-1.5 py-0.5 text-[12px] font-semibold", tone.chip)}>{tier.code}</span>
-                  <span className="text-[14px] font-semibold text-[#1a2b3c]">{tier.name}</span>
+                  <span className="text-[14px] font-semibold text-ink">{tier.name}</span>
                 </div>
-                <span className="text-[18px] font-semibold text-[#1a2b3c]">
-                  {tier.count} <span className="text-[12px] font-normal text-[#64748b]">DAs</span>
+                <span className="text-[18px] font-semibold text-ink">
+                  {tier.count} <span className="text-[12px] font-normal text-muted">DAs</span>
                 </span>
               </div>
 
-              <div className="mt-3 flex-1 rounded-lg bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-[11.5px] font-medium uppercase tracking-wide text-[#334155]">Rule</p>
-                <p className="mt-1.5 text-[12.5px] leading-snug text-[#1a2b3c]">{rules[tier.code]}</p>
+              <div className="mt-3 flex-1 rounded-lg bg-surface px-3 py-2.5">
+                <p className="text-[11.5px] font-medium uppercase tracking-wide text-slate-700">Rule</p>
+                <p className="mt-1.5 text-[12.5px] leading-snug text-ink">{rules[tier.code]}</p>
               </div>
 
               <button type="button" onClick={() => onViewTier?.(tier.code)} className={cn("mt-3 self-start text-[12.5px] font-semibold hover:underline", tone.link)}>
@@ -142,15 +142,15 @@ export function PerformanceTiers({ onViewTier }: { onViewTier?: (tier: TierCode)
           {THRESHOLD_FIELDS.map(({ tier: code, fields }) => {
             const tier = PERFORMANCE_TIERS.find((t) => t.code === code)!;
             return (
-              <div key={code} className="rounded-lg border border-[#E5E7EB] p-3.5">
+              <div key={code} className="rounded-lg border border-line p-3.5">
                 <div className="flex items-center gap-2">
                   <span className={cn("rounded px-1.5 py-0.5 text-[12px] font-semibold", TONES[tier.tone].chip)}>{code}</span>
-                  <span className="text-[14px] font-semibold text-[#1a2b3c]">{tier.name}</span>
+                  <span className="text-[14px] font-semibold text-ink">{tier.name}</span>
                 </div>
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                   {fields.map((f) => (
                     <div key={f.key} className="flex flex-col gap-1.5">
-                      <label htmlFor={`tier-${f.key}`} className="text-[12.5px] font-medium text-[#4a5568]">{f.label}</label>
+                      <label htmlFor={`tier-${f.key}`} className="text-[12.5px] font-medium text-ink-soft">{f.label}</label>
                       <Input
                         id={`tier-${f.key}`}
                         type="number"
@@ -164,7 +164,7 @@ export function PerformanceTiers({ onViewTier }: { onViewTier?: (tier: TierCode)
                     </div>
                   ))}
                 </div>
-                <p className="mt-2.5 text-[12px] text-[#64748b]">Rule: {previewRules[code]}</p>
+                <p className="mt-2.5 text-[12px] text-muted">Rule: {previewRules[code]}</p>
               </div>
             );
           })}

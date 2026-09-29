@@ -11,7 +11,7 @@ import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { KEBELES, WOREDAS } from "@/features/agents/data";
+import { KEBELES, WOREDAS } from "@/features/agents";
 
 const AUDIT_LOG = [
   ["16 Sep 2026, 09:02", "Yonas Haile (Admin)", "Updated sync schedule → Every 6 hours"],
@@ -66,12 +66,12 @@ export function SettingsWorkspace() {
 
         {tab === "master" && (
           <div className="p-5">
-            <p className="text-[13.5px] text-[#4a5568]">Administrative units used for scope, assignment and geofence validation. Unknown inbound codes (e.g. OR-DN-017) surface as “Invalid Kebele reference” exceptions until mapped here.</p>
+            <p className="text-[13.5px] text-ink-soft">Administrative units used for scope, assignment and geofence validation. Unknown inbound codes (e.g. OR-DN-017) surface as “Invalid Kebele reference” exceptions until mapped here.</p>
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
               {WOREDAS.map((w) => (
-                <div key={w} className="rounded-lg border border-[#E5E7EB] p-4">
-                  <div className="flex items-center justify-between"><h3 className="text-[14px] font-semibold text-[#1a2b3c]">{w}</h3><Pill tone="slate">Oromia · West Shewa</Pill></div>
-                  <ul className="mt-2 flex flex-wrap gap-1.5">{KEBELES[w].map((k) => <li key={k} className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-0.5 text-[12.5px] text-[#475569]">{k}</li>)}</ul>
+                <div key={w} className="rounded-lg border border-line p-4">
+                  <div className="flex items-center justify-between"><h3 className="text-[14px] font-semibold text-ink">{w}</h3><Pill tone="slate">Oromia · West Shewa</Pill></div>
+                  <ul className="mt-2 flex flex-wrap gap-1.5">{KEBELES[w].map((k) => <li key={k} className="rounded-full border border-slate-200 bg-surface px-2.5 py-0.5 text-[12.5px] text-slate-600">{k}</li>)}</ul>
                   <button type="button" onClick={() => setNotice(`Kebele mapping for ${w} opened — add or map inbound MoA codes to master kebeles.`)} className="mt-3 text-[12.5px] font-semibold text-brand-green hover:underline">Manage kebeles</button>
                 </div>
               ))}
@@ -81,10 +81,10 @@ export function SettingsWorkspace() {
 
         {tab === "audit" && (
           <div className="p-5">
-            <p className="text-[13.5px] text-[#4a5568]">Immutable audit log — every actor, role, entity, action, decision and timestamp. Records cannot be deleted, including by administrators.</p>
-            <ul className="mt-4 divide-y divide-[#F1F3F4] rounded-lg border border-[#E5E7EB]">
+            <p className="text-[13.5px] text-ink-soft">Immutable audit log — every actor, role, entity, action, decision and timestamp. Records cannot be deleted, including by administrators.</p>
+            <ul className="mt-4 divide-y divide-line-soft rounded-lg border border-line">
               {AUDIT_LOG.map(([at, actor, action]) => (
-                <li key={at} className="flex flex-col gap-0.5 px-4 py-3 text-[13.5px] sm:flex-row sm:gap-4"><span className="w-44 shrink-0 text-[12.5px] text-[#64748b]">{at}</span><span className="text-[#1a2b3c]"><span className="font-semibold">{actor}</span> — {action}</span></li>
+                <li key={at} className="flex flex-col gap-0.5 px-4 py-3 text-[13.5px] sm:flex-row sm:gap-4"><span className="w-44 shrink-0 text-[12.5px] text-muted">{at}</span><span className="text-ink"><span className="font-semibold">{actor}</span> — {action}</span></li>
               ))}
             </ul>
             <ExportButton label="Export audit log" onClick={() => {

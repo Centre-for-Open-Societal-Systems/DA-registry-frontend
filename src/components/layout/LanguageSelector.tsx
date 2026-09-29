@@ -1,8 +1,7 @@
-"use client";
-
+// Portal languages (the knowledge base publishes in English and Amharic).
 const LANGUAGES = [
   { code: "en", label: "English" },
-  { code: "hi", label: "हिन्दी" },
+  { code: "am", label: "አማርኛ" },
 ];
 
 export function LanguageSelector() {

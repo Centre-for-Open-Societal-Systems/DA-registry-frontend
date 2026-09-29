@@ -11,7 +11,7 @@ export const WOREDA_SUMMARY = {
   agentCount: 24,
 };
 
-export interface PerformanceStat {
+export interface SupervisorPerformanceStat {
   key: string;
   label: string;
   value: string;
@@ -20,12 +20,12 @@ export interface PerformanceStat {
   icon: "calendar" | "userCheck" | "handshake" | "alert" | "training";
 }
 
-export const PERFORMANCE_STATS: PerformanceStat[] = [
-  { key: "agents", label: "Agents", value: "24", accent: "border-l-[#2563EB]", tile: "bg-[#E6F0FD] text-[#2563EB]", icon: "calendar" },
-  { key: "active", label: "Active today", value: "19", accent: "border-l-brand-green", tile: "bg-[#E6F5F0] text-brand-green", icon: "userCheck" },
-  { key: "visits", label: "Visits (week)", value: "312", accent: "border-l-[#EA580C]", tile: "bg-[#FFF1E6] text-[#EA580C]", icon: "handshake" },
-  { key: "reviews", label: "Pending reviews", value: "6", accent: "border-l-[#DC2626]", tile: "bg-[#FEECEC] text-[#DC2626]", icon: "alert" },
-  { key: "training", label: "Training", value: "88%", accent: "border-l-[#7C3AED]", tile: "bg-[#F1EAFE] text-[#7C3AED]", icon: "training" },
+export const SUPERVISOR_PERFORMANCE_STATS: SupervisorPerformanceStat[] = [
+  { key: "agents", label: "Agents", value: "24", accent: "border-l-blue-600", tile: "bg-info-tint text-blue-600", icon: "calendar" },
+  { key: "active", label: "Active today", value: "19", accent: "border-l-brand-green", tile: "bg-brand-tint text-brand-green", icon: "userCheck" },
+  { key: "visits", label: "Visits (week)", value: "312", accent: "border-l-orange-600", tile: "bg-orange-50 text-orange-600", icon: "handshake" },
+  { key: "reviews", label: "Pending reviews", value: "6", accent: "border-l-danger", tile: "bg-danger-tint text-danger", icon: "alert" },
+  { key: "training", label: "Training", value: "88%", accent: "border-l-violet-600", tile: "bg-violet-tint text-violet-600", icon: "training" },
 ];
 
 export type TierCode = "T1" | "T2" | "T3" | "T4";

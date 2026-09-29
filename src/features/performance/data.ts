@@ -19,15 +19,15 @@ export const AGENT_SUMMARY = {
 };
 
 export const PERFORMANCE_STATS: PerformanceStat[] = [
-  { key: "visits", label: "Visits this week", value: "12", hint: "Target: 10 visits", accent: "border-l-[#2563EB]", tile: "bg-[#E6F0FD] text-[#2563EB]", icon: "calendar" },
-  { key: "farmers", label: "Farmers supported", value: "148", hint: "Active this quarter", accent: "border-l-[#7C3AED]", tile: "bg-[#F1EAFE] text-[#7C3AED]", icon: "users" },
-  { key: "registrations", label: "Registrations completed", value: "34", hint: "All records verified", accent: "border-l-brand-green", tile: "bg-[#E6F5F0] text-brand-green", icon: "check" },
-  { key: "training", label: "Training hours", value: "18", hint: "Target: 15 hours", accent: "border-l-[#EA580C]", tile: "bg-[#FFF1E6] text-[#EA580C]", icon: "hourglass" },
-  { key: "tasks", label: "Tasks completed", value: "27 / 31", hint: "4 remaining", accent: "border-l-brand-green", tile: "bg-[#E6F5F0] text-brand-green", icon: "tasks" },
-  { key: "grievances", label: "Grievances resolved", value: "9", hint: "2 still open", accent: "border-l-[#DC2626]", tile: "bg-[#FEECEC] text-[#DC2626]", icon: "megaphone" },
-  { key: "response", label: "Avg. response time", value: "1.8 d", hint: "SLA: 3 days", accent: "border-l-[#0891B2]", tile: "bg-[#E0F7FA] text-[#0891B2]", icon: "clock" },
-  { key: "satisfaction", label: "Farmer satisfaction", value: "4.6 / 5", hint: "From 62 surveys", accent: "border-l-[#CA8A04]", tile: "bg-[#FEF9C3] text-[#CA8A04]", icon: "star" },
-  { key: "fieldDays", label: "Field days", value: "38", hint: "This quarter", accent: "border-l-[#2563EB]", tile: "bg-[#E6F0FD] text-[#2563EB]", icon: "map" },
+  { key: "visits", label: "Visits this week", value: "12", hint: "Target: 10 visits", accent: "border-l-blue-600", tile: "bg-info-tint text-blue-600", icon: "calendar" },
+  { key: "farmers", label: "Farmers supported", value: "148", hint: "Active this quarter", accent: "border-l-violet-600", tile: "bg-violet-tint text-violet-600", icon: "users" },
+  { key: "registrations", label: "Registrations completed", value: "34", hint: "All records verified", accent: "border-l-brand-green", tile: "bg-brand-tint text-brand-green", icon: "check" },
+  { key: "training", label: "Training hours", value: "18", hint: "Target: 15 hours", accent: "border-l-orange-600", tile: "bg-orange-50 text-orange-600", icon: "hourglass" },
+  { key: "tasks", label: "Tasks completed", value: "27 / 31", hint: "4 remaining", accent: "border-l-brand-green", tile: "bg-brand-tint text-brand-green", icon: "tasks" },
+  { key: "grievances", label: "Grievances resolved", value: "9", hint: "2 still open", accent: "border-l-danger", tile: "bg-danger-tint text-danger", icon: "megaphone" },
+  { key: "response", label: "Avg. response time", value: "1.8 d", hint: "SLA: 3 days", accent: "border-l-cyan-600", tile: "bg-cyan-50 text-cyan-600", icon: "clock" },
+  { key: "satisfaction", label: "Farmer satisfaction", value: "4.6 / 5", hint: "From 62 surveys", accent: "border-l-yellow-600", tile: "bg-yellow-100 text-yellow-600", icon: "star" },
+  { key: "fieldDays", label: "Field days", value: "38", hint: "This quarter", accent: "border-l-blue-600", tile: "bg-info-tint text-blue-600", icon: "map" },
 ];
 
 export type GoalStatus = "On track" | "Needs attention" | "At risk";

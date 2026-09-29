@@ -8,7 +8,7 @@ export function AdvancedFiltersButton({ activeCount, onClick, className }: { act
       onClick={onClick}
       className={cn(
         "inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border bg-white px-3.5 text-[13.5px] font-medium transition-colors",
-        activeCount > 0 ? "border-brand-green text-brand-green hover:bg-[#F0FAF5]" : "border-zinc-200 text-[#1a2b3c] hover:bg-zinc-50",
+        activeCount > 0 ? "border-brand-green text-brand-green hover:bg-brand-wash" : "border-zinc-200 text-ink hover:bg-zinc-50",
         className,
       )}
     >

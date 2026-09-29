@@ -58,6 +58,8 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     title: "Agent Registry",
     items: [
+      // The DA sees their own Woreda team here; the full registry is for officers.
+      { title: "My Teams", href: "/my-teams", roles: ["DA"], part: 1 },
       { title: "Agents", href: "/agents", roles: OFFICERS, part: 1 },
       // Supervisor sees field operations here (visits + kebele assignment) instead of the registry-admin items
       { title: "Field Visits", href: "/visits", roles: ["Supervisor"], part: 1 },
@@ -116,6 +118,7 @@ export const PAGE_TITLES: { prefix: string; title: string }[] = [
   { prefix: "/agents/fayda", title: "Fayda Verification" },
   { prefix: "/agents/", title: "DA Profile" },
   { prefix: "/agents", title: "Agents" },
+  { prefix: "/my-teams", title: "My Teams" },
   { prefix: "/approvals", title: "Approvals" },
   { prefix: "/registry-sync", title: "Registry Sync" },
   { prefix: "/feedback", title: "Internal Feedback" },

@@ -39,8 +39,8 @@ export function ReportsList() {
     <>
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
       <Card className="flex flex-col gap-3 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[13.5px] text-[#4a5568]">{scopeNote}</p>
-        <label className="flex items-center gap-2 text-[13px] text-[#4a5568]">Period
+        <p className="text-[13.5px] text-ink-soft">{scopeNote}</p>
+        <label className="flex items-center gap-2 text-[13px] text-ink-soft">Period
           <Select value={period} onChange={(e) => setPeriod(e.target.value)} className="h-9 w-44 text-[13.5px]"><option>This week</option><option>This month</option><option>This quarter</option><option>Meher 2026</option></Select>
         </label>
       </Card>
@@ -48,12 +48,12 @@ export function ReportsList() {
         {REPORTS.map((r) => (
           <Card key={r.id} className="flex flex-col shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="text-[15px] font-semibold text-[#1a2b3c]">{r.name}</h3>
+              <h3 className="text-[15px] font-semibold text-ink">{r.name}</h3>
               <div className="flex gap-1.5"><Pill tone="slate">{r.scope}</Pill>{r.part === 2 && <Pill tone="purple">Part 2</Pill>}</div>
             </div>
-            <p className="mt-1.5 flex-1 text-[13.5px] text-[#4a5568]">{r.description}</p>
+            <p className="mt-1.5 flex-1 text-[13.5px] text-ink-soft">{r.description}</p>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[12px] text-[#64748b]">Last run {r.lastRun}</span>
+              <span className="text-[12px] text-muted">Last run {r.lastRun}</span>
               <div className="flex gap-1.5">
                 {r.formats.map((f) => (
                   <ExportButton key={f} label={f} disabled={r.part === 2} onClick={() => setNotice(`${r.name} (${f}, ${period}) queued — you'll be notified when the export is ready.`)} />

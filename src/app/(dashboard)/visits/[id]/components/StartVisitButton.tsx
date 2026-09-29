@@ -7,7 +7,7 @@ import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { cn } from "@/lib/utils";
-import type { TodaysVisit } from "@/features/visits/types";
+import type { TodaysVisit } from "@/features/visits";
 
 type GpsState = { status: "idle" | "locating" } | { status: "ok"; label: string } | { status: "unavailable" };
 
@@ -80,18 +80,18 @@ export function StartVisitButton({ visitId, next }: { visitId: string; next: Tod
           </>
         }
       >
-        <p className="text-[13.5px] leading-relaxed text-[#4a5568]">
+        <p className="text-[13.5px] leading-relaxed text-ink-soft">
           Starting a visit checks you in at the farm. The arrival time and location are saved with the visit, and you then record what happened on the outcome form.
         </p>
 
-        <ul className="mt-4 divide-y divide-[#E5E7EB] rounded-lg border border-[#E5E7EB]">
+        <ul className="mt-4 divide-y divide-line rounded-lg border border-line">
           <li className="flex items-center justify-between gap-4 px-4 py-3 text-[14px]">
-            <span className="text-[#4a5568]">Arrival time</span>
-            <span className="font-semibold text-[#1a2b3c]">{arrivedAt}</span>
+            <span className="text-ink-soft">Arrival time</span>
+            <span className="font-semibold text-ink">{arrivedAt}</span>
           </li>
           <li className="flex items-center justify-between gap-4 px-4 py-3 text-[14px]">
-            <span className="text-[#4a5568]">GPS location</span>
-            <span className={cn("text-right font-semibold", gps.status === "ok" ? "text-brand-green" : gps.status === "unavailable" ? "text-[#B45309]" : "text-[#64748b]")}>
+            <span className="text-ink-soft">GPS location</span>
+            <span className={cn("text-right font-semibold", gps.status === "ok" ? "text-brand-green" : gps.status === "unavailable" ? "text-amber-700" : "text-muted")}>
               {gps.status === "ok" && gps.label}
               {gps.status === "locating" && <span className="animate-pulse">Locating…</span>}
               {gps.status === "idle" && "—"}
@@ -104,12 +104,12 @@ export function StartVisitButton({ visitId, next }: { visitId: string; next: Tod
             </span>
           </li>
           <li className="flex items-center justify-between gap-4 px-4 py-3 text-[14px]">
-            <span className="text-[#4a5568]">Planned arrival</span>
-            <span className="font-semibold text-[#1a2b3c]">{next.plannedArrival} · {next.note}</span>
+            <span className="text-ink-soft">Planned arrival</span>
+            <span className="font-semibold text-ink">{next.plannedArrival} · {next.note}</span>
           </li>
         </ul>
 
-        <label className="mt-4 flex cursor-pointer items-start gap-3 text-[13.5px] text-[#1a2b3c]">
+        <label className="mt-4 flex cursor-pointer items-start gap-3 text-[13.5px] text-ink">
           <span className="pt-0.5"><Checkbox checked={farmerPresent} onChange={(e) => setFarmerPresent(e.target.checked)} /></span>
           I am at the farm and {next.farmerName} is present for this visit.
         </label>

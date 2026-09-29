@@ -117,12 +117,12 @@ export function UsersRoles() {
   };
 
   const columns: Column<RbacAssignment>[] = [
-    { key: "user", header: "User", cell: (u) => <span><span className="font-medium text-[#1a2b3c]">{u.name}</span><span className="block font-mono text-[12px] text-[#64748b]">{u.userId} · {u.faydaId ? `Fayda ${u.faydaId}` : "Fayda not linked yet"}</span></span> },
+    { key: "user", header: "User", cell: (u) => <span><span className="font-medium text-ink">{u.name}</span><span className="block font-mono text-[12px] text-muted">{u.userId} · {u.faydaId ? `Fayda ${u.faydaId}` : "Fayda not linked yet"}</span></span> },
     { key: "role", header: <FilterDropdown label="Role" allLabel="All roles" options={roleOptions} selected={filters.role} onApply={setFilter("role")} />, cell: (u) => <Pill tone={ROLE_TONE[u.role]}>{ROLE_LABELS[u.role]}</Pill> },
-    { key: "scope", header: <FilterDropdown label="Scope" allLabel="All woreda scopes" options={scopeOptions} selected={filters.scope} onApply={setFilter("scope")} />, cell: (u) => <span className="text-[13px]">{u.regionScope}<span className="block text-[12px] text-[#64748b]">{u.woredaScope}</span></span> },
+    { key: "scope", header: <FilterDropdown label="Scope" allLabel="All woreda scopes" options={scopeOptions} selected={filters.scope} onApply={setFilter("scope")} />, cell: (u) => <span className="text-[13px]">{u.regionScope}<span className="block text-[12px] text-muted">{u.woredaScope}</span></span> },
     { key: "active", header: <FilterDropdown label="Active" allLabel="All users" options={activeOptions} selected={filters.active} onApply={setFilter("active")} />, cell: (u) => <Pill tone={u.active ? "green" : "slate"} dot>{u.active ? "Active" : "Inactive"}</Pill> },
-    { key: "eff", header: "Effective", cell: (u) => <span className="text-[13px] text-[#64748b]">{u.effectiveFrom} → {u.effectiveTo}</span> },
-    { key: "by", header: "Assigned by", cell: (u) => <span className="text-[13px] text-[#64748b]">{u.assignedBy}</span> },
+    { key: "eff", header: "Effective", cell: (u) => <span className="text-[13px] text-muted">{u.effectiveFrom} → {u.effectiveTo}</span> },
+    { key: "by", header: "Assigned by", cell: (u) => <span className="text-[13px] text-muted">{u.assignedBy}</span> },
     { key: "actions", header: "Actions", align: "center", cell: (u) => <RowAction icon="edit" onClick={() => setEditing(u)}>Edit</RowAction> },
   ];
 
@@ -151,8 +151,8 @@ export function UsersRoles() {
           <>
             <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
-                <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Users</h2>
-                <p className="mt-0.5 text-[12.5px] text-[#4a5568]" title="A user acts only within role, active status, Woreda/region scope and function. Visibility does not grant edit rights.">
+                <h2 className="text-[15px] font-semibold text-ink">Users</h2>
+                <p className="mt-0.5 text-[12.5px] text-ink-soft" title="A user acts only within role, active status, Woreda/region scope and function. Visibility does not grant edit rights.">
                   Deny-by-default — access only within role and scope.
                 </p>
               </div>
@@ -181,13 +181,13 @@ export function UsersRoles() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px] text-left text-[13.5px]">
-              <thead className="border-y border-[#E5E7EB] bg-[#F8FAFC] text-[13px] text-[#334155]"><tr><th className="px-4 py-3 font-medium">Role</th><th className="px-4 py-3 font-medium">Can</th><th className="px-4 py-3 font-medium">Cannot (hidden / disabled)</th></tr></thead>
+              <thead className="border-y border-line bg-surface text-[13px] text-slate-700"><tr><th className="px-4 py-3 font-medium">Role</th><th className="px-4 py-3 font-medium">Can</th><th className="px-4 py-3 font-medium">Cannot (hidden / disabled)</th></tr></thead>
               <tbody>
                 {PERMISSIONS.map((p) => (
-                  <tr key={p.role} className="border-b border-[#F1F3F4] align-top">
+                  <tr key={p.role} className="border-b border-line-soft align-top">
                     <td className="px-4 py-3"><Pill tone={ROLE_TONE[p.role]}>{ROLE_LABELS[p.role]}</Pill></td>
-                    <td className="px-4 py-3 text-[#1a2b3c]">{p.can}</td>
-                    <td className="px-4 py-3 text-[#4a5568]">{p.cannot}</td>
+                    <td className="px-4 py-3 text-ink">{p.can}</td>
+                    <td className="px-4 py-3 text-ink-soft">{p.cannot}</td>
                   </tr>
                 ))}
               </tbody>

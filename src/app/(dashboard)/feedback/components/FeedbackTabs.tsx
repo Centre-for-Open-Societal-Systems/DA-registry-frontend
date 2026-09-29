@@ -22,8 +22,8 @@ export function FeedbackTabs() {
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col gap-3 px-4 pt-5 md:flex-row md:items-start md:justify-between">
           <div>
-            <h1 className="text-[20px] font-semibold tracking-tight text-[#1a2b3c] sm:text-[22px]">Internal Feedback</h1>
-            <p className="mt-1 text-[13.5px] text-[#4a5568]">
+            <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">Internal Feedback</h1>
+            <p className="mt-1 text-[13.5px] text-ink-soft">
               Operational, equipment, payment/incentive, safety and data/system issues raised by DAs to their supervisor — distinct from farmer grievances and from performance feedback.
             </p>
           </div>

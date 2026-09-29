@@ -1,5 +1,5 @@
 import { StatCard } from "@/components/ui/StatCard";
-import { VISIT_STATS } from "@/features/visits/data";
+import { VISIT_STATS } from "@/features/visits";
 
 export function VisitsStats() {
   return (
@@ -7,8 +7,8 @@ export function VisitsStats() {
       <StatCard
         label="Planned this week"
         value={String(VISIT_STATS.plannedThisWeek)}
-        accent="border-l-[#2563EB]"
-        tile="bg-[#E6F0FD] text-[#2563EB]"
+        accent="border-l-blue-600"
+        tile="bg-info-tint text-blue-600"
         icon={
           <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <rect x="3" y="5" width="18" height="16" rx="2" />
@@ -20,7 +20,7 @@ export function VisitsStats() {
         label="Completed"
         value={String(VISIT_STATS.completed)}
         accent="border-l-brand-green"
-        tile="bg-[#E6F5F0] text-brand-green"
+        tile="bg-brand-tint text-brand-green"
         valueClassName="text-brand-green"
         icon={
           <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -32,9 +32,9 @@ export function VisitsStats() {
       <StatCard
         label="Missed / rescheduled"
         value={String(VISIT_STATS.missed)}
-        accent="border-l-[#DC2626]"
-        tile="bg-[#FEECEC] text-[#DC2626]"
-        valueClassName="text-[#C2410C]"
+        accent="border-l-danger"
+        tile="bg-danger-tint text-danger"
+        valueClassName="text-orange-700"
         icon={
           <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 3l10 18H2L12 3z" />
@@ -46,7 +46,7 @@ export function VisitsStats() {
         label="On-time rate"
         value={VISIT_STATS.onTimeRate}
         accent="border-l-brand-green"
-        tile="bg-[#E6F5F0] text-brand-green"
+        tile="bg-brand-tint text-brand-green"
         icon={
           <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M3 17l6-6 4 4 8-8v4h2V3h-8v2h4l-6 6-4-4-7 7z" />

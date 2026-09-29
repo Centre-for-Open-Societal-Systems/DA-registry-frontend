@@ -150,13 +150,13 @@ export function FilterDropdown({
           aria-haspopup="dialog"
           aria-expanded={isOpen}
           className={cn(
-            "flex h-12 w-full items-center justify-between gap-3 rounded-lg border bg-white px-3 text-left text-[14px] text-[#1a2b3c] transition-colors",
+            "flex h-12 w-full items-center justify-between gap-3 rounded-lg border bg-white px-3 text-left text-[14px] text-ink transition-colors",
             isOpen ? "border-brand-green ring-1 ring-brand-green" : "border-zinc-300 hover:border-zinc-400",
           )}
         >
           <span className="truncate">{selectSummary}</span>
           <svg
-            className={cn("h-4 w-4 shrink-0 text-[#94A3B8] transition-transform", isOpen && "rotate-180")}
+            className={cn("h-4 w-4 shrink-0 text-subtle transition-transform", isOpen && "rotate-180")}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -175,13 +175,13 @@ export function FilterDropdown({
           aria-haspopup="dialog"
           aria-expanded={isOpen}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-md py-0.5 pr-1 text-left font-medium transition-colors hover:text-[#1a2b3c]",
+            "inline-flex items-center gap-1.5 rounded-md py-0.5 pr-1 text-left font-medium transition-colors hover:text-ink",
             isActive && "text-brand-green",
           )}
         >
           {label}
           <svg
-            className={cn("h-3.5 w-3.5", isActive ? "text-brand-green" : "text-[#64748b]")}
+            className={cn("h-3.5 w-3.5", isActive ? "text-brand-green" : "text-muted")}
             viewBox="0 0 24 24"
             fill={isActive ? "currentColor" : "none"}
             stroke="currentColor"
@@ -201,17 +201,17 @@ export function FilterDropdown({
             role="dialog"
             aria-label={`Filter by ${label}`}
             style={{ top: position.top, bottom: position.bottom, left: position.left, width: position.width, maxHeight: position.maxHeight }}
-            className="fixed z-[120] flex animate-dropdown-in flex-col overflow-hidden rounded-xl border border-[#E5E7EB] bg-white text-[14px] font-normal shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)]"
+            className="fixed z-[120] flex animate-dropdown-in flex-col overflow-hidden rounded-xl border border-line bg-white text-[14px] font-normal shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)]"
           >
             {/* "All" row */}
             <label
               className={cn(
-                "flex shrink-0 cursor-pointer items-center gap-3 border-b border-[#E5E7EB] px-4 py-2.5",
-                allSelected ? "bg-[#EBFAF2]" : "bg-white hover:bg-[#F8FAFC]",
+                "flex shrink-0 cursor-pointer items-center gap-3 border-b border-line px-4 py-2.5",
+                allSelected ? "bg-brand-mint" : "bg-white hover:bg-surface",
               )}
             >
               <Checkbox checked={allSelected} onChange={() => setDraft(new Set())} aria-label={allLabel} />
-              <span className={cn("flex flex-1 items-center gap-1.5 font-semibold", allSelected ? "text-brand-green" : "text-[#1a2b3c]")}>
+              <span className={cn("flex flex-1 items-center gap-1.5 font-semibold", allSelected ? "text-brand-green" : "text-ink")}>
                 {allLabel}
                 {allSelected && (
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -222,16 +222,16 @@ export function FilterDropdown({
               <span
                 className={cn(
                   "rounded-md px-2 py-0.5 text-[13px] font-semibold",
-                  allSelected ? "bg-[#CFF3E1] text-brand-green" : "bg-[#EEF2F7] text-[#475569]",
+                  allSelected ? "bg-emerald-100 text-brand-green" : "bg-line-soft text-slate-600",
                 )}
               >
                 {totalCount.toLocaleString()}
               </span>
             </label>
 
-            <div className="shrink-0 border-b border-[#E5E7EB] px-3 py-2.5">
+            <div className="shrink-0 border-b border-line px-3 py-2.5">
               <label className="relative block">
-                <svg className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748b]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
+                <svg className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
                   <circle cx="11" cy="11" r="7" />
                   <path d="M20 20l-3.5-3.5" />
                 </svg>
@@ -242,21 +242,21 @@ export function FilterDropdown({
                   placeholder={`Search ${label.toLowerCase()}…`}
                   aria-label={`Search ${label}`}
                   autoFocus
-                  className="h-9 w-full rounded-md border border-zinc-200 bg-[#F8FAFC] pl-8 pr-3 text-[13.5px] text-[#1a2b3c] placeholder:text-[#64748b] focus:border-brand-green focus:outline-none"
+                  className="h-9 w-full rounded-md border border-zinc-200 bg-surface pl-8 pr-3 text-[13.5px] text-ink placeholder:text-muted focus:border-brand-green focus:outline-none"
                 />
               </label>
             </div>
 
             <ul className="max-h-[240px] min-h-0 overflow-y-auto overscroll-contain green-scrollbar">
-              {visibleOptions.length === 0 && <li className="px-4 py-4 text-center text-[13px] text-[#64748b]">No matches for “{query.trim()}”</li>}
+              {visibleOptions.length === 0 && <li className="px-4 py-4 text-center text-[13px] text-muted">No matches for “{query.trim()}”</li>}
               {visibleOptions.map((option) => {
                 const checked = draft.has(option.value);
                 return (
-                  <li key={option.value} className="border-b border-[#F1F3F4] last:border-0">
-                    <label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[#F8FAFC]">
+                  <li key={option.value} className="border-b border-line-soft last:border-0">
+                    <label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface">
                       <Checkbox checked={checked} onChange={() => toggleOption(option.value)} aria-label={option.label} />
-                      <span className="flex-1 text-[#1a2b3c]">{option.label}</span>
-                      <span className="rounded-md bg-[#EEF2F7] px-2 py-0.5 text-[13px] font-semibold text-[#475569]">
+                      <span className="flex-1 text-ink">{option.label}</span>
+                      <span className="rounded-md bg-line-soft px-2 py-0.5 text-[13px] font-semibold text-slate-600">
                         {option.count.toLocaleString()}
                       </span>
                     </label>
@@ -266,7 +266,7 @@ export function FilterDropdown({
             </ul>
 
             {isDirty && (
-              <div className="flex shrink-0 justify-end border-t border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+              <div className="flex shrink-0 justify-end border-t border-line bg-surface px-4 py-3">
                 <button
                   type="button"
                   onClick={apply}

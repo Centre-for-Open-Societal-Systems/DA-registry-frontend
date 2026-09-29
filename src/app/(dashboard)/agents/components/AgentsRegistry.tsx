@@ -16,10 +16,10 @@ import { ExportButton } from "@/components/ui/ExportButton";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { useAuthStore } from "@/store/useAuthStore";
-import { ACTIVE_TONE, AGENTS, APPROVAL_TONE, FAYDA_TONE, KEBELES, TOTAL_AGENTS, WOREDAS } from "@/features/agents/data";
+import { ACTIVE_TONE, AGENTS, APPROVAL_TONE, FAYDA_TONE, KEBELES, TOTAL_AGENTS, WOREDAS } from "@/features/agents";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { downloadCsv, downloadTemplate, fileDate, type CsvColumn } from "@/lib/download";
-import type { Agent } from "@/features/agents/types";
+import type { Agent } from "@/features/agents";
 
 const FAYDA = ["Verified", "Pending", "Mismatch"];
 const ACTIVE = ["Active", "On-leave", "Separated", "Unassigned"];
@@ -123,16 +123,16 @@ export function AgentsRegistry() {
   }, [query, filters]);
 
   const columns: Column<Agent>[] = [
-    { key: "daId", header: "DA-ID", cell: (a) => <span className="font-mono text-[13px] font-medium text-[#1a2b3c]">{a.daId}</span> },
-    { key: "name", header: "Full Name", cell: (a) => <Link href={`/agents/${a.daId}`} className="font-medium text-[#1a2b3c] hover:text-brand-green">{a.fullName}</Link> },
-    { key: "fayda", header: "Fayda ID", cell: (a) => <span className="whitespace-nowrap font-mono text-[13px] text-[#4a5568]">{a.faydaId}</span> },
+    { key: "daId", header: "DA-ID", cell: (a) => <span className="font-mono text-[13px] font-medium text-ink">{a.daId}</span> },
+    { key: "name", header: "Full Name", cell: (a) => <Link href={`/agents/${a.daId}`} className="font-medium text-ink hover:text-brand-green">{a.fullName}</Link> },
+    { key: "fayda", header: "Fayda ID", cell: (a) => <span className="whitespace-nowrap font-mono text-[13px] text-ink-soft">{a.faydaId}</span> },
     { key: "faydaStatus", header: <FilterDropdown label="Fayda Status" allLabel="All Fayda statuses" options={FAYDA_OPTIONS} selected={filters.fayda} onApply={setFilter("fayda")} />, cell: (a) => <Pill tone={FAYDA_TONE[a.faydaStatus]} dot>{a.faydaStatus}</Pill> },
     { key: "active", header: <FilterDropdown label="Active Status" allLabel="All active statuses" options={ACTIVE_OPTIONS} selected={filters.active} onApply={setFilter("active")} />, cell: (a) => <Pill tone={ACTIVE_TONE[a.activeStatus]} dot>{a.activeStatus}</Pill> },
     { key: "tier", header: <FilterDropdown label="Education Tier" allLabel="All tiers" options={TIER_OPTIONS} selected={filters.tier} onApply={setFilter("tier")} />, cell: (a) => a.educationTier },
-    { key: "kebele", header: <FilterDropdown label="Assigned Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setFilter("kebele")} />, cell: (a) => (a.kebele === UNASSIGNED ? <span className="text-[#94A3B8]">Unassigned</span> : <span>{a.kebele}<span className="block text-[12px] text-[#64748b]">{a.woreda}</span></span>) },
+    { key: "kebele", header: <FilterDropdown label="Assigned Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setFilter("kebele")} />, cell: (a) => (a.kebele === UNASSIGNED ? <span className="text-subtle">Unassigned</span> : <span>{a.kebele}<span className="block text-[12px] text-muted">{a.woreda}</span></span>) },
     { key: "farmers", header: "Farmer Count", align: "right", cell: (a) => a.farmerCount.toLocaleString() },
     { key: "approval", header: <FilterDropdown label="Approval Status" allLabel="All approval statuses" options={APPROVAL_OPTIONS} selected={filters.approval} onApply={setFilter("approval")} />, cell: (a) => <Pill tone={APPROVAL_TONE[a.approvalStatus]}>{a.approvalStatus}</Pill> },
-    { key: "updated", header: "Last Updated", cell: (a) => <span className="whitespace-nowrap text-[13px] text-[#64748b]">{a.updatedAt}</span> },
+    { key: "updated", header: "Last Updated", cell: (a) => <span className="whitespace-nowrap text-[13px] text-muted">{a.updatedAt}</span> },
     {
       key: "actions", header: "Actions", align: "center",
       cell: (a) => (
@@ -150,8 +150,8 @@ export function AgentsRegistry() {
         {/* Toolbar */}
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Master registry</h2>
-            <span className="text-[13px] text-[#64748b]">{rows.length} of {TOTAL_AGENTS.toLocaleString()} agents</span>
+            <h2 className="text-[15px] font-semibold text-ink">Master registry</h2>
+            <span className="text-[13px] text-muted">{rows.length} of {TOTAL_AGENTS.toLocaleString()} agents</span>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
@@ -163,7 +163,7 @@ export function AgentsRegistry() {
                 <button type="button" onClick={() => setImportOpen(true)} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center gap-2 rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white hover:bg-brand-green-dark">
                   Import agents
                 </button>
-                <button type="button" onClick={() => setNotice("Sync from MoA queued — inbound batch will appear in Registry Sync with its receipt.")} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center gap-2 rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green hover:bg-[#F0FAF5]">
+                <button type="button" onClick={() => setNotice("Sync from MoA queued — inbound batch will appear in Registry Sync with its receipt.")} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center gap-2 rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green hover:bg-brand-wash">
                   Sync from MoA
                 </button>
               </>
@@ -209,12 +209,12 @@ export function AgentsRegistry() {
         footer={<><Button variant="outline" onClick={() => setImportOpen(false)}>Cancel</Button><Button variant="brand" onClick={() => { setImportOpen(false); setNotice("Import job #205 queued — 0 records parsed yet. Proposals will appear in Approvals as they pass identity checks."); }}>Upload &amp; validate</Button></>}
       >
         <div className="flex flex-col gap-4">
-          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-zinc-300 bg-[#F8FAFC] px-4 py-6 text-center hover:border-brand-green sm:py-8">
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-zinc-300 bg-surface px-4 py-6 text-center hover:border-brand-green sm:py-8">
             <input type="file" accept=".csv,.xlsx" className="sr-only" />
-            <span className="text-[14px] font-medium text-[#1a2b3c]">Drop the import file here or click to choose</span>
-            <span className="text-[12.5px] text-[#64748b]">CSV or XLSX · max 10 MB · template v3 (MoA extension staff)</span>
+            <span className="text-[14px] font-medium text-ink">Drop the import file here or click to choose</span>
+            <span className="text-[12.5px] text-muted">CSV or XLSX · max 10 MB · template v3 (MoA extension staff)</span>
           </label>
-          <ul className="list-disc space-y-1 pl-5 text-[13px] text-[#4a5568]">
+          <ul className="list-disc space-y-1 pl-5 text-[13px] text-ink-soft">
             <li>Each row is checked for a Fayda link and uniqueness before a DA-ID is minted (Generated / Queued / Exception / Failed-retry).</li>
             <li>Proposals are held in DA Registry (Gen 2) shadow state until the Woreda supervisor approves.</li>
             <li>There is no manual “Add DA” and no self-registration in this version.</li>

@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { FormField } from "@/components/ui/FormField";
-import { ProfilePhotoUpload } from "@/features/farmers/components/ProfilePhotoUpload";
-import { AGENT_PROFILE } from "@/features/farmers/agentProfile";
+import { ProfilePhotoUpload } from "@/features/farmers";
+import { AGENT_PROFILE } from "@/features/farmers";
 
 const [FIRST_NAME, ...REST] = AGENT_PROFILE.name.split(" ");
 
@@ -45,14 +46,14 @@ const formatDate = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateStri
 function ReadOnlyValue({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[13px] text-[#64748b]">{label}</dt>
-      <dd className="mt-1 text-[14.5px] font-medium text-[#1a2b3c]">{value || "—"}</dd>
+      <dt className="text-[13px] text-muted">{label}</dt>
+      <dd className="mt-1 text-[14.5px] font-medium text-ink">{value || "—"}</dd>
     </div>
   );
 }
 
 // Identity fields are verified via Fayda and can't be edited here — shown greyed out.
-const LOCKED = "h-11 cursor-not-allowed border-zinc-200 bg-[#F8FAFC] text-[#1a2b3c] disabled:opacity-100";
+const LOCKED = "h-11 cursor-not-allowed border-zinc-200 bg-surface text-ink disabled:opacity-100";
 
 function LockedField({ label, value, required }: { label: string; value: string; required?: boolean }) {
   const id = `locked-${label.toLowerCase().replace(/\s+/g, "-")}`;
@@ -91,9 +92,9 @@ export function DemographicsSection({ editing, onCancel, onSubmit }: Demographic
   };
 
   const header = (
-    <div className="border-b border-[#E5E7EB] px-6 py-3.5">
-      <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Demographics &amp; personal details</h2>
-      <p className="mt-1 text-[12.5px] text-[#4a5568]">
+    <div className="border-b border-line px-6 py-3.5">
+      <h2 className="text-[15px] font-semibold text-ink">Demographics &amp; personal details</h2>
+      <p className="mt-1 text-[12.5px] text-ink-soft">
         {editing ? "Editing - changes are sent to your Woreda supervisor for approval" : "Your identity details"}
       </p>
     </div>
@@ -143,8 +144,8 @@ export function DemographicsSection({ editing, onCancel, onSubmit }: Demographic
           </div>
         </Card>
 
-        <div className="flex flex-col gap-3 border-t border-[#E5E7EB] pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[13px] text-[#64748b]">Last updated profile changes: {formatDate(p.lastUpdated).replace(/^0/, "")}</p>
+        <div className="flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[13px] text-muted">Last updated profile changes: {formatDate(p.lastUpdated).replace(/^0/, "")}</p>
           <div className="flex flex-col-reverse gap-3 sm:flex-row">
             <Button type="button" variant="outline" onClick={() => { setError(null); onCancel(); }}>Cancel</Button>
             <Button type="submit" variant="brand">Save Changes</Button>
@@ -159,11 +160,9 @@ export function DemographicsSection({ editing, onCancel, onSubmit }: Demographic
       {header}
       <div className="grid animate-fade-in grid-cols-1 gap-6 px-5 py-5 lg:grid-cols-[215px_1fr] lg:gap-8">
         <div className="flex flex-col gap-2">
-          <span className="text-[13px] text-[#64748b]">Profile Photo</span>
+          <span className="text-[13px] text-muted">Profile Photo</span>
           <div className="h-24 w-24 overflow-hidden rounded-full bg-zinc-200">
-            {/* Static sample photo; next/image adds nothing for a single avatar */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={p.photo} alt={`${AGENT_PROFILE.name} profile photo`} className="h-full w-full object-cover" />
+            <Image src={p.photo} alt={`${AGENT_PROFILE.name} profile photo`} width={96} height={96} className="h-full w-full object-cover" />
           </div>
         </div>
 

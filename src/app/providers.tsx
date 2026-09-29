@@ -1,5 +1,3 @@
-"use client";
-
 import type { ReactNode } from "react";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import { AuthHydration } from "@/components/auth/AuthHydration";

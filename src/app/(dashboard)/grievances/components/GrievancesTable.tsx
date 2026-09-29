@@ -16,10 +16,10 @@ import {
   GRIEVANCE_PRIORITY_OPTIONS,
   GRIEVANCE_STATUS_OPTIONS,
   GRIEVANCES,
-} from "@/features/grievances/data";
-import { GrievancePriorityPill, GrievanceStatusPill } from "@/features/grievances/components/GrievancePills";
-import { GrievanceDetailModal } from "@/features/grievances/components/GrievanceDetailModal";
-import type { Grievance } from "@/features/grievances/types";
+} from "@/features/grievances";
+import { GrievancePriorityPill, GrievanceStatusPill } from "@/features/grievances";
+import { GrievanceDetailModal } from "@/features/grievances";
+import type { Grievance } from "@/features/grievances";
 import { GrievanceStats, type StatKey } from "./GrievanceStats";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { TablePagination } from "@/components/ui/TablePagination";
@@ -84,17 +84,17 @@ export function GrievancesTable() {
         {/* Toolbar */}
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Grievance Records</h2>
-            <span className="whitespace-nowrap rounded-full border border-[#E5E7EB] bg-[#F8FAFC] px-3 py-0.5 text-[12.5px] text-[#4a5568]">
+            <h2 className="text-[15px] font-semibold text-ink">Grievance Records</h2>
+            <span className="whitespace-nowrap rounded-full border border-line bg-surface px-3 py-0.5 text-[12.5px] text-ink-soft">
               Showing {start}–{end} of {rows.length}
             </span>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             {/* Segments fill the row on phones with short labels; full labels from sm up */}
-            <div role="group" aria-label="Raised by" className="flex h-9 items-center rounded-md border border-zinc-200 bg-[#F8FAFC] p-0.5">
+            <div role="group" aria-label="Raised by" className="flex h-9 items-center rounded-md border border-zinc-200 bg-surface p-0.5">
               {(["All", "DA", "Farmer"] as const).map((k) => (
-                <button key={k} type="button" onClick={() => { setRaisedBy(k); setPage(1); }} className={cn("h-8 flex-1 whitespace-nowrap rounded px-3 text-[13px] font-medium transition-colors sm:flex-none", raisedBy === k ? "bg-white text-brand-green shadow-sm" : "text-[#4a5568]")}>
+                <button key={k} type="button" onClick={() => { setRaisedBy(k); setPage(1); }} className={cn("h-8 flex-1 whitespace-nowrap rounded px-3 text-[13px] font-medium transition-colors sm:flex-none", raisedBy === k ? "bg-white text-brand-green shadow-sm" : "text-ink-soft")}>
                   {k === "All" ? "All" : (
                     <>
                       <span className="sm:hidden">{k === "DA" ? "By DA" : "By farmer"}</span>
@@ -126,7 +126,7 @@ export function GrievancesTable() {
               <col className="w-[110px]" />
             </colgroup>
             <thead>
-              <tr className="border-y border-[#E5E7EB] bg-[#F8FAFC] text-[13px] font-medium text-[#334155]">
+              <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
                 <th className="whitespace-nowrap px-4 py-3 font-medium">Ticket ID</th>
                 <th className="px-4 py-3 font-medium">Details</th>
                 <th className="px-4 py-3 font-medium">
@@ -142,22 +142,22 @@ export function GrievancesTable() {
                 <th className="px-4 py-3 text-center font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody className="text-[14px] text-[#334155]">
+            <tbody className="text-[14px] text-slate-700">
               {pageRows.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-4 py-6"><EmptyState title="No grievances match the selected filters" hint="Clear a filter or try a different search." /></td>
                 </tr>
               )}
               {pageRows.map((g) => (
-                <tr key={g.ticketId} className="border-b border-[#F1F3F4] transition-colors last:border-0 hover:bg-[#F8FAFC]">
-                  <td className="whitespace-nowrap px-3 py-4 text-[13px] font-semibold text-[#1a2b3c]">{g.ticketId}</td>
+                <tr key={g.ticketId} className="border-b border-line-soft transition-colors last:border-0 hover:bg-surface">
+                  <td className="whitespace-nowrap px-3 py-4 text-[13px] font-semibold text-ink">{g.ticketId}</td>
                   <td className="px-4 py-4">
-                    <p className="truncate text-[14.5px] font-semibold text-[#1a2b3c]" title={g.title}>{g.title}</p>
-                    <p className="mt-1 text-[13px] text-[#64748b]">
+                    <p className="truncate text-[14.5px] font-semibold text-ink" title={g.title}>{g.title}</p>
+                    <p className="mt-1 text-[13px] text-muted">
                       {g.submitter} · {g.region}, {g.woreda}
                     </p>
-                    <p className="mt-0.5 text-[13px] text-[#64748b]">{g.type}</p>
-                    <p className="mt-1 flex items-center gap-3 text-[12px] text-[#64748b]">
+                    <p className="mt-0.5 text-[13px] text-muted">{g.type}</p>
+                    <p className="mt-1 flex items-center gap-3 text-[12px] text-muted">
                       <span className="inline-flex items-center gap-1">
                         <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                           <path d="M21.4 11.05l-9.2 9.2a6 6 0 01-8.5-8.5l9.2-9.2a4 4 0 015.7 5.7l-9.2 9.2a2 2 0 01-2.8-2.8l8.5-8.5" />
@@ -174,7 +174,7 @@ export function GrievancesTable() {
                   <td className="px-4 py-4 text-[13.5px]">{g.category}</td>
                   <td className="px-4 py-4"><GrievanceStatusPill status={g.status} /></td>
                   <td className="px-4 py-4"><GrievancePriorityPill priority={g.priority} /></td>
-                  <td className="whitespace-nowrap px-4 py-4 text-[13px] leading-snug text-[#334155]">
+                  <td className="whitespace-nowrap px-4 py-4 text-[13px] leading-snug text-slate-700">
                     {g.submittedAt.split(", ").slice(0, 2).join(", ")},
                     <br />
                     {g.submittedAt.split(", ")[2]}

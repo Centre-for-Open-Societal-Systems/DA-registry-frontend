@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { RaiseGrievanceModal } from "@/features/grievances/components/RaiseGrievanceModal";
+import { RaiseGrievanceModal } from "@/features/grievances";
 
 export function RaiseGrievanceButton({ farmerId, className }: { farmerId?: string; className?: string }) {
   const [open, setOpen] = useState(false);

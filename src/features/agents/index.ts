@@ -1,0 +1,7 @@
+// Public API of the agents feature. Import from "@/features/agents", never from files inside it.
+export * from "./approvals";
+export * from "./data";
+export * from "./team";
+export * from "./types";
+export * from "./components/ExceptionsPanel";
+export * from "./components/ModuleStrip";

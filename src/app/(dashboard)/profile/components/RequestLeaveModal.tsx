@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { LEAVE_BALANCES, type LeaveRecord } from "@/features/farmers/agentProfile";
+import { LEAVE_BALANCES, type LeaveRecord } from "@/features/farmers";
 import { Banner } from "@/components/ui/Banner";
 
 interface RequestLeaveModalProps {
@@ -92,9 +92,9 @@ export function RequestLeaveModal({ isOpen, onClose, onSubmit }: RequestLeaveMod
           </FormField>
         </div>
 
-        <p className="-mt-1 text-[13px] text-[#4a5568]">
-          Duration: <span className="text-[14px] font-semibold text-[#1a2b3c]">{days} working day{days === 1 ? "" : "s"}</span>
-          <span className="text-[#64748b]">
+        <p className="-mt-1 text-[13px] text-ink-soft">
+          Duration: <span className="text-[14px] font-semibold text-ink">{days} working day{days === 1 ? "" : "s"}</span>
+          <span className="text-muted">
             {" "}· {remainingAfter} of {balance.entitlement} {shortLabel} days remaining after this
           </span>
         </p>

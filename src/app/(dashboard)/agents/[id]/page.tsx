@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAgent } from "@/features/agents/data";
+import { getAgent } from "@/features/agents";
 import { AgentProfile } from "./components/AgentProfile";
 
 export async function generateMetadata(props: PageProps<"/agents/[id]">): Promise<Metadata> {

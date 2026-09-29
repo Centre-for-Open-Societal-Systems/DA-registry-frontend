@@ -19,7 +19,7 @@ import {
   REGISTRATION_STATUS_OPTIONS,
   REGISTRATION_STATUS_TONE,
   REGISTRATION_TYPE_OPTIONS,
-} from "@/features/dashboard/admin";
+} from "@/features/dashboard";
 
 const SEARCH_PLACEHOLDER = searchPlaceholder(["Agent", "Type", "Kebele", "Last Updated", "Status"]);
 
@@ -55,7 +55,7 @@ export function PendingRegistrations() {
   return (
     <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
       <div className="flex flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Pending Registration</h2>
+        <h2 className="text-[15px] font-semibold text-ink">Pending Registration</h2>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
           <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
           <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
@@ -65,7 +65,7 @@ export function PendingRegistrations() {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px] border-collapse text-left">
           <thead>
-            <tr className="border-y border-[#E5E7EB] bg-[#F8FAFC] text-[13px] font-medium text-[#334155]">
+            <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
               <th className="whitespace-nowrap px-4 py-3 font-medium">
                 <FilterDropdown label="Agent" allLabel="All agents" options={REGISTRATION_AGENT_OPTIONS} selected={filters.agent} onApply={setFilter("agent")} />
               </th>
@@ -82,16 +82,16 @@ export function PendingRegistrations() {
               <th className="px-4 py-3 text-center font-medium">Action</th>
             </tr>
           </thead>
-          <tbody className="text-[14px] text-[#334155]">
+          <tbody className="text-[14px] text-slate-700">
             {rows.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-6"><EmptyState title="No registrations match the selected filters" hint="Clear a filter or try a different search." /></td>
               </tr>
             )}
             {pageRows.map((r) => (
-              <tr key={r.id} className="border-b border-[#F1F3F4] transition-colors last:border-0 hover:bg-[#F8FAFC]">
-                <td className="px-4 py-3.5 font-semibold text-[#334155]">{r.agent}</td>
-                <td className="px-4 py-3.5 text-[13.5px] text-[#4a5568]">{r.type}</td>
+              <tr key={r.id} className="border-b border-line-soft transition-colors last:border-0 hover:bg-surface">
+                <td className="px-4 py-3.5 font-semibold text-slate-700">{r.agent}</td>
+                <td className="px-4 py-3.5 text-[13.5px] text-ink-soft">{r.type}</td>
                 <td className="px-4 py-3.5">{r.kebele}</td>
                 <td className="px-4 py-3.5">{r.updatedAt}</td>
                 <td className="px-4 py-3.5 text-center">

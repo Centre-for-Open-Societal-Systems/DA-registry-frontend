@@ -17,8 +17,8 @@ import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdow
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { useAuthStore } from "@/store/useAuthStore";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
-import { SYNC_EVENTS, SYNC_TONE } from "@/features/agents/data";
-import type { SyncEvent, SyncOutcome } from "@/features/agents/types";
+import { SYNC_EVENTS, SYNC_TONE } from "@/features/agents";
+import type { SyncEvent, SyncOutcome } from "@/features/agents";
 
 const OUTCOMES: SyncOutcome[] = ["Failed", "Pending", "Success", "Reconciled"];
 const DIRECTIONS = ["OAN → MoA", "MoA → OAN"];
@@ -74,36 +74,36 @@ export function SyncEvents() {
   };
 
   const columns: Column<SyncEvent>[] = [
-    { key: "id", header: "Event", cell: (e) => <span className="font-mono text-[13px] font-medium text-[#1a2b3c]">{e.id}</span> },
-    { key: "entity", header: <FilterDropdown label="Entity" allLabel="All entities" options={entityOptions} selected={filters.entity} onApply={setFilter("entity")} />, cell: (e) => <span>{e.entityType}<span className="block font-mono text-[12px] text-[#64748b]">{e.entityRef}</span></span> },
+    { key: "id", header: "Event", cell: (e) => <span className="font-mono text-[13px] font-medium text-ink">{e.id}</span> },
+    { key: "entity", header: <FilterDropdown label="Entity" allLabel="All entities" options={entityOptions} selected={filters.entity} onApply={setFilter("entity")} />, cell: (e) => <span>{e.entityType}<span className="block font-mono text-[12px] text-muted">{e.entityRef}</span></span> },
     { key: "dir", header: <FilterDropdown label="Direction" allLabel="All directions" options={directionOptions} selected={filters.direction} onApply={setFilter("direction")} />, cell: (e) => <Pill tone={e.direction === "OAN → MoA" ? "blue" : "purple"}>{e.direction}</Pill> },
     { key: "outcome", header: <FilterDropdown label="Outcome" allLabel="All outcomes" options={outcomeOptions} selected={filters.outcome} onApply={setFilter("outcome")} />, cell: (e) => <Pill tone={SYNC_TONE[e.outcome]} dot>{e.outcome}</Pill> },
-    { key: "detail", header: "Detail", cell: (e) => <span className="text-[13px] text-[#4a5568]">{e.detail}</span> },
+    { key: "detail", header: "Detail", cell: (e) => <span className="text-[13px] text-ink-soft">{e.detail}</span> },
     { key: "retries", header: "Retries", align: "center", cell: (e) => e.retryCount },
-    { key: "at", header: "Timestamp", cell: (e) => <span className="whitespace-nowrap text-[13px] text-[#64748b]">{e.at}</span> },
+    { key: "at", header: "Timestamp", cell: (e) => <span className="whitespace-nowrap text-[13px] text-muted">{e.at}</span> },
     {
       key: "actions", header: "Actions", align: "center",
       cell: (e) => e.outcome === "Failed" ? (
         <RowAction icon="retry" onClick={() => retry(e.id)}>Retry</RowAction>
-      ) : <span className="text-[12.5px] text-[#94A3B8]">—</span>,
+      ) : <span className="text-[12.5px] text-subtle">—</span>,
     },
   ];
 
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Success (7d)" value={String(count("Success"))} accent="border-l-brand-green" tile="bg-[#E6F5F0] text-brand-green" icon={icon("M20 6L9 17l-5-5")} />
-        <StatCard label="Pending receipt" value={String(count("Pending"))} accent="border-l-[#D97706]" tile="bg-[#FFF7EB] text-[#D97706]" icon={icon("M12 6v6l4 2M12 22a10 10 0 100-20 10 10 0 000 20z")} />
-        <StatCard label="Failed" value={String(count("Failed"))} hint="Retry available" accent="border-l-[#DC2626]" tile="bg-[#FFF1F1] text-[#DC2626]" icon={icon("M12 8v4M12 16h.01M12 22a10 10 0 100-20 10 10 0 000 20z")} />
-        <StatCard label="Last batch" value="01 Sep" hint="42 received · 40 accepted" accent="border-l-[#2563EB]" tile="bg-[#EFF6FF] text-[#2563EB]" icon={icon("M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15")} />
+        <StatCard label="Success (7d)" value={String(count("Success"))} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M20 6L9 17l-5-5")} />
+        <StatCard label="Pending receipt" value={String(count("Pending"))} accent="border-l-amber-600" tile="bg-warning-wash text-amber-600" icon={icon("M12 6v6l4 2M12 22a10 10 0 100-20 10 10 0 000 20z")} />
+        <StatCard label="Failed" value={String(count("Failed"))} hint="Retry available" accent="border-l-danger" tile="bg-danger-wash text-danger" icon={icon("M12 8v4M12 16h.01M12 22a10 10 0 100-20 10 10 0 000 20z")} />
+        <StatCard label="Last batch" value="01 Sep" hint="42 received · 40 accepted" accent="border-l-blue-600" tile="bg-blue-50 text-blue-600" icon={icon("M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15")} />
       </div>
 
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         {/* Toolbar */}
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Sync events</h2>
-            <p className="mt-0.5 text-[12.5px] text-[#4a5568]">Registry-sync (OAN ⇄ MoA) is distinct from device-sync (app ⇄ server, see Sync queue).</p>
+            <h2 className="text-[15px] font-semibold text-ink">Sync events</h2>
+            <p className="mt-0.5 text-[12.5px] text-ink-soft">Registry-sync (OAN ⇄ MoA) is distinct from device-sync (app ⇄ server, see Sync queue).</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
@@ -151,7 +151,7 @@ export function SyncEvents() {
       <Modal isOpen={reconcileOpen} onClose={() => setReconcileOpen(false)} title="Bulk reconciliation" subtitle="Compare OAN DA Registry against the MoA master and queue corrections"
         footer={<><Button variant="outline" onClick={() => setReconcileOpen(false)}>Cancel</Button><Button variant="brand" onClick={() => { setReconcileOpen(false); setNotice("Reconciliation run #31 started for Oromia (1,284 records). Differences will appear as Reconciled / Failed events and a downloadable report."); }}>Run reconciliation</Button></>}
       >
-        <ul className="list-disc space-y-1.5 pl-5 text-[13.5px] text-[#4a5568]">
+        <ul className="list-disc space-y-1.5 pl-5 text-[13.5px] text-ink-soft">
           <li>Scope: all regions (admin) — records compared by DA-ID and Fayda ID.</li>
           <li>Outcomes per record: identical · OAN newer (push) · MoA newer (pull) · conflict (surfaced as an exception).</li>
           <li>Conflicts are never auto-resolved; they land in the exceptions view for a person to decide.</li>

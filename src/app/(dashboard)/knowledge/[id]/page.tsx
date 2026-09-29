@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getArticle } from "@/features/communication/data";
+import { getArticle } from "@/features/communication";
 import { ArticleView } from "./components/ArticleView";
 
 export async function generateMetadata(props: PageProps<"/knowledge/[id]">): Promise<Metadata> {

@@ -16,13 +16,13 @@ interface FormFieldProps {
 export function FormField({ label, htmlFor, required, hint, hintTone = "muted", className, children }: FormFieldProps) {
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <label htmlFor={htmlFor} className="text-[14px] font-medium text-[#1a2b3c]">
+      <label htmlFor={htmlFor} className="text-[14px] font-medium text-ink">
         {label}
-        {required && <span className="ml-1 text-[#DC2626]">*</span>}
+        {required && <span className="ml-1 text-danger">*</span>}
       </label>
       {children}
       {hint && (
-        <p className={cn("text-[12.5px]", hintTone === "error" ? "text-[#DC2626]" : "text-[#6B7280]")}>
+        <p className={cn("text-[12.5px]", hintTone === "error" ? "text-danger" : "text-gray-500")}>
           {hint}
         </p>
       )}

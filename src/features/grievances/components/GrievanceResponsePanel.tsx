@@ -70,12 +70,12 @@ export function GrievanceResponsePanel({ onSubmitResponse, onAddNote }: Grievanc
   const tabClass = (active: boolean) =>
     cn(
       "inline-flex h-11 shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-3 text-[13.5px] font-medium transition-colors sm:px-4",
-      active ? "border-brand-green text-brand-green" : "border-transparent text-[#64748b] hover:text-[#1a2b3c]"
+      active ? "border-brand-green text-brand-green" : "border-transparent text-muted hover:text-ink"
     );
 
   return (
-    <section className="rounded-xl border border-[#E5E7EB] bg-white">
-      <div className="flex overflow-x-auto border-b border-[#E5E7EB] px-2" role="tablist">
+    <section className="rounded-xl border border-line bg-white">
+      <div className="flex overflow-x-auto border-b border-line px-2" role="tablist">
         <button type="button" role="tab" aria-selected={tab === "response"} onClick={() => setTab("response")} className={tabClass(tab === "response")}>
           <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21h18v-2H3v2zM5 10h2v7H5v-7zm4 0h2v7H9v-7zm4 0h2v7h-2v-7zm4 0h2v7h-2v-7zM12 2L2 7v2h20V7L12 2z" /></svg>
           Dept Response<span className="hidden sm:inline">&nbsp;(Appendix D)</span>
@@ -98,9 +98,9 @@ export function GrievanceResponsePanel({ onSubmitResponse, onAddNote }: Grievanc
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="actionTaken" className="text-[14px] font-medium text-[#1a2b3c]">
-              Action Taken <span className="text-[#DC2626]">*</span>{" "}
-              <span className="text-[13px] font-normal text-[#64748b]">({actionTaken.length}/{ACTION_MAX})</span>
+            <label htmlFor="actionTaken" className="text-[14px] font-medium text-ink">
+              Action Taken <span className="text-danger">*</span>{" "}
+              <span className="text-[13px] font-normal text-muted">({actionTaken.length}/{ACTION_MAX})</span>
             </label>
             <Textarea
               id="actionTaken"
@@ -123,9 +123,9 @@ export function GrievanceResponsePanel({ onSubmitResponse, onAddNote }: Grievanc
           </FormField>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="responseInternalNote" className="flex items-center gap-1.5 text-[14px] font-medium text-[#1a2b3c]">
-              <span className="text-[#64748b]">{HiddenEyeIcon}</span>
-              Internal Notes <span className="text-[12.5px] font-normal text-[#64748b]">(not visible to submitter)</span>
+            <label htmlFor="responseInternalNote" className="flex items-center gap-1.5 text-[14px] font-medium text-ink">
+              <span className="text-muted">{HiddenEyeIcon}</span>
+              Internal Notes <span className="text-[12.5px] font-normal text-muted">(not visible to submitter)</span>
             </label>
             <Textarea
               id="responseInternalNote"
@@ -133,7 +133,7 @@ export function GrievanceResponsePanel({ onSubmitResponse, onAddNote }: Grievanc
               value={internalNote}
               onChange={(e) => setInternalNote(e.target.value)}
               placeholder="Process gaps, follow-up actions, escalation reasons..."
-              className="border-[#FDE68A]/70 bg-[#FFFBEB] focus:border-[#D97706] focus:ring-[#D97706]"
+              className="border-amber-200/70 bg-amber-50 focus:border-amber-600 focus:ring-amber-600"
             />
           </div>
 
@@ -147,9 +147,9 @@ export function GrievanceResponsePanel({ onSubmitResponse, onAddNote }: Grievanc
       ) : (
         <form onSubmit={handleNote} className="flex flex-col gap-4 px-4 py-4">
           <div className="flex flex-col gap-2">
-            <label htmlFor="caseNote" className="flex items-center gap-1.5 text-[14px] font-medium text-[#1a2b3c]">
-              <span className="text-[#64748b]">{HiddenEyeIcon}</span>
-              Internal Notes <span className="text-[12.5px] font-normal text-[#64748b]">(not visible to submitter)</span>
+            <label htmlFor="caseNote" className="flex items-center gap-1.5 text-[14px] font-medium text-ink">
+              <span className="text-muted">{HiddenEyeIcon}</span>
+              Internal Notes <span className="text-[12.5px] font-normal text-muted">(not visible to submitter)</span>
             </label>
             <Textarea
               id="caseNote"
@@ -157,7 +157,7 @@ export function GrievanceResponsePanel({ onSubmitResponse, onAddNote }: Grievanc
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Add an internal case note visible only to officers..."
-              className="border-[#FDE68A]/70 bg-[#FFFBEB] focus:border-[#D97706] focus:ring-[#D97706]"
+              className="border-amber-200/70 bg-amber-50 focus:border-amber-600 focus:ring-amber-600"
             />
           </div>
           <div className="flex justify-end">

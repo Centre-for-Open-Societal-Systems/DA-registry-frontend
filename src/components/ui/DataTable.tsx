@@ -51,13 +51,13 @@ export function DataTable<T>({ columns, rows, rowKey, state = "ready", emptyTitl
     {searchable && (
       <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <SearchInput value={query} onChange={setQuery} placeholder={placeholderOverride ?? searchPlaceholder(columns.map((c) => c.header))} />
-        {isFiltered && <span className="text-[12.5px] text-[#64748b]">{visibleRows.length} of {rows.length} rows</span>}
+        {isFiltered && <span className="text-[12.5px] text-muted">{visibleRows.length} of {rows.length} rows</span>}
       </div>
     )}
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-left" style={{ minWidth }}>
         <thead>
-          <tr className="border-y border-[#E5E7EB] bg-[#F8FAFC] text-[13px] font-medium text-[#334155]">
+          <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
             {columns.map((c) => (
               <th key={c.key} className={cn("whitespace-nowrap px-4 py-3 font-medium", ALIGN[c.align ?? "left"], c.className)}>
                 {c.header}
@@ -65,13 +65,14 @@ export function DataTable<T>({ columns, rows, rowKey, state = "ready", emptyTitl
             ))}
           </tr>
         </thead>
-        <tbody className="text-[14px] text-[#334155]">
+        <tbody className="text-[14px] text-slate-700">
           {state === "loading" &&
+            // Fixed placeholder rows that never reorder, so the index is a stable key here.
             [0, 1, 2, 3, 4].map((i) => (
-              <tr key={i} className="border-b border-[#F1F3F4]">
+              <tr key={i} className="border-b border-line-soft">
                 {columns.map((c) => (
                   <td key={c.key} className="px-4 py-4">
-                    <span className="block h-3.5 w-3/4 animate-pulse rounded bg-[#E2E8F0]" />
+                    <span className="block h-3.5 w-3/4 animate-pulse rounded bg-slate-200" />
                   </td>
                 ))}
               </tr>
@@ -101,9 +102,9 @@ export function DataTable<T>({ columns, rows, rowKey, state = "ready", emptyTitl
                   key={key}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   className={cn(
-                    "border-b border-[#F1F3F4] transition-colors last:border-b-0 hover:bg-[#F8FAFC]",
+                    "border-b border-line-soft transition-colors last:border-b-0 hover:bg-surface",
                     onRowClick && "cursor-pointer",
-                    selectedKey === key && "bg-[#F0FAF5]",
+                    selectedKey === key && "bg-brand-wash",
                   )}
                 >
                   {columns.map((c) => (

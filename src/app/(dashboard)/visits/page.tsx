@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import { Card } from "@/components/ui/Card";
 import { PageTabs } from "@/components/ui/PageTabs";
-import { FARMER_PAGE_TABS } from "@/features/farmers/data";
-import { PlanVisitButton } from "@/features/farmers/components/PlanVisitButton";
+import { FARMER_PAGE_TABS } from "@/features/farmers";
+import { PlanVisitButton } from "@/features/farmers";
 import { VisitsStats } from "./components/VisitsStats";
 import { VisitsTable } from "./components/VisitsTable";
 
@@ -18,8 +18,8 @@ export default function VisitsPage() {
         <PageTabs tabs={FARMER_PAGE_TABS} activeHref="/visits" />
         <div className="flex flex-col gap-4 px-4 py-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-[20px] font-semibold tracking-tight text-[#1a2b3c] sm:text-[22px]">Visits</h1>
-            <p className="mt-1 text-[13.5px] text-[#4a5568]">
+            <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">Visits</h1>
+            <p className="mt-1 text-[13.5px] text-ink-soft">
               Planned and completed field visits. Visits are planned from farmer availability the DA gathers offline - no
               app-mandated routes.
             </p>

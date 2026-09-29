@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
-import { GRIEVANCE_STATS } from "@/features/grievances/data";
-import type { GrievanceBucket } from "@/features/grievances/types";
+import { GRIEVANCE_STATS } from "@/features/grievances";
+import type { GrievanceBucket } from "@/features/grievances";
 
 export type StatKey = "All" | GrievanceBucket;
 
@@ -15,7 +15,7 @@ interface StatDef {
 const STATS: StatDef[] = [
   {
     key: "All",
-    tile: "bg-[#E6F0FD] text-[#2563EB]",
+    tile: "bg-info-tint text-blue-600",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -25,7 +25,7 @@ const STATS: StatDef[] = [
   },
   {
     key: "Pending",
-    tile: "bg-[#FFF1E6] text-[#EA580C]",
+    tile: "bg-orange-50 text-orange-600",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         <path d="M6 2h12M6 22h12M8 2v4l4 5 4-5V2M8 22v-4l4-5 4 5v4" />
@@ -34,7 +34,7 @@ const STATS: StatDef[] = [
   },
   {
     key: "In Progress",
-    tile: "bg-[#E6F0FD] text-[#2563EB]",
+    tile: "bg-info-tint text-blue-600",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
         <circle cx="12" cy="3" r="1.8" /><circle cx="18.4" cy="5.6" r="1.8" /><circle cx="21" cy="12" r="1.8" />
@@ -45,7 +45,7 @@ const STATS: StatDef[] = [
   },
   {
     key: "Under Review",
-    tile: "bg-[#F1EAFE] text-[#7C3AED]",
+    tile: "bg-violet-tint text-violet-600",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="7" />
@@ -55,7 +55,7 @@ const STATS: StatDef[] = [
   },
   {
     key: "Resolved",
-    tile: "bg-[#DDF5EA] text-brand-green",
+    tile: "bg-green-100 text-brand-green",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.2 14.2l-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4-6 6z" />
@@ -64,7 +64,7 @@ const STATS: StatDef[] = [
   },
   {
     key: "Rejected",
-    tile: "bg-[#FEECEC] text-[#DC2626]",
+    tile: "bg-danger-tint text-danger",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="9" />
@@ -94,8 +94,8 @@ export function GrievanceStats({ active, onSelect }: GrievanceStatsProps) {
               )}
             >
               <div className="min-w-0">
-                <p className="text-[13px] leading-snug text-[#4a5568] sm:text-[14px]">{stat.key}</p>
-                <p className="mt-1.5 text-[22px] font-semibold leading-none text-[#1a2b3c] sm:text-[24px]">{GRIEVANCE_STATS[stat.key]}</p>
+                <p className="text-[13px] leading-snug text-ink-soft sm:text-[14px]">{stat.key}</p>
+                <p className="mt-1.5 text-[22px] font-semibold leading-none text-ink sm:text-[24px]">{GRIEVANCE_STATS[stat.key]}</p>
               </div>
               {/* Smaller tile on phones so two cards fit per row without the label being clipped */}
               <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-y-1.5 group-hover:scale-[1.15] group-hover:shadow-sm [&>svg]:h-5 [&>svg]:w-5 sm:h-14 sm:w-14 sm:[&>svg]:h-6 sm:[&>svg]:w-6", stat.tile)}>{stat.icon}</div>

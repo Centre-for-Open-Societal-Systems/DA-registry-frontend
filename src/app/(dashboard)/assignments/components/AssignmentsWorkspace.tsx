@@ -18,9 +18,9 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { useAuthStore } from "@/store/useAuthStore";
-import { KEBELES, WOREDAS } from "@/features/agents/data";
+import { KEBELES, WOREDAS } from "@/features/agents";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
-import { AGENT_STATUS_TONE, ASSIGNMENT_TONE, ASSIGNMENTS, KEBELE_COVERAGE, type AgentAssignment, type AssociationMode, type Geofence } from "@/features/assignments/data";
+import { AGENT_STATUS_TONE, ASSIGNMENT_TONE, ASSIGNMENTS, KEBELE_COVERAGE, type AgentAssignment, type AssociationMode, type Geofence } from "@/features/assignments";
 
 const icon = (d: string) => <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>;
 
@@ -166,17 +166,17 @@ export function AssignmentsWorkspace() {
   };
 
   const columns: Column<AgentAssignment>[] = [
-    { key: "agent", header: "Agent", cell: (r) => <Link href={`/agents/${r.daId}`} className="font-medium text-[#1a2b3c] hover:text-brand-green">{r.agent}</Link> },
-    { key: "daId", header: "DA-ID", cell: (r) => <span className="font-mono text-[13px] text-[#4a5568]">{r.daId}</span> },
+    { key: "agent", header: "Agent", cell: (r) => <Link href={`/agents/${r.daId}`} className="font-medium text-ink hover:text-brand-green">{r.agent}</Link> },
+    { key: "daId", header: "DA-ID", cell: (r) => <span className="font-mono text-[13px] text-ink-soft">{r.daId}</span> },
     { key: "woreda", header: <FilterDropdown label="Woreda" allLabel="All woredas" options={woredaOptions} selected={filters.woreda} onApply={setFilter("woreda")} />, cell: (r) => r.woreda },
-    { key: "kebele", header: <FilterDropdown label="Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setFilter("kebele")} />, cell: (r) => (r.kebele ? <span>{r.kebele}<span className="block text-[12px] text-[#64748b]">since {r.effectiveDate}</span></span> : <span className="text-[#94A3B8]">—</span>) },
+    { key: "kebele", header: <FilterDropdown label="Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setFilter("kebele")} />, cell: (r) => (r.kebele ? <span>{r.kebele}<span className="block text-[12px] text-muted">since {r.effectiveDate}</span></span> : <span className="text-subtle">—</span>) },
     { key: "farmers", header: "Farmers", align: "right", cell: (r) => r.farmers.toLocaleString() },
     {
       key: "status",
       header: (
         <span className="inline-flex items-center gap-1.5">
           <FilterDropdown label="Status" allLabel="All Status" options={statusOptions} selected={filters.status} onApply={setFilter("status")} />
-          <span className="text-[#94A3B8]">/</span>
+          <span className="text-subtle">/</span>
           <FilterDropdown label="Assignment" allLabel="All assignment states" options={assignmentOptions} selected={filters.assignment} onApply={setFilter("assignment")} />
         </span>
       ),
@@ -195,17 +195,17 @@ export function AssignmentsWorkspace() {
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Agents" value={String(rows.length)} accent="border-l-brand-green" tile="bg-[#E6F5F0] text-brand-green" icon={icon("M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z")} />
-        <StatCard label="Kebeles covered" value={String(kebelesCovered)} accent="border-l-[#2563EB]" tile="bg-[#EFF6FF] text-[#2563EB]" icon={icon("M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0zM12 13a3 3 0 100-6 3 3 0 000 6z")} />
-        <StatCard label="Unassigned" value={String(unassigned)} accent="border-l-[#D97706]" tile="bg-[#FFF7EB] text-[#D97706]" icon={icon("M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 11l-4 4M18 11l4 4")} />
-        <StatCard label="Average load" value={avgLoad.toLocaleString()} hint="farmers per assigned agent" accent="border-l-[#7C3AED]" tile="bg-[#F5F3FF] text-[#7C3AED]" icon={icon("M18 20V10M12 20V4M6 20v-6")} />
+        <StatCard label="Agents" value={String(rows.length)} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z")} />
+        <StatCard label="Kebeles covered" value={String(kebelesCovered)} accent="border-l-blue-600" tile="bg-blue-50 text-blue-600" icon={icon("M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0zM12 13a3 3 0 100-6 3 3 0 000 6z")} />
+        <StatCard label="Unassigned" value={String(unassigned)} accent="border-l-amber-600" tile="bg-warning-wash text-amber-600" icon={icon("M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 11l-4 4M18 11l4 4")} />
+        <StatCard label="Average load" value={avgLoad.toLocaleString()} hint="farmers per assigned agent" accent="border-l-violet-600" tile="bg-violet-50 text-violet-600" icon={icon("M18 20V10M12 20V4M6 20v-6")} />
       </div>
 
       {outcome && <Banner tone={outcome.tone} title={outcome.title} onDismiss={() => setOutcome(null)}>{outcome.body}</Banner>}
 
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Agents by Kebele and Woreda</h2>
+          <h2 className="text-[15px] font-semibold text-ink">Agents by Kebele and Woreda</h2>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
             <AdvancedFiltersButton activeCount={countActive(filters)} onClick={() => setIsFiltersOpen(true)} />
@@ -235,8 +235,8 @@ export function AssignmentsWorkspace() {
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="flex items-center gap-2 text-[15px] font-semibold text-[#1a2b3c]">Kebele coverage summary <Pill tone="slate">Read-only</Pill></h2>
-            <p className="mt-0.5 text-[12.5px] text-[#4a5568]">Service coverage across kebeles in Bako Tibe. This reporting view is managed separately and is not edited from the assignment screen.</p>
+            <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink">Kebele coverage summary <Pill tone="slate">Read-only</Pill></h2>
+            <p className="mt-0.5 text-[12.5px] text-ink-soft">Service coverage across kebeles in Bako Tibe. This reporting view is managed separately and is not edited from the assignment screen.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             <SearchInput value={coverageQuery} onChange={setCoverageQuery} placeholder={COVERAGE_SEARCH_PLACEHOLDER} />
@@ -250,7 +250,7 @@ export function AssignmentsWorkspace() {
           emptyTitle="No kebeles match the selected filters"
           emptyHint="Clear a filter or try a different search."
           columns={[
-            { key: "kebele", header: "Kebele", cell: (k) => <span className="font-medium text-[#1a2b3c]">{k.kebele}</span> },
+            { key: "kebele", header: "Kebele", cell: (k) => <span className="font-medium text-ink">{k.kebele}</span> },
             { key: "woreda", header: <FilterDropdown label="Woreda" allLabel="All woredas" options={COVERAGE_WOREDA_OPTIONS} selected={coverageFilters.woreda} onApply={setCoverageFilter("woreda")} />, cell: (k) => k.woreda },
             { key: "agents", header: "Agents", align: "right", cell: (k) => k.agents },
             { key: "farmers", header: "Linked farmers", align: "right", cell: (k) => k.farmers.toLocaleString() },
@@ -295,8 +295,8 @@ export function AssignmentsWorkspace() {
             </FormField>
           </div>
           {draft.kebele && (
-            <div className="mt-4 rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-3 text-[13px] text-[#4a5568]">
-              Geofence validation runs on commit: <span className="font-semibold text-[#1a2b3c]">In-boundary → Validated → Effective</span>, or <span className="font-semibold text-[#DC2626]">Out-of-bounds → Flagged</span> with the reason.
+            <div className="mt-4 rounded-lg border border-line bg-surface p-3 text-[13px] text-ink-soft">
+              Geofence validation runs on commit: <span className="font-semibold text-ink">In-boundary → Validated → Effective</span>, or <span className="font-semibold text-danger">Out-of-bounds → Flagged</span> with the reason.
             </div>
           )}
         </Modal>

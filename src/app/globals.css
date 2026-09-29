@@ -10,9 +10,102 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+  /* Colors: use these tokens (text-ink, bg-surface, border-line …), never raw hex in class names.
+     A new color gets a token here first. */
+
+  /* Brand */
   --color-brand-green: #037957;
   --color-brand-green-dark: #026146;
+  --color-brand-green-bright: #0b7a57; /* sidebar gradient top */
+  --color-brand-green-deep: #05392a; /* sidebar gradient bottom, tooltips */
+  --color-sidebar-scrollbar: #012519; /* darker than the sidebar so the thumb stands out */
   --color-brand-gold: #e3b755;
+  --color-brand-wash: #f0faf5; /* selected rows, soft green panels */
+  --color-brand-mint: #ebfaf2;
+  --color-brand-tint: #e6f5f0; /* icon tiles, verified pills */
+  --color-brand-border-soft: #d5ede4;
+  --color-brand-border: #a7e3c7;
+
+  /* Text */
+  --color-ink: #1a2b3c; /* headings and primary text */
+  --color-ink-soft: #4a5568; /* body copy */
+  --color-muted: #64748b; /* secondary text, labels */
+  --color-subtle: #94a3b8; /* hints, timestamps, placeholders */
+
+  /* Surfaces and lines */
+  --color-surface: #f8fafc; /* page background, table headers */
+  --color-surface-alt: #fafbfc;
+  --color-line: #e5e7eb; /* card and input borders */
+  --color-line-soft: #f1f3f4; /* row dividers */
+
+  /* Status */
+  --color-danger: #dc2626;
+  --color-danger-wash: #fff1f1;
+  --color-danger-tint: #feecec;
+  --color-danger-border: #fcc4c4;
+  --color-warning-wash: #fff7eb;
+  --color-warning-border: #fcd9a8;
+  --color-warning-border-strong: #f5c48b;
+  --color-success-ink: #0f5132;
+  --color-info-tint: #e6f0fd;
+  --color-violet-tint: #f1eafe;
+
+  /* Tailwind palette shades in use, pinned to their exact v3 hex (v4 defaults are OKLCH and render slightly differently). */
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-900: #0f172a;
+  --color-gray-100: #f3f4f6;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-zinc-50: #fafafa;
+  --color-red-50: #fef2f2;
+  --color-red-200: #fecaca;
+  --color-red-500: #ef4444;
+  --color-red-700: #b91c1c;
+  --color-red-800: #991b1b;
+  --color-orange-50: #fff7ed;
+  --color-orange-100: #ffedd5;
+  --color-orange-500: #f97316;
+  --color-orange-600: #ea580c;
+  --color-orange-700: #c2410c;
+  --color-orange-800: #9a3412;
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-700: #b45309;
+  --color-yellow-50: #fefce8;
+  --color-yellow-100: #fef9c3;
+  --color-yellow-600: #ca8a04;
+  --color-yellow-700: #a16207;
+  --color-green-100: #dcfce7;
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-600: #059669;
+  --color-emerald-800: #065f46;
+  --color-cyan-50: #ecfeff;
+  --color-cyan-600: #0891b2;
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-900: #1e3a8a;
+  --color-indigo-50: #eef2ff;
+  --color-indigo-600: #4f46e5;
+  --color-violet-50: #f5f3ff;
+  --color-violet-100: #ede9fe;
+  --color-violet-200: #ddd6fe;
+  --color-violet-500: #8b5cf6;
+  --color-violet-600: #7c3aed;
+  --color-violet-700: #6d28d9;
+  --color-purple-100: #f3e8ff;
 
   /* Entrance animations shared by modals, dropdown panels, banners and confirmation ticks */
   --animate-fade-in: fade-in 160ms ease-out both;
@@ -67,12 +160,12 @@ body {
   background: transparent;
 }
 .green-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #037957;
+  background-color: var(--color-brand-green);
   border-radius: 4px;
 }
 .green-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #037957 transparent;
+  scrollbar-color: var(--color-brand-green) transparent;
 }
 
 /* Sidebar Specific Scrollbar */
@@ -83,10 +176,10 @@ body {
   background: transparent;
 }
 .sidebar-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #012519; /* Very dark green to stand out against the sidebar bg */
+  background-color: var(--color-sidebar-scrollbar);
   border-radius: 4px;
 }
 .sidebar-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #012519 transparent;
+  scrollbar-color: var(--color-sidebar-scrollbar) transparent;
 }

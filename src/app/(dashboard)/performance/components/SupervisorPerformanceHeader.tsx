@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Dropdown } from "@/components/ui/Dropdown";
-import { REGIONS, WOREDA_SUMMARY } from "@/features/performance/supervisorData";
+import { REGIONS, WOREDA_SUMMARY } from "@/features/performance";
 import { DateRangeDropdown } from "../../dashboard/components/DateRangeDropdown";
 
 export function SupervisorPerformanceHeader() {
@@ -13,8 +13,8 @@ export function SupervisorPerformanceHeader() {
   return (
     <Card className="relative z-50 flex flex-col gap-4 px-4 py-5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] md:flex-row md:items-center md:justify-between">
       <div>
-        <h1 className="text-[20px] font-semibold tracking-tight text-[#1a2b3c] sm:text-[22px]">My Performance</h1>
-        <p className="mt-1.5 text-[14px] text-[#4a5568]">
+        <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">My Performance</h1>
+        <p className="mt-1.5 text-[14px] text-ink-soft">
           {WOREDA_SUMMARY.woreda} · {WOREDA_SUMMARY.agentCount} development agents
         </p>
       </div>
@@ -26,7 +26,7 @@ export function SupervisorPerformanceHeader() {
           options={REGIONS}
           align="right"
           className="sm:w-[170px] [&>button]:h-9 [&>button]:rounded-lg [&>button]:border-zinc-200"
-          renderValue={(o) => <span className="text-[13.5px] text-[#334155]">Region: {o.label}</span>}
+          renderValue={(o) => <span className="text-[13.5px] text-slate-700">Region: {o.label}</span>}
         />
         {/* Same period picker as the role dashboards */}
         <DateRangeDropdown />

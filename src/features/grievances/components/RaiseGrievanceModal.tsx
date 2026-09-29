@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Banner } from "@/components/ui/Banner";
-import { FARMERS } from "@/features/farmers/data";
+import { FARMERS } from "@/features/farmers";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = ["Inputs", "Schemes", "Payments", "Markets", "Extension", "Land"];
@@ -68,13 +68,13 @@ export function RaiseGrievanceModal({ isOpen, onClose, farmerId }: Props) {
               ? "No connectivity — the grievance is stored on the device and will be forwarded to the Grievance Service on reconnection. The external case ID is assigned then."
               : `External case ID ${result.ref}. Status is sourced from the Grievance Service; the submitter is notified by SMS on every change.`}
           </Banner>
-          <p className="text-[13px] text-[#4a5568]">Reference: <span className="font-mono font-medium text-[#1a2b3c]">{result.ref}</span></p>
+          <p className="text-[13px] text-ink-soft">Reference: <span className="font-mono font-medium text-ink">{result.ref}</span></p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-2 rounded-lg bg-[#F1F5F9] p-1">
+          <div className="grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1">
             {(["farmer", "me"] as const).map((k) => (
-              <button key={k} type="button" onClick={() => setForWhom(k)} className={cn("h-9 rounded-md text-[13.5px] font-semibold transition-colors", forWhom === k ? "bg-white text-brand-green shadow-sm" : "text-[#4a5568]")}>
+              <button key={k} type="button" onClick={() => setForWhom(k)} className={cn("h-9 rounded-md text-[13.5px] font-semibold transition-colors", forWhom === k ? "bg-white text-brand-green shadow-sm" : "text-ink-soft")}>
                 {k === "farmer" ? "On behalf of a farmer" : "For myself"}
               </button>
             ))}
@@ -96,13 +96,13 @@ export function RaiseGrievanceModal({ isOpen, onClose, farmerId }: Props) {
             <Textarea id="grv-desc" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What happened, where, and when" />
           </FormField>
           <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => setAttachments((a) => [...a, `photo-${a.length + 1}.jpg`])} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-[13px] font-medium text-[#334155] hover:bg-zinc-50">Add photo</button>
-            <button type="button" onClick={() => setAttachments((a) => [...a, `voice-note-${a.length + 1}.m4a`])} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-[13px] font-medium text-[#334155] hover:bg-zinc-50">Record voice note</button>
-            {attachments.map((a) => <span key={a} className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-0.5 font-mono text-[12px] text-[#475569]">{a}</span>)}
+            <button type="button" onClick={() => setAttachments((a) => [...a, `photo-${a.length + 1}.jpg`])} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-[13px] font-medium text-slate-700 hover:bg-zinc-50">Add photo</button>
+            <button type="button" onClick={() => setAttachments((a) => [...a, `voice-note-${a.length + 1}.m4a`])} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-[13px] font-medium text-slate-700 hover:bg-zinc-50">Record voice note</button>
+            {attachments.map((a) => <span key={a} className="rounded-full border border-slate-200 bg-surface px-2.5 py-0.5 font-mono text-[12px] text-slate-600">{a}</span>)}
           </div>
-          <div className="rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-3 text-[12.5px] leading-relaxed text-[#4a5568]">
-            <p><span className="font-semibold text-[#1a2b3c]">Shared with the Grievance Service:</span> farmer/DA name, Farmer-ID or DA-ID, kebele, contact number, category, description and attachments.</p>
-            <p className="mt-1"><span className="font-semibold text-[#1a2b3c]">Withheld from woreda-level reports:</span> Fayda ID, phone number and household data — reports carry the case ID and category only.</p>
+          <div className="rounded-lg border border-line bg-surface p-3 text-[12.5px] leading-relaxed text-ink-soft">
+            <p><span className="font-semibold text-ink">Shared with the Grievance Service:</span> farmer/DA name, Farmer-ID or DA-ID, kebele, contact number, category, description and attachments.</p>
+            <p className="mt-1"><span className="font-semibold text-ink">Withheld from woreda-level reports:</span> Fayda ID, phone number and household data — reports carry the case ID and category only.</p>
             <p className="mt-1">While offline the record is held on the device and forwarded on reconnection.</p>
           </div>
         </div>

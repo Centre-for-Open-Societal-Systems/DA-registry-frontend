@@ -7,9 +7,9 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ExportButton } from "@/components/ui/ExportButton";
 import { cn } from "@/lib/utils";
-import { FARMERS } from "@/features/farmers/data";
-import { FarmerAvatar } from "@/features/farmers/components/FarmerAvatar";
-import { StatusPill } from "@/features/farmers/components/StatusPill";
+import { FARMERS } from "@/features/farmers";
+import { FarmerAvatar } from "@/features/farmers";
+import { StatusPill } from "@/features/farmers";
 import {
   applyFilters,
   countActiveFilters,
@@ -19,7 +19,7 @@ import {
   KEBELE_OPTIONS,
   STATUS_OPTIONS,
   type FarmerFilters,
-} from "@/features/farmers/filters";
+} from "@/features/farmers";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer } from "@/components/ui/AdvancedFiltersDrawer";
@@ -28,7 +28,7 @@ import { TablePagination, usePagination } from "@/components/ui/TablePagination"
 import { RowAction } from "@/components/ui/RowAction";
 import { Banner } from "@/components/ui/Banner";
 import { downloadCsv, fileDate, type CsvColumn } from "@/lib/download";
-import type { Farmer } from "@/features/farmers/types";
+import type { Farmer } from "@/features/farmers";
 
 const SEARCH_PLACEHOLDER = searchPlaceholder(["Farmer Details", "Kebele", "Crop", "Registered date", "Status"]);
 
@@ -81,7 +81,7 @@ export function FarmersTable() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2.5">
-          <h2 className="text-[15px] font-semibold text-[#1a2b3c]">My Farmers</h2>
+          <h2 className="text-[15px] font-semibold text-ink">My Farmers</h2>
           <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-green px-1.5 text-[12px] font-semibold text-white">
             {selected.size}
           </span>
@@ -109,7 +109,7 @@ export function FarmersTable() {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px] border-collapse text-left">
           <thead>
-            <tr className="border-y border-[#E5E7EB] bg-[#F8FAFC] text-[13px] font-medium text-[#334155]">
+            <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
               <th className="w-16 px-6 py-3">
                 <Checkbox checked={allSelected} onChange={toggleAll} aria-label="Select all farmers" />
               </th>
@@ -127,7 +127,7 @@ export function FarmersTable() {
               <th className="px-4 py-3 text-center font-medium">Action</th>
             </tr>
           </thead>
-          <tbody className="text-[14px] text-[#334155]">
+          <tbody className="text-[14px] text-slate-700">
             {rows.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-6"><EmptyState title="No farmers match the selected filters" hint="Clear a filter or try a different search." /></td>
@@ -139,8 +139,8 @@ export function FarmersTable() {
                 <tr
                   key={farmer.id}
                   className={cn(
-                    "border-b border-[#F1F3F4] transition-colors last:border-0",
-                    isSelected ? "bg-[#F0FAF5]" : "hover:bg-[#F8FAFC]",
+                    "border-b border-line-soft transition-colors last:border-0",
+                    isSelected ? "bg-brand-wash" : "hover:bg-surface",
                   )}
                 >
                   <td className="px-4 py-3.5">
@@ -154,8 +154,8 @@ export function FarmersTable() {
                     <div className="flex items-center gap-2.5">
                       <FarmerAvatar name={farmer.name} avatar={farmer.avatar} />
                       <div className="leading-tight">
-                        <p className="font-medium text-[#1a2b3c]">{farmer.name}</p>
-                        <p className="mt-0.5 text-[13px] text-[#64748b]">{farmer.email}</p>
+                        <p className="font-medium text-ink">{farmer.name}</p>
+                        <p className="mt-0.5 text-[13px] text-muted">{farmer.email}</p>
                       </div>
                     </div>
                   </td>
@@ -166,7 +166,7 @@ export function FarmersTable() {
                   <td className="px-4 py-3.5 text-center leading-tight">
                     {farmer.registeredAt}
                     <br />
-                    <span className="text-[#475569]">- {farmer.registeredTime}</span>
+                    <span className="text-slate-600">- {farmer.registeredTime}</span>
                   </td>
                   <td className="px-4 py-3.5 text-center">
                     <StatusPill status={farmer.status} reason={farmer.statusReason} />

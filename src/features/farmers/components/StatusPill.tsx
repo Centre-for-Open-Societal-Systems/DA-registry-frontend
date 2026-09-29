@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { Pill, type PillTone } from "@/components/ui/Pill";
 import { Tooltip } from "@/components/ui/Tooltip";

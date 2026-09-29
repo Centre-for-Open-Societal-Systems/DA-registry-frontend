@@ -13,10 +13,10 @@ export interface AdminStat {
 }
 
 export const ADMIN_STATS: AdminStat[] = [
-  { key: "farmers", label: "Linked farmers", value: "12,490", accent: "border-l-[#2563EB]", tile: "bg-[#E6F0FD] text-[#2563EB]", icon: "handshake" },
-  { key: "visits", label: "Visits today", value: "22", accent: "border-l-[#7C3AED]", tile: "bg-[#F1EAFE] text-[#7C3AED]", icon: "calendar" },
-  { key: "quality", label: "Avg. data quality", value: "84", accent: "border-l-brand-green", tile: "bg-[#E6F5F0] text-brand-green", icon: "shield" },
-  { key: "accuracy", label: "Data accuracy", value: "18", accent: "border-l-[#DC2626]", tile: "bg-[#FEECEC] text-[#DC2626]", icon: "alert" },
+  { key: "farmers", label: "Linked farmers", value: "12,490", accent: "border-l-blue-600", tile: "bg-info-tint text-blue-600", icon: "handshake" },
+  { key: "visits", label: "Visits today", value: "22", accent: "border-l-violet-600", tile: "bg-violet-tint text-violet-600", icon: "calendar" },
+  { key: "quality", label: "Avg. data quality", value: "84", accent: "border-l-brand-green", tile: "bg-brand-tint text-brand-green", icon: "shield" },
+  { key: "accuracy", label: "Data accuracy", value: "18", accent: "border-l-danger", tile: "bg-danger-tint text-danger", icon: "alert" },
 ];
 
 export interface TrendPoint {

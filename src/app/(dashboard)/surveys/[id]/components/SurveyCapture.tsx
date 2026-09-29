@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { Banner } from "@/components/ui/Banner";
@@ -9,9 +8,10 @@ import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { FARMERS } from "@/features/farmers/data";
-import { RESPONSE_TONE, type Parameter, type ResponseStatus, type SurveyTask } from "@/features/surveys/data";
+import { FARMERS } from "@/features/farmers";
+import { RESPONSE_TONE, type Parameter, type ResponseStatus, type SurveyTask } from "@/features/surveys";
 import { cn } from "@/lib/utils";
+import { BackLink } from "@/components/ui/BackLink";
 
 type Answers = Record<string, string | string[]>;
 
@@ -76,29 +76,26 @@ export function SurveyCapture({ task }: { task: SurveyTask }) {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <Link href="/surveys" className="inline-flex w-fit items-center gap-2.5 text-[15px] font-medium text-[#1a2b3c] transition-colors hover:text-brand-green">
-        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-        Back to Surveys
-      </Link>
+      <BackLink href="/surveys" label="Back to Surveys" />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
         {/* Task context */}
         <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-          <h1 className="text-[18px] font-semibold leading-tight text-[#1a2b3c]">{task.name}</h1>
+          <h1 className="text-[18px] font-semibold leading-tight text-ink">{task.name}</h1>
           <div className="mt-2 flex flex-wrap gap-1.5"><Pill tone="blue">Template {task.templateVersion}</Pill><Pill tone="slate">{task.type}</Pill><Pill tone="green">~{task.estMinutes} min</Pill></div>
           <dl className="mt-4 space-y-2 text-[13px]">
-            <div><dt className="text-[11.5px] font-semibold uppercase tracking-wider text-[#64748b]">Window</dt><dd className="text-[#1a2b3c]">{task.window.open} → {task.window.close}</dd></div>
-            <div><dt className="text-[11.5px] font-semibold uppercase tracking-wider text-[#64748b]">Languages</dt><dd className="text-[#1a2b3c]">{task.languages.join(" · ")}</dd></div>
-            <div><dt className="text-[11.5px] font-semibold uppercase tracking-wider text-[#64748b]">Progress</dt><dd className="text-[#1a2b3c]">{task.collected + (status === "Synced" || status === "Queued" ? 1 : 0)} of {task.targetFarmers} farmers · {task.queued + (status === "Queued" ? 1 : 0)} queued on device</dd></div>
+            <div><dt className="text-[11.5px] font-semibold uppercase tracking-wider text-muted">Window</dt><dd className="text-ink">{task.window.open} → {task.window.close}</dd></div>
+            <div><dt className="text-[11.5px] font-semibold uppercase tracking-wider text-muted">Languages</dt><dd className="text-ink">{task.languages.join(" · ")}</dd></div>
+            <div><dt className="text-[11.5px] font-semibold uppercase tracking-wider text-muted">Progress</dt><dd className="text-ink">{task.collected + (status === "Synced" || status === "Queued" ? 1 : 0)} of {task.targetFarmers} farmers · {task.queued + (status === "Queued" ? 1 : 0)} queued on device</dd></div>
           </dl>
 
           <div className="mt-5">
-            <label htmlFor="farmer" className="text-[14px] font-medium text-[#1a2b3c]">Farmer</label>
+            <label htmlFor="farmer" className="text-[14px] font-medium text-ink">Farmer</label>
             <Select id="farmer" value={farmerId} disabled={started} onChange={(e) => { setFarmerId(e.target.value); setStatus(null); }} className="mt-1.5">
               <option value="">Select farmer…</option>
               {FARMERS.map((f) => <option key={f.id} value={f.id}>{f.name} — {f.kebele}{answered.has(f.id) ? " (answered)" : ""}</option>)}
             </Select>
-            {duplicate && <p className="mt-1.5 text-[12.5px] font-medium text-[#DC2626]">A response for this farmer already exists for this survey — one response per farmer.</p>}
+            {duplicate && <p className="mt-1.5 text-[12.5px] font-medium text-danger">A response for this farmer already exists for this survey — one response per farmer.</p>}
           </div>
 
           {!started && (
@@ -107,7 +104,7 @@ export function SurveyCapture({ task }: { task: SurveyTask }) {
             </Button>
           )}
           {status && status !== "In progress" && status !== "Declined" && (
-            <div className="mt-4 flex items-center gap-2 text-[13px]"><span className="text-[#64748b]">Response status</span><Pill tone={RESPONSE_TONE[status]} dot>{status}</Pill></div>
+            <div className="mt-4 flex items-center gap-2 text-[13px]"><span className="text-muted">Response status</span><Pill tone={RESPONSE_TONE[status]} dot>{status}</Pill></div>
           )}
         </Card>
 
@@ -133,27 +130,27 @@ export function SurveyCapture({ task }: { task: SurveyTask }) {
             </div>
           ) : !started || !current ? (
             <div className="flex min-h-[320px] flex-col items-center justify-center gap-2 p-8 text-center">
-              <p className="text-[15px] font-semibold text-[#1a2b3c]">Select a farmer to begin</p>
-              <p className="max-w-md text-[13.5px] text-[#4a5568]">{task.parameters.length} questions · consent first, registry fields pre-filled and read-only, skip logic applied automatically.</p>
+              <p className="text-[15px] font-semibold text-ink">Select a farmer to begin</p>
+              <p className="max-w-md text-[13.5px] text-ink-soft">{task.parameters.length} questions · consent first, registry fields pre-filled and read-only, skip logic applied automatically.</p>
             </div>
           ) : (
             <div className="flex flex-col">
-              <div className="flex items-center justify-between border-b border-[#E5E7EB] px-5 py-3.5">
-                <span className="text-[13px] font-medium text-[#4a5568]">Question {step + 1} of {visibleParams.length}</span>
+              <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+                <span className="text-[13px] font-medium text-ink-soft">Question {step + 1} of {visibleParams.length}</span>
                 <div className="flex items-center gap-3">
-                  <div className="h-1.5 w-32 rounded-full bg-[#E2E8F0]"><div className="h-1.5 rounded-full bg-brand-green transition-all" style={{ width: `${progress}%` }} /></div>
+                  <div className="h-1.5 w-32 rounded-full bg-slate-200"><div className="h-1.5 rounded-full bg-brand-green transition-all" style={{ width: `${progress}%` }} /></div>
                   <Pill tone="slate">{current.type}</Pill>
                 </div>
               </div>
               <div className="flex flex-col gap-4 p-5">
-                <p className="text-[17px] font-semibold leading-snug text-[#1a2b3c]">{current.prompt}{current.required && <span className="ml-1 text-[#DC2626]">*</span>}</p>
-                {current.helper && <p className="-mt-2 text-[13px] text-[#64748b]">{current.helper}</p>}
+                <p className="text-[17px] font-semibold leading-snug text-ink">{current.prompt}{current.required && <span className="ml-1 text-danger">*</span>}</p>
+                {current.helper && <p className="-mt-2 text-[13px] text-muted">{current.helper}</p>}
                 <QuestionInput param={current} value={valueOf(current)} onChange={(v) => set(current.id, v)} />
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#E5E7EB] bg-[#F8FAFC] px-5 py-3">
-                <button type="button" onClick={saveDraft} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md border border-zinc-200 bg-white px-3.5 text-[13.5px] font-medium text-[#1a2b3c] transition-colors hover:bg-zinc-50">Save draft</button>
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface px-5 py-3">
+                <button type="button" onClick={saveDraft} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md border border-zinc-200 bg-white px-3.5 text-[13.5px] font-medium text-ink transition-colors hover:bg-zinc-50">Save draft</button>
                 <div className="flex items-center gap-2">
-                  <button type="button" disabled={step === 0} onClick={() => setStep(step - 1)} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md border border-zinc-200 bg-white px-3.5 text-[13.5px] font-medium text-[#1a2b3c] transition-colors hover:bg-zinc-50 disabled:opacity-50">Back</button>
+                  <button type="button" disabled={step === 0} onClick={() => setStep(step - 1)} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md border border-zinc-200 bg-white px-3.5 text-[13.5px] font-medium text-ink transition-colors hover:bg-zinc-50 disabled:opacity-50">Back</button>
                   <button type="button" disabled={!canContinue} onClick={next} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-brand-green-dark disabled:opacity-50">
                     {current.type === "consent" && answers[current.id] === "declined" ? "End response" : step === visibleParams.length - 1 ? "Submit response" : "Save & continue"}
                   </button>
@@ -171,7 +168,7 @@ function QuestionInput({ param, value, onChange }: { param: Parameter; value: st
   const str = typeof value === "string" ? value : "";
   const arr = Array.isArray(value) ? value : [];
   const option = (label: string, selected: boolean, onClick: () => void) => (
-    <button key={label} type="button" onClick={onClick} className={cn("flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-[14px] transition-all", selected ? "border-brand-green bg-[#F0FAF5] text-brand-green" : "border-[#E5E7EB] bg-white text-[#1a2b3c] hover:border-brand-green/30 hover:shadow-sm")}>
+    <button key={label} type="button" onClick={onClick} className={cn("flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-[14px] transition-all", selected ? "border-brand-green bg-brand-wash text-brand-green" : "border-line bg-white text-ink hover:border-brand-green/30 hover:shadow-sm")}>
       {label}
     </button>
   );
@@ -185,7 +182,7 @@ function QuestionInput({ param, value, onChange }: { param: Parameter; value: st
         </div>
       );
     case "auto":
-      return <input readOnly value={str} className="h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 font-mono text-sm text-[#4a5568]" aria-label={`${param.prompt} (pre-filled from ${param.prefill})`} />;
+      return <input readOnly value={str} className="h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 font-mono text-sm text-ink-soft" aria-label={`${param.prompt} (pre-filled from ${param.prefill})`} />;
     case "lookup":
     case "single":
       return <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{param.options?.map((o) => option(o, str === o, () => onChange(o)))}</div>;
@@ -193,7 +190,7 @@ function QuestionInput({ param, value, onChange }: { param: Parameter; value: st
       return (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {param.options?.map((o) => (
-            <label key={o} className={cn("flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-[14px]", arr.includes(o) ? "border-brand-green bg-[#F0FAF5]" : "border-[#E5E7EB] bg-white")}>
+            <label key={o} className={cn("flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-[14px]", arr.includes(o) ? "border-brand-green bg-brand-wash" : "border-line bg-white")}>
               <Checkbox checked={arr.includes(o)} onChange={() => onChange(arr.includes(o) ? arr.filter((x) => x !== o) : [...arr, o])} /> {o}
             </label>
           ))}
@@ -203,7 +200,7 @@ function QuestionInput({ param, value, onChange }: { param: Parameter; value: st
       return (
         <div className="flex gap-2">
           {[1, 2, 3, 4, 5].map((n) => (
-            <button key={n} type="button" onClick={() => onChange(String(n))} aria-label={`${n} of 5`} className={cn("flex h-12 w-12 items-center justify-center rounded-lg border text-[16px] font-semibold transition-colors", str === String(n) ? "border-brand-green bg-brand-green text-white" : "border-[#E5E7EB] bg-white text-[#1a2b3c] hover:border-brand-green")}>{n}</button>
+            <button key={n} type="button" onClick={() => onChange(String(n))} aria-label={`${n} of 5`} className={cn("flex h-12 w-12 items-center justify-center rounded-lg border text-[16px] font-semibold transition-colors", str === String(n) ? "border-brand-green bg-brand-green text-white" : "border-line bg-white text-ink hover:border-brand-green")}>{n}</button>
           ))}
         </div>
       );

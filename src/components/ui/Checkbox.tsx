@@ -7,7 +7,7 @@ export function Checkbox(props: CheckboxProps) {
     <span className="relative flex h-[18px] w-[18px] items-center justify-center">
       <input
         type="checkbox"
-        className="peer h-[18px] w-[18px] cursor-pointer appearance-none rounded-[3px] border-2 border-[#94A3B8] bg-white transition-colors checked:border-brand-green checked:bg-brand-green"
+        className="peer h-[18px] w-[18px] cursor-pointer appearance-none rounded-[3px] border-2 border-subtle bg-white transition-colors checked:border-brand-green checked:bg-brand-green"
         {...props}
       />
       <svg

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
-import { QUEUE, QUEUE_TONE, type FieldConflict, type QueueItem } from "@/features/sync/data";
+import { QUEUE, QUEUE_TONE, type FieldConflict, type QueueItem } from "@/features/sync";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { cn } from "@/lib/utils";
 
@@ -121,27 +121,27 @@ export function SyncQueue() {
   };
 
   const columns: Column<QueueItem>[] = [
-    { key: "entity", header: <FilterDropdown label="Item" allLabel="All items" options={entityOptions} selected={filters.entity} onApply={setFilter("entity")} />, cell: (i) => <span><span className="font-medium text-[#1a2b3c]">{i.entity}</span><span className="block text-[12.5px] text-[#64748b]">{i.ref}</span></span> },
-    { key: "captured", header: "Captured", cell: (i) => <span className="whitespace-nowrap text-[13px] text-[#64748b]">{i.capturedAt}</span> },
-    { key: "size", header: "Size", cell: (i) => <span className="text-[13px] text-[#4a5568]">{i.size}</span> },
-    { key: "status", header: <FilterDropdown label="Status" allLabel="All Status" options={statusOptions} selected={filters.status} onApply={setFilter("status")} />, cell: (i) => <div className="flex flex-col items-start gap-1"><Pill tone={QUEUE_TONE[i.status]} dot>{i.status}</Pill>{i.detail && <span className="text-[12px] text-[#64748b]">{i.detail}</span>}</div> },
+    { key: "entity", header: <FilterDropdown label="Item" allLabel="All items" options={entityOptions} selected={filters.entity} onApply={setFilter("entity")} />, cell: (i) => <span><span className="font-medium text-ink">{i.entity}</span><span className="block text-[12.5px] text-muted">{i.ref}</span></span> },
+    { key: "captured", header: "Captured", cell: (i) => <span className="whitespace-nowrap text-[13px] text-muted">{i.capturedAt}</span> },
+    { key: "size", header: "Size", cell: (i) => <span className="text-[13px] text-ink-soft">{i.size}</span> },
+    { key: "status", header: <FilterDropdown label="Status" allLabel="All Status" options={statusOptions} selected={filters.status} onApply={setFilter("status")} />, cell: (i) => <div className="flex flex-col items-start gap-1"><Pill tone={QUEUE_TONE[i.status]} dot>{i.status}</Pill>{i.detail && <span className="text-[12px] text-muted">{i.detail}</span>}</div> },
     {
       key: "actions", header: "Actions", align: "center",
       cell: (i) => i.status === "Conflict" ? (
         <RowAction tone="warning" onClick={() => openConflict(i)}>Needs you — resolve</RowAction>
       ) : i.status === "Failed" ? (
         <RowAction icon="retry" onClick={syncNow}>Retry</RowAction>
-      ) : <span className="text-[12.5px] text-[#94A3B8]">—</span>,
+      ) : <span className="text-[12.5px] text-subtle">—</span>,
     },
   ];
 
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Awaiting sync" value={String(awaiting)} accent="border-l-[#D97706]" tile="bg-[#FFF7EB] text-[#D97706]" icon={icon("M12 6v6l4 2M12 22a10 10 0 100-20 10 10 0 000 20z")} />
-        <StatCard label="Conflicts" value={String(conflicts)} hint="Need a decision" accent="border-l-[#6D28D9]" tile="bg-[#F5F3FF] text-[#6D28D9]" icon={icon("M12 8v4M12 16h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z")} />
-        <StatCard label="Failed" value={String(failed)} hint="Auto-retry scheduled" accent="border-l-[#DC2626]" tile="bg-[#FFF1F1] text-[#DC2626]" icon={icon("M12 8v4M12 16h.01M12 22a10 10 0 100-20 10 10 0 000 20z")} />
-        <StatCard label="Device storage" value="71%" hint="1.2 GB free" accent="border-l-brand-green" tile="bg-[#E6F5F0] text-brand-green" icon={icon("M22 12H2M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z")} />
+        <StatCard label="Awaiting sync" value={String(awaiting)} accent="border-l-amber-600" tile="bg-warning-wash text-amber-600" icon={icon("M12 6v6l4 2M12 22a10 10 0 100-20 10 10 0 000 20z")} />
+        <StatCard label="Conflicts" value={String(conflicts)} hint="Need a decision" accent="border-l-violet-700" tile="bg-violet-50 text-violet-700" icon={icon("M12 8v4M12 16h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z")} />
+        <StatCard label="Failed" value={String(failed)} hint="Auto-retry scheduled" accent="border-l-danger" tile="bg-danger-wash text-danger" icon={icon("M12 8v4M12 16h.01M12 22a10 10 0 100-20 10 10 0 000 20z")} />
+        <StatCard label="Device storage" value="71%" hint="1.2 GB free" accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M22 12H2M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z")} />
       </div>
 
       {outcome && <Banner tone={outcome.tone} title={outcome.title} onDismiss={() => setOutcome(null)}>{outcome.body}</Banner>}
@@ -149,8 +149,8 @@ export function SyncQueue() {
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Device sync queue</h2>
-            <p className="mt-0.5 text-[12.5px] text-[#4a5568]">Everything captured on this device that hasn&apos;t reached the server. Items awaiting a decision are never discarded.</p>
+            <h2 className="text-[15px] font-semibold text-ink">Device sync queue</h2>
+            <p className="mt-0.5 text-[12.5px] text-ink-soft">Everything captured on this device that hasn&apos;t reached the server. Items awaiting a decision are never discarded.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
@@ -196,23 +196,23 @@ export function SyncQueue() {
             <Button variant="brand" onClick={() => resolve("mine")}>Keep mine</Button>
           </>}
         >
-          <p className="text-[13.5px] text-[#4a5568]">This record changed on the device and on the server. Choose per field for a merge, or take one side entirely. Each choice leads to a distinct outcome — nothing is silently lost.</p>
-          <div className="mt-4 overflow-hidden rounded-lg border border-[#E5E7EB]">
+          <p className="text-[13.5px] text-ink-soft">This record changed on the device and on the server. Choose per field for a merge, or take one side entirely. Each choice leads to a distinct outcome — nothing is silently lost.</p>
+          <div className="mt-4 overflow-hidden rounded-lg border border-line">
             <table className="w-full text-left text-[13.5px]">
-              <thead className="bg-[#F8FAFC] text-[12.5px] text-[#334155]"><tr><th className="px-3 py-2 font-medium">Field</th><th className="px-3 py-2 font-medium">Device (mine)</th><th className="px-3 py-2 font-medium">Server</th><th className="px-3 py-2 text-center font-medium">Merge uses</th></tr></thead>
+              <thead className="bg-surface text-[12.5px] text-slate-700"><tr><th className="px-3 py-2 font-medium">Field</th><th className="px-3 py-2 font-medium">Device (mine)</th><th className="px-3 py-2 font-medium">Server</th><th className="px-3 py-2 text-center font-medium">Merge uses</th></tr></thead>
               <tbody>
                 {(selected.conflicts ?? []).map((c: FieldConflict) => {
                   const same = c.device === c.server;
                   return (
-                    <tr key={c.field} className="border-t border-[#F1F3F4]">
-                      <td className="px-3 py-2 font-medium text-[#1a2b3c]">{c.field}</td>
-                      <td className={cn("px-3 py-2", !same && "font-medium text-[#B45309]")}>{c.device}</td>
-                      <td className={cn("px-3 py-2", !same && "font-medium text-[#1D4ED8]")}>{c.server}</td>
+                    <tr key={c.field} className="border-t border-line-soft">
+                      <td className="px-3 py-2 font-medium text-ink">{c.field}</td>
+                      <td className={cn("px-3 py-2", !same && "font-medium text-amber-700")}>{c.device}</td>
+                      <td className={cn("px-3 py-2", !same && "font-medium text-blue-700")}>{c.server}</td>
                       <td className="px-3 py-2 text-center">
                         {same ? <Pill tone="slate">identical</Pill> : (
                           <div className="inline-flex rounded-md border border-zinc-200 p-0.5">
                             {(["device", "server"] as const).map((side) => (
-                              <button key={side} type="button" onClick={() => setMerge((m) => ({ ...m, [c.field]: side }))} className={cn("h-7 rounded px-2.5 text-[12px] font-medium", merge[c.field] === side ? "bg-brand-green text-white" : "text-[#4a5568]")}>{side}</button>
+                              <button key={side} type="button" onClick={() => setMerge((m) => ({ ...m, [c.field]: side }))} className={cn("h-7 rounded px-2.5 text-[12px] font-medium", merge[c.field] === side ? "bg-brand-green text-white" : "text-ink-soft")}>{side}</button>
                             ))}
                           </div>
                         )}
@@ -223,10 +223,10 @@ export function SyncQueue() {
               </tbody>
             </table>
           </div>
-          <ul className="mt-4 space-y-1 text-[12.5px] text-[#64748b]">
-            <li><span className="font-semibold text-[#1a2b3c]">Keep mine</span> — device values written; server values shown as overwritten and kept in the audit trail.</li>
-            <li><span className="font-semibold text-[#1a2b3c]">Keep server</span> — server values written; discarded device values are listed so you can re-enter field-verified data.</li>
-            <li><span className="font-semibold text-[#1a2b3c]">Merge</span> — per-field provenance recorded; the merged record is flagged for supervisor spot-check.</li>
+          <ul className="mt-4 space-y-1 text-[12.5px] text-muted">
+            <li><span className="font-semibold text-ink">Keep mine</span> — device values written; server values shown as overwritten and kept in the audit trail.</li>
+            <li><span className="font-semibold text-ink">Keep server</span> — server values written; discarded device values are listed so you can re-enter field-verified data.</li>
+            <li><span className="font-semibold text-ink">Merge</span> — per-field provenance recorded; the merged record is flagged for supervisor spot-check.</li>
           </ul>
         </Modal>
       )}

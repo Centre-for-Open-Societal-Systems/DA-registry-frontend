@@ -9,7 +9,7 @@ import { DataTable, type Column } from "@/components/ui/DataTable";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
-import { SURVEY_TASKS, type SurveyTask } from "@/features/surveys/data";
+import { SURVEY_TASKS, type SurveyTask } from "@/features/surveys";
 import { useAuthStore } from "@/store/useAuthStore";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 
@@ -59,23 +59,23 @@ export function SurveyTasks() {
     {
       key: "name",
       header: <FilterDropdown label="Survey" allLabel="All survey types" options={TYPE_OPTIONS} selected={filters.type} onApply={setFilter("type")} />,
-      cell: (s) => <span><span className="font-medium text-[#1a2b3c]">{s.name}</span><span className="block text-[12px] text-[#64748b]">{s.type} · template {s.templateVersion}</span></span>,
+      cell: (s) => <span><span className="font-medium text-ink">{s.name}</span><span className="block text-[12px] text-muted">{s.type} · template {s.templateVersion}</span></span>,
     },
     { key: "window", header: "Window", cell: (s) => <span className="whitespace-nowrap text-[13px]">{s.window.open} → {s.window.close}</span> },
-    { key: "lang", header: <FilterDropdown label="Languages" allLabel="All languages" options={LANGUAGE_OPTIONS} selected={filters.language} onApply={setFilter("language")} />, cell: (s) => <span className="text-[13px] text-[#4a5568]">{s.languages.join(" · ")}</span> },
+    { key: "lang", header: <FilterDropdown label="Languages" allLabel="All languages" options={LANGUAGE_OPTIONS} selected={filters.language} onApply={setFilter("language")} />, cell: (s) => <span className="text-[13px] text-ink-soft">{s.languages.join(" · ")}</span> },
     {
       key: "progress", header: "Responses", cell: (s) => (
         <div className="min-w-[140px]">
-          <div className="flex items-center justify-between text-[12.5px]"><span className="font-medium text-[#1a2b3c]">{s.collected} of {s.targetFarmers}</span><span className="text-[#64748b]">{Math.round((s.collected / s.targetFarmers) * 100)}%</span></div>
-          <div className="mt-1 h-1.5 w-full rounded-full bg-[#E2E8F0]"><div className="h-1.5 rounded-full bg-brand-green" style={{ width: `${(s.collected / s.targetFarmers) * 100}%` }} /></div>
-          {s.queued > 0 && <span className="mt-1 block text-[11.5px] text-[#B45309]">{s.queued} queued on device</span>}
+          <div className="flex items-center justify-between text-[12.5px]"><span className="font-medium text-ink">{s.collected} of {s.targetFarmers}</span><span className="text-muted">{Math.round((s.collected / s.targetFarmers) * 100)}%</span></div>
+          <div className="mt-1 h-1.5 w-full rounded-full bg-slate-200"><div className="h-1.5 rounded-full bg-brand-green" style={{ width: `${(s.collected / s.targetFarmers) * 100}%` }} /></div>
+          {s.queued > 0 && <span className="mt-1 block text-[11.5px] text-amber-700">{s.queued} queued on device</span>}
         </div>
       ),
     },
     { key: "status", header: <FilterDropdown label="Status" allLabel="All Status" options={STATUS_OPTIONS} selected={filters.status} onApply={setFilter("status")} />, cell: (s) => <Pill tone={STATUS_TONE[s.status]} dot>{s.status}</Pill> },
     {
       key: "actions", header: "Actions", align: "center",
-      cell: (s) => s.status === "Closed" ? <span className="whitespace-nowrap text-[12.5px] text-[#94A3B8]">Window closed</span> : (
+      cell: (s) => s.status === "Closed" ? <span className="whitespace-nowrap text-[12.5px] text-subtle">Window closed</span> : (
         <RowAction href={`/surveys/${s.id}`} tone="solid">Collect response</RowAction>
       ),
     },
@@ -86,8 +86,8 @@ export function SurveyTasks() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Assigned surveys</h2>
-          <p className="mt-0.5 text-[12.5px] text-[#4a5568]">
+          <h2 className="text-[15px] font-semibold text-ink">Assigned surveys</h2>
+          <p className="mt-0.5 text-[12.5px] text-ink-soft">
             Responses are captured question by question, can be saved and resumed offline, and sync when connectivity returns. One response per farmer per survey.
             {role !== "DA" && " Template design, deployment and results are Part 2 (Performance › Surveys)."}
           </p>

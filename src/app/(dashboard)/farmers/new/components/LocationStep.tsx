@@ -7,7 +7,7 @@ import { Select } from "@/components/ui/Select";
 import { FormField } from "@/components/ui/FormField";
 import { REGIONS } from "../locationData";
 
-const ERROR_BORDER = "border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]";
+const ERROR_BORDER = "border-danger focus:border-danger focus:ring-danger";
 
 type GpsStatus = { tone: "muted" | "error"; text: string } | null;
 
@@ -74,8 +74,8 @@ export function LocationStep({ initial = {} }: { initial?: Record<string, string
 
   return (
     <Card className="min-h-[480px] p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-      <div className="border-b border-[#E5E7EB] px-5 py-3.5">
-        <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Location and kebele</h2>
+      <div className="border-b border-line px-5 py-3.5">
+        <h2 className="text-[15px] font-semibold text-ink">Location and kebele</h2>
       </div>
 
       <form className="grid grid-cols-1 gap-x-6 gap-y-5 px-5 py-5 md:grid-cols-2 xl:grid-cols-3" onSubmit={(e) => e.preventDefault()}>

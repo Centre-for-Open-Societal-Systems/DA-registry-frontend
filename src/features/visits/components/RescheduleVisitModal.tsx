@@ -1,12 +1,10 @@
-"use client";
-
 import { Modal } from "@/components/ui/Modal";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { getFarmer } from "@/features/farmers/data";
+import { getFarmer } from "@/features/farmers";
 import { RESCHEDULE_REASONS } from "../data";
 import type { VisitRecord } from "../types";
 import { VisitFarmerCard } from "./VisitFarmerCard";
@@ -51,10 +49,10 @@ export function RescheduleVisitModal({ visit, onClose }: RescheduleVisitModalPro
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField label="New date" htmlFor="reschedule-date">
-            <Input id="reschedule-date" type="date" className="h-10 text-[#64748b]" required />
+            <Input id="reschedule-date" type="date" className="h-10 text-muted" required />
           </FormField>
           <FormField label="New time" htmlFor="reschedule-time">
-            <Input id="reschedule-time" type="time" className="h-10 text-[#64748b]" required />
+            <Input id="reschedule-time" type="time" className="h-10 text-muted" required />
           </FormField>
         </div>
 

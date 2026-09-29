@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { FormField } from "@/components/ui/FormField";
 import { cn } from "@/lib/utils";
+import { readDraft, removeDraft, writeDraft } from "@/lib/drafts";
 import {
   ISSUE_CATEGORIES,
   ISSUE_SEVERITIES,
@@ -31,13 +32,13 @@ interface NewIssueFormProps {
 
 // Selected-state colours per severity: green / amber / red
 const SEVERITY_ACTIVE: Record<IssueSeverity, string> = {
-  Low: "border-brand-green bg-[#EBFAF2] text-brand-green",
-  Medium: "border-[#D97706] bg-[#FFFBEB] text-[#B45309]",
-  High: "border-[#DC2626] bg-[#FEF2F2] text-[#DC2626]",
+  Low: "border-brand-green bg-brand-mint text-brand-green",
+  Medium: "border-amber-600 bg-amber-50 text-amber-700",
+  High: "border-danger bg-red-50 text-danger",
 };
 
-// Draft kept on this device (the form already works offline); cleared once the issue is submitted.
-const DRAFT_KEY = "oan:new-issue-draft";
+// Draft kept for this browser session only (see lib/drafts); cleared once the issue is submitted.
+const DRAFT_KEY = "new-issue";
 const DRAFT_FIELDS = ["category", "subject", "description", "relatedTo"] as const;
 
 interface IssueDraft {
@@ -49,13 +50,7 @@ interface IssueDraft {
 
 const formatTime = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
-const removeDraft = () => {
-  try {
-    localStorage.removeItem(DRAFT_KEY);
-  } catch {
-    // storage unavailable — nothing to clear
-  }
-};
+const clearIssueDraft = () => removeDraft(DRAFT_KEY);
 
 export function NewIssueForm({ onSubmit }: NewIssueFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,13 +62,7 @@ export function NewIssueForm({ onSubmit }: NewIssueFormProps) {
   // Restore a saved draft once mounted (deferred a tick so server and first client render match).
   useEffect(() => {
     const t = setTimeout(() => {
-      let draft: IssueDraft | null = null;
-      try {
-        const raw = localStorage.getItem(DRAFT_KEY);
-        draft = raw ? (JSON.parse(raw) as IssueDraft) : null;
-      } catch {
-        draft = null;
-      }
+      const draft = readDraft<IssueDraft>(DRAFT_KEY);
       const form = formRef.current;
       if (!draft || !form) return;
       for (const name of DRAFT_FIELDS) {
@@ -99,10 +88,10 @@ export function NewIssueForm({ onSubmit }: NewIssueFormProps) {
       savedAt: new Date().toISOString(),
     };
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      writeDraft(DRAFT_KEY, draft);
       setNotice({
         tone: "success",
-        text: `Draft saved on this device at ${formatTime(draft.savedAt)}.${attachments.length ? " Attachment names are kept — re-attach the files before submitting." : ""}`,
+        text: `Draft saved for this session at ${formatTime(draft.savedAt)}.${attachments.length ? " Attachment names are kept — re-attach the files before submitting." : ""}`,
       });
     } catch {
       setNotice({ tone: "error", text: "Couldn't save the draft — browser storage is unavailable (private mode or storage full)." });
@@ -127,14 +116,14 @@ export function NewIssueForm({ onSubmit }: NewIssueFormProps) {
     form.reset();
     setSeverity("Medium");
     setAttachments([]);
-    removeDraft();
+    clearIssueDraft();
     setNotice(null);
   };
 
   return (
     <Card className="flex h-full flex-col p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-      <div className="border-b border-[#E5E7EB] px-5 py-3.5">
-        <h2 className="text-[15px] font-semibold text-[#1a2b3c]">New issue</h2>
+      <div className="border-b border-line px-5 py-3.5">
+        <h2 className="text-[15px] font-semibold text-ink">New issue</h2>
       </div>
 
       <form ref={formRef} onSubmit={handleSubmit} className="flex flex-1 flex-col gap-5 px-4 py-4">
@@ -152,8 +141,8 @@ export function NewIssueForm({ onSubmit }: NewIssueFormProps) {
         </FormField>
 
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-[14px] font-medium text-[#1a2b3c]">
-            Severity<span className="ml-1 text-[#DC2626]">*</span>
+          <legend className="text-[14px] font-medium text-ink">
+            Severity<span className="ml-1 text-danger">*</span>
           </legend>
           <div className="mt-2 flex gap-2">
             {ISSUE_SEVERITIES.map((level) => {
@@ -166,7 +155,7 @@ export function NewIssueForm({ onSubmit }: NewIssueFormProps) {
                   onClick={() => setSeverity(level)}
                   className={cn(
                     "h-8 rounded-full border px-4 text-[13.5px] font-medium transition-colors",
-                    isActive ? SEVERITY_ACTIVE[level] : "border-[#E5E7EB] bg-white text-[#1a2b3c] hover:bg-[#F8FAFC]"
+                    isActive ? SEVERITY_ACTIVE[level] : "border-line bg-white text-ink hover:bg-surface"
                   )}
                 >
                   {level}
@@ -203,7 +192,7 @@ export function NewIssueForm({ onSubmit }: NewIssueFormProps) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F8FAFC] text-[14px] text-[#1a2b3c] transition-colors hover:border-brand-green/50 hover:bg-[#F3F4F6]"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 bg-surface text-[14px] text-ink transition-colors hover:border-brand-green/50 hover:bg-gray-100"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
               <path d="M12 5v14M5 12h14" />
@@ -213,7 +202,7 @@ export function NewIssueForm({ onSubmit }: NewIssueFormProps) {
           {attachments.length > 0 && (
             <ul className="flex flex-wrap gap-1.5">
               {attachments.map((name) => (
-                <li key={name} className="rounded-md bg-[#F3F4F6] px-2 py-0.5 text-[12px] text-[#4a5568]">{name}</li>
+                <li key={name} className="rounded-md bg-gray-100 px-2 py-0.5 text-[12px] text-ink-soft">{name}</li>
               ))}
             </ul>
           )}

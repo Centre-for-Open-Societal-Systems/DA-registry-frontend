@@ -29,7 +29,7 @@ export function PlanVisitButton({ farmer, className, mode = "plan", label = "Pla
           "inline-flex shrink-0 whitespace-nowrap h-9 items-center gap-2 rounded-md px-3.5 text-[13.5px] font-semibold transition-colors",
           variant === "solid"
             ? "bg-brand-green text-white hover:bg-brand-green-dark"
-            : "border border-brand-green bg-white text-brand-green hover:bg-[#F0FAF5]",
+            : "border border-brand-green bg-white text-brand-green hover:bg-brand-wash",
           className,
         )}
       >

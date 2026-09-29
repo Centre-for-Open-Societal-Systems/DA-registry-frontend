@@ -14,7 +14,7 @@ import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useAuthStore } from "@/store/useAuthStore";
-import { ARTICLE_CATEGORIES, ARTICLES, type Article } from "@/features/communication/data";
+import { ARTICLE_CATEGORIES, ARTICLES, type Article } from "@/features/communication";
 import { matchesQuery } from "@/lib/search";
 import { cn } from "@/lib/utils";
 
@@ -47,9 +47,9 @@ export function KnowledgeHub() {
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => setCategory("")} className={cn("h-8 rounded-full border px-3 text-[13px] font-medium transition-colors", !category ? "border-brand-green bg-[#F0FAF5] text-brand-green" : "border-zinc-200 bg-white text-[#4a5568] hover:bg-zinc-50")}>All</button>
+            <button type="button" onClick={() => setCategory("")} className={cn("h-8 rounded-full border px-3 text-[13px] font-medium transition-colors", !category ? "border-brand-green bg-brand-wash text-brand-green" : "border-zinc-200 bg-white text-ink-soft hover:bg-zinc-50")}>All</button>
             {ARTICLE_CATEGORIES.map((c) => (
-              <button key={c} type="button" onClick={() => setCategory(c === category ? "" : c)} className={cn("h-8 rounded-full border px-3 text-[13px] font-medium transition-colors", category === c ? "border-brand-green bg-[#F0FAF5] text-brand-green" : "border-zinc-200 bg-white text-[#4a5568] hover:bg-zinc-50")}>{c}</button>
+              <button key={c} type="button" onClick={() => setCategory(c === category ? "" : c)} className={cn("h-8 rounded-full border px-3 text-[13px] font-medium transition-colors", category === c ? "border-brand-green bg-brand-wash text-brand-green" : "border-zinc-200 bg-white text-ink-soft hover:bg-zinc-50")}>{c}</button>
             ))}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
@@ -64,14 +64,14 @@ export function KnowledgeHub() {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visible.map((a) => (
-            <Link key={a.id} href={`/knowledge/${a.id}`} className="flex flex-col rounded-xl border border-[#E5E7EB] bg-white p-4 sm:p-5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] transition-all hover:border-brand-green/30 hover:shadow-sm">
+            <Link key={a.id} href={`/knowledge/${a.id}`} className="flex flex-col rounded-xl border border-line bg-white p-4 sm:p-5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] transition-all hover:border-brand-green/30 hover:shadow-sm">
               <div className="flex items-center justify-between gap-2">
                 <Pill tone="green">{a.category}</Pill>
-                <span className="text-[12px] text-[#64748b]">{a.languages.includes("am") ? "EN · አማ" : "EN"}</span>
+                <span className="text-[12px] text-muted">{a.languages.includes("am") ? "EN · አማ" : "EN"}</span>
               </div>
-              <h3 className="mt-3 text-[15.5px] font-semibold leading-snug text-[#1a2b3c]">{a.title}</h3>
-              <p className="mt-1.5 flex-1 text-[13.5px] leading-relaxed text-[#4a5568]">{a.summary}</p>
-              <div className="mt-4 flex items-center justify-between gap-3 text-[12px] text-[#64748b]">
+              <h3 className="mt-3 text-[15.5px] font-semibold leading-snug text-ink">{a.title}</h3>
+              <p className="mt-1.5 flex-1 text-[13.5px] leading-relaxed text-ink-soft">{a.summary}</p>
+              <div className="mt-4 flex items-center justify-between gap-3 text-[12px] text-muted">
                 <span className="min-w-0">{a.author} · <span className="whitespace-nowrap">{a.updatedAt}</span></span>
                 <span className="shrink-0 whitespace-nowrap font-medium text-brand-green">{a.sends} sends</span>
               </div>

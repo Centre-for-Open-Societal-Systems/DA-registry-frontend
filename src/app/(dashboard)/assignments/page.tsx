@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { FARMER_PAGE_TABS } from "@/features/farmers/data";
+import { FARMER_PAGE_TABS } from "@/features/farmers";
 import { AssignmentsWorkspace } from "./components/AssignmentsWorkspace";
 
 export const metadata: Metadata = {

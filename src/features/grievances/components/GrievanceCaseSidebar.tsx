@@ -7,15 +7,15 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { FormField } from "@/components/ui/FormField";
 import { cn } from "@/lib/utils";
-import { FarmerAvatar } from "@/features/farmers/components/FarmerAvatar";
+import { FarmerAvatar } from "@/features/farmers";
 import { CASE_STATUSES, DEPARTMENTS, OFFICERS } from "../data";
 import type { GrievanceCase } from "../types";
 
 function Panel({ icon, title, action, children }: { icon: ReactNode; title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <section className="rounded-xl border border-[#E5E7EB] bg-white">
-      <header className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] px-4 py-3">
-        <div className="flex items-center gap-2 text-[15px] font-semibold text-[#1a2b3c]">
+    <section className="rounded-xl border border-line bg-white">
+      <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <div className="flex items-center gap-2 text-[15px] font-semibold text-ink">
           {icon}
           {title}
         </div>
@@ -38,14 +38,14 @@ function SlaTracker({ sla, pendingDeferral, onDefer }: SlaTrackerProps) {
   return (
     <Panel
       icon={
-        <svg className="h-4 w-4 text-[#DC2626]" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="h-4 w-4 text-danger" viewBox="0 0 24 24" fill="currentColor">
           <path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.96 8.96 0 0012 4a9 9 0 109 9c0-2.12-.74-4.07-1.97-5.61z" />
         </svg>
       }
       title="SLA Tracker"
       action={
         overdue && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-[#FECACA] bg-[#FEF2F2] px-2.5 py-0.5 text-[12px] font-semibold text-[#DC2626]">
+          <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-[12px] font-semibold text-danger">
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 5h2v6h-2V7zm0 8h2v2h-2v-2z" /></svg>
             Overdue
           </span>
@@ -53,23 +53,23 @@ function SlaTracker({ sla, pendingDeferral, onDefer }: SlaTrackerProps) {
       }
     >
       <div className="flex items-center justify-between text-[13px]">
-        <span className="text-[#64748b]">SLA Consumed</span>
-        <span className={cn("font-semibold", overdue ? "text-[#DC2626]" : "text-[#1a2b3c]")}>{sla.consumedPct}%</span>
+        <span className="text-muted">SLA Consumed</span>
+        <span className={cn("font-semibold", overdue ? "text-danger" : "text-ink")}>{sla.consumedPct}%</span>
       </div>
-      <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#F1F5F9]">
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[#F97316] to-[#DC2626]"
+          className="h-full rounded-full bg-gradient-to-r from-orange-500 to-danger"
           style={{ width: `${Math.min(sla.consumedPct, 100)}%` }}
         />
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-        <div className="rounded-lg bg-[#F8FAFC] px-3 py-2.5">
-          <p className="text-[12px] text-[#64748b]">Submitted</p>
-          <p className="mt-0.5 text-[13.5px] font-semibold text-[#1a2b3c]">{sla.submittedOn}</p>
+        <div className="rounded-lg bg-surface px-3 py-2.5">
+          <p className="text-[12px] text-muted">Submitted</p>
+          <p className="mt-0.5 text-[13.5px] font-semibold text-ink">{sla.submittedOn}</p>
         </div>
-        <div className="rounded-lg bg-[#FEF2F2] px-3 py-2.5">
-          <p className="text-[12px] text-[#EF4444]">Due Date</p>
-          <p className="mt-0.5 text-[13.5px] font-semibold text-[#DC2626]">{sla.dueOn}</p>
+        <div className="rounded-lg bg-red-50 px-3 py-2.5">
+          <p className="text-[12px] text-red-500">Due Date</p>
+          <p className="mt-0.5 text-[13.5px] font-semibold text-danger">{sla.dueOn}</p>
         </div>
       </div>
       {pendingDeferral ? (
@@ -101,7 +101,7 @@ function CaseManagement({ onSaved }: { onSaved: (summary: string) => void }) {
 
   return (
     <Panel
-      icon={<svg className="h-4 w-4 text-[#4F46E5]" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4" /><path d="M4 20a8 8 0 0116 0z" /></svg>}
+      icon={<svg className="h-4 w-4 text-indigo-600" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4" /><path d="M4 20a8 8 0 0116 0z" /></svg>}
       title="Case Management"
     >
       <div className="flex flex-col gap-4">
@@ -114,7 +114,7 @@ function CaseManagement({ onSaved }: { onSaved: (summary: string) => void }) {
         <FormField label="Department" htmlFor="caseDepartment">
           <Dropdown id="caseDepartment" value={department} onChange={setDepartment} options={DEPARTMENTS} placeholder="Select Department" align="right" />
         </FormField>
-        <label className="flex cursor-pointer items-center gap-3 text-[14px] text-[#1a2b3c]">
+        <label className="flex cursor-pointer items-center gap-3 text-[14px] text-ink">
           <Checkbox checked={escalated} onChange={(e) => setEscalated(e.target.checked)} />
           Escalated
         </label>
@@ -130,7 +130,7 @@ function CaseManagement({ onSaved }: { onSaved: (summary: string) => void }) {
 }
 
 const DetailIcon = ({ d }: { d: string }) => (
-  <svg className="h-3.5 w-3.5 text-[#94A3B8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+  <svg className="h-3.5 w-3.5 text-subtle" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <path d={d} />
   </svg>
 );
@@ -148,27 +148,27 @@ function SubmitterDetails({ data }: { data: GrievanceCase }) {
 
   return (
     <Panel
-      icon={<svg className="h-4 w-4 text-[#4F46E5]" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4" /><path d="M4 20a8 8 0 0116 0z" /></svg>}
+      icon={<svg className="h-4 w-4 text-indigo-600" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4" /><path d="M4 20a8 8 0 0116 0z" /></svg>}
       title="Submitter Details"
     >
       <div className="flex items-center gap-3">
-        <span className="rounded-full p-0.5 ring-2 ring-[#E5E7EB]">
+        <span className="rounded-full p-0.5 ring-2 ring-line">
           <FarmerAvatar name={submitter.name} avatar={submitter.avatar} size="lg" className="h-14 w-14" />
         </span>
         <div className="min-w-0">
-          <p className="truncate text-[16px] font-semibold text-[#1a2b3c]">{submitter.name}</p>
-          <p className="text-[13px] text-[#64748b]">{submitter.kind}</p>
-          <span className="mt-1 inline-block rounded-md bg-[#EEF2FF] px-2 py-0.5 text-[12px] font-semibold text-[#4F46E5]">{submitter.faydaId}</span>
+          <p className="truncate text-[16px] font-semibold text-ink">{submitter.name}</p>
+          <p className="text-[13px] text-muted">{submitter.kind}</p>
+          <span className="mt-1 inline-block rounded-md bg-indigo-50 px-2 py-0.5 text-[12px] font-semibold text-indigo-600">{submitter.faydaId}</span>
         </div>
       </div>
       <dl className="mt-4 flex flex-col gap-3">
         {rows.map((row) => (
           <div key={row.label}>
-            <dt className="flex items-center gap-1.5 text-[11.5px] text-[#94A3B8]">
+            <dt className="flex items-center gap-1.5 text-[11.5px] text-subtle">
               <DetailIcon d={row.icon} />
               {row.label}
             </dt>
-            <dd className="mt-0.5 pl-5 text-[13.5px] text-[#1a2b3c]">{row.value}</dd>
+            <dd className="mt-0.5 pl-5 text-[13.5px] text-ink">{row.value}</dd>
           </div>
         ))}
       </dl>
@@ -178,21 +178,21 @@ function SubmitterDetails({ data }: { data: GrievanceCase }) {
 
 function ThreadSummary({ deptResponses, internalNotes, attachments }: { deptResponses: number; internalNotes: number; attachments: number }) {
   const rows = [
-    { label: "Dept responses", value: deptResponses, tile: "bg-[#FFF1E6] text-[#EA580C]", icon: <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21h18v-2H3v2zM5 10h2v7H5v-7zm4 0h2v7H9v-7zm4 0h2v7h-2v-7zm4 0h2v7h-2v-7zM12 2L2 7v2h20V7L12 2z" /></svg> },
-    { label: "Internal notes", value: internalNotes, tile: "bg-[#E6F0FD] text-[#2563EB]", icon: <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M17.9 17.9A10 10 0 016.1 6.1M9.9 4.2A10 10 0 0121.8 12a10 10 0 01-1.5 2.5M3 3l18 18" /><path d="M9.9 9.9a3 3 0 004.2 4.2" /></svg> },
-    { label: "Attachments", value: attachments, tile: "bg-[#EEF2FF] text-[#4F46E5]", icon: <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21.4 11.05l-9.2 9.2a6 6 0 01-8.5-8.5l9.2-9.2a4 4 0 015.7 5.7l-9.2 9.2a2 2 0 01-2.8-2.8l8.5-8.5" /></svg> },
+    { label: "Dept responses", value: deptResponses, tile: "bg-orange-50 text-orange-600", icon: <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21h18v-2H3v2zM5 10h2v7H5v-7zm4 0h2v7H9v-7zm4 0h2v7h-2v-7zm4 0h2v7h-2v-7zM12 2L2 7v2h20V7L12 2z" /></svg> },
+    { label: "Internal notes", value: internalNotes, tile: "bg-info-tint text-blue-600", icon: <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M17.9 17.9A10 10 0 016.1 6.1M9.9 4.2A10 10 0 0121.8 12a10 10 0 01-1.5 2.5M3 3l18 18" /><path d="M9.9 9.9a3 3 0 004.2 4.2" /></svg> },
+    { label: "Attachments", value: attachments, tile: "bg-indigo-50 text-indigo-600", icon: <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21.4 11.05l-9.2 9.2a6 6 0 01-8.5-8.5l9.2-9.2a4 4 0 015.7 5.7l-9.2 9.2a2 2 0 01-2.8-2.8l8.5-8.5" /></svg> },
   ];
   return (
     <Panel
-      icon={<svg className="h-4 w-4 text-[#4F46E5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.5 1.5M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.5-1.5" /></svg>}
+      icon={<svg className="h-4 w-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.5 1.5M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.5-1.5" /></svg>}
       title="Thread Summary"
     >
-      <ul className="-mx-4 -my-4 divide-y divide-[#F1F3F4]">
+      <ul className="-mx-4 -my-4 divide-y divide-line-soft">
         {rows.map((row) => (
           <li key={row.label} className="flex items-center gap-3 px-4 py-3">
             <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", row.tile)}>{row.icon}</span>
-            <span className="flex-1 text-[13.5px] text-[#334155]">{row.label}</span>
-            <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F1F5F9] px-2 text-[12.5px] font-semibold text-[#334155]">{row.value}</span>
+            <span className="flex-1 text-[13.5px] text-slate-700">{row.label}</span>
+            <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-slate-100 px-2 text-[12.5px] font-semibold text-slate-700">{row.value}</span>
           </li>
         ))}
       </ul>

@@ -1,12 +1,14 @@
+"use client";
+
 import { DataTable, type Column } from "@/components/ui/DataTable";
-import { CROP_HISTORY } from "@/features/farmers/data";
-import { StatusPill } from "@/features/farmers/components/StatusPill";
+import { CROP_HISTORY } from "@/features/farmers";
+import { StatusPill } from "@/features/farmers";
 import { SectionCard } from "./SectionCard";
 
 type CropRow = (typeof CROP_HISTORY)[number];
 
 const COLUMNS: Column<CropRow>[] = [
-  { key: "season", header: "Season", cell: (row) => <span className="font-medium text-[#1a2b3c]">{row.season}</span> },
+  { key: "season", header: "Season", cell: (row) => <span className="font-medium text-ink">{row.season}</span> },
   { key: "crop", header: "Crop", cell: (row) => row.crop },
   { key: "yield", header: "Yield", cell: (row) => row.yield },
   { key: "status", header: "Status", align: "center", cell: (row) => <StatusPill status={row.status} /> },

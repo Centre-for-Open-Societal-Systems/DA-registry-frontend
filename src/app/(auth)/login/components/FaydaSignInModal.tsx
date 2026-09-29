@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { FormField } from "@/components/ui/FormField";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
-import { DEMO_ACCOUNTS, type DemoAccount } from "@/features/auth/accounts";
+import { DEMO_ACCOUNTS, type DemoAccount } from "@/features/auth";
 
 // No Fayda integration yet: the one demo DA is linked to this FIN and any 6-digit OTP is accepted.
 const DEMO_FIN = "351244987712";

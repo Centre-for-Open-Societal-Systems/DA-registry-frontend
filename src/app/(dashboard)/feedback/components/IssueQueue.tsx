@@ -145,21 +145,21 @@ export function IssueQueue() {
   };
 
   const columns: Column<QueueIssue>[] = [
-    { key: "ref", header: "Ref", cell: (i) => <span className="whitespace-nowrap font-mono text-[13px] font-medium text-[#1a2b3c]">{i.ref}</span> },
-    { key: "subject", header: "Subject", cell: (i) => <span className="block min-w-[200px] font-medium text-[#1a2b3c]">{i.subject}</span> },
+    { key: "ref", header: "Ref", cell: (i) => <span className="whitespace-nowrap font-mono text-[13px] font-medium text-ink">{i.ref}</span> },
+    { key: "subject", header: "Subject", cell: (i) => <span className="block min-w-[200px] font-medium text-ink">{i.subject}</span> },
     {
       key: "cat",
       header: (
         <span className="inline-flex items-center gap-1.5">
           <FilterDropdown label="Category" allLabel="All categories" options={categoryOptions} selected={filters.category} onApply={setFilter("category")} />
-          <span className="text-[#94A3B8]">/</span>
+          <span className="text-subtle">/</span>
           <FilterDropdown label="Severity" allLabel="All severities" options={severityOptions} selected={filters.severity} onApply={setFilter("severity")} />
         </span>
       ),
       cell: (i) => <div className="flex flex-col gap-1"><span className="text-[13px]">{i.category}</span><Pill tone={SEV_TONE[i.severity]}>{i.severity}</Pill></div> },
-    { key: "reporter", header: "Reporter", cell: (i) => <span>{i.reporter}<span className="block text-[12px] text-[#64748b]">{i.woreda}</span></span> },
-    { key: "assignee", header: <FilterDropdown label="Assignee" allLabel="All assignees" options={assigneeOptions} selected={filters.assignee} onApply={setFilter("assignee")} />, cell: (i) => (i.assignee === "Unassigned" ? <span className="text-[#DC2626]">Unassigned</span> : i.assignee) },
-    { key: "sla", header: "SLA", cell: (i) => (i.slaBreached ? <Pill tone="red" dot>Breached · {i.slaDue}</Pill> : <span className="text-[13px] text-[#4a5568]">{i.slaDue}</span>) },
+    { key: "reporter", header: "Reporter", cell: (i) => <span>{i.reporter}<span className="block text-[12px] text-muted">{i.woreda}</span></span> },
+    { key: "assignee", header: <FilterDropdown label="Assignee" allLabel="All assignees" options={assigneeOptions} selected={filters.assignee} onApply={setFilter("assignee")} />, cell: (i) => (i.assignee === "Unassigned" ? <span className="text-danger">Unassigned</span> : i.assignee) },
+    { key: "sla", header: "SLA", cell: (i) => (i.slaBreached ? <Pill tone="red" dot>Breached · {i.slaDue}</Pill> : <span className="text-[13px] text-ink-soft">{i.slaDue}</span>) },
     { key: "status", header: <FilterDropdown label="Status" allLabel="All Status" options={statusOptions} selected={filters.status} onApply={setFilter("status")} />, cell: (i) => <Pill tone={STATUS_TONE[i.status]} dot>{i.status}</Pill> },
     {
       key: "actions", header: "Actions", align: "center",
@@ -183,17 +183,17 @@ export function IssueQueue() {
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Open" value={String(stats.open)} accent="border-l-[#2563EB]" tile="bg-[#EFF6FF] text-[#2563EB]" icon={icon("M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z")} />
-        <StatCard label="Unassigned" value={String(stats.unassigned)} accent="border-l-[#D97706]" tile="bg-[#FFF7EB] text-[#D97706]" icon={icon("M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 11l-4 4M18 11l4 4")} />
-        <StatCard label="Breaching SLA" value={String(stats.breaching)} accent="border-l-[#DC2626]" tile="bg-[#FFF1F1] text-[#DC2626]" icon={icon("M12 8v4M12 16h.01M12 22a10 10 0 100-20 10 10 0 000 20z")} />
-        <StatCard label="Resolved (30d)" value={String(stats.resolved30)} accent="border-l-brand-green" tile="bg-[#E6F5F0] text-brand-green" icon={icon("M20 6L9 17l-5-5")} />
+        <StatCard label="Open" value={String(stats.open)} accent="border-l-blue-600" tile="bg-blue-50 text-blue-600" icon={icon("M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z")} />
+        <StatCard label="Unassigned" value={String(stats.unassigned)} accent="border-l-amber-600" tile="bg-warning-wash text-amber-600" icon={icon("M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 11l-4 4M18 11l4 4")} />
+        <StatCard label="Breaching SLA" value={String(stats.breaching)} accent="border-l-danger" tile="bg-danger-wash text-danger" icon={icon("M12 8v4M12 16h.01M12 22a10 10 0 100-20 10 10 0 000 20z")} />
+        <StatCard label="Resolved (30d)" value={String(stats.resolved30)} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M20 6L9 17l-5-5")} />
       </div>
 
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Issue queue — Bako Tibe</h2>
-            <p className="mt-0.5 text-[12.5px] text-[#4a5568]">Internal operational issues routed to you as the responsible Supervisor. Farmer grievances are triaged in the external Grievance Service, not here.</p>
+            <h2 className="text-[15px] font-semibold text-ink">Issue queue — Bako Tibe</h2>
+            <p className="mt-0.5 text-[12.5px] text-ink-soft">Internal operational issues routed to you as the responsible Supervisor. Farmer grievances are triaged in the external Grievance Service, not here.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
@@ -242,10 +242,10 @@ export function IssueQueue() {
             <FormField label={action.type === "assign" ? "Note (optional)" : action.type === "info" ? "What do you need from the reporter?" : action.type === "resolve" ? "Resolution note" : "Why is this being reopened?"} htmlFor="note" required={action.type !== "assign"} hint="Added to the audit history and sent to the reporter by app/SMS.">
               <Textarea id="note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} />
             </FormField>
-            <div className="rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-3">
-              <p className="text-[12px] font-semibold uppercase tracking-wider text-[#64748b]">History</p>
-              <ul className="mt-1.5 space-y-1 text-[12.5px] text-[#4a5568]">
-                {action.issue.history.map((h, i) => <li key={i}><span className="text-[#94A3B8]">{h.at}</span> — {h.text}</li>)}
+            <div className="rounded-lg border border-line bg-surface p-3">
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-muted">History</p>
+              <ul className="mt-1.5 space-y-1 text-[12.5px] text-ink-soft">
+                {action.issue.history.map((h) => <li key={`${h.at}-${h.text}`}><span className="text-subtle">{h.at}</span> — {h.text}</li>)}
               </ul>
             </div>
           </div>

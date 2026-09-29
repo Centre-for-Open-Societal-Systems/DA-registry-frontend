@@ -7,7 +7,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
-import { WOREDAS } from "@/features/agents/data";
+import { WOREDAS } from "@/features/agents";
 import { ROLE_LABELS, ROLES, type Role } from "@/lib/rbac";
 
 /** Everything the Add and Edit user forms capture (dates are display strings, e.g. "12 Mar 2019"; "—" = open-ended). */
@@ -46,8 +46,8 @@ const CONTROL = "h-9 border-zinc-200 text-[13.5px]";
 
 function Section({ title, children, first }: { title: string; children: ReactNode; first?: boolean }) {
   return (
-    <section className={cn("px-4 py-5 sm:px-6", !first && "border-t border-[#E5E7EB]")}>
-      <h3 className="text-[15px] font-semibold text-[#1a2b3c]">{title}</h3>
+    <section className={cn("px-4 py-5 sm:px-6", !first && "border-t border-line")}>
+      <h3 className="text-[15px] font-semibold text-ink">{title}</h3>
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
     </section>
   );

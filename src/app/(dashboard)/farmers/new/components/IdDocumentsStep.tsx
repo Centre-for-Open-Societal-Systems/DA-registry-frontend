@@ -69,8 +69,8 @@ export function IdDocumentsStep() {
             </svg>
           </span>
           <div className="flex flex-col">
-            <span className="font-semibold text-[#1a2b3c]">{doc.type}</span>
-            <span className="text-[12.5px] text-[#4a5568]">{doc.fileName}</span>
+            <span className="font-semibold text-ink">{doc.type}</span>
+            <span className="text-[12.5px] text-ink-soft">{doc.fileName}</span>
           </div>
         </div>
       ),
@@ -101,8 +101,8 @@ export function IdDocumentsStep() {
 
   return (
     <Card className="min-h-[480px] overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-      <div className="border-b border-[#E5E7EB] px-5 py-3.5">
-        <h2 className="text-[15px] font-semibold text-[#1a2b3c]">ID and documents</h2>
+      <div className="border-b border-line px-5 py-3.5">
+        <h2 className="text-[15px] font-semibold text-ink">ID and documents</h2>
       </div>
 
       <div className="px-5 py-5">
@@ -112,20 +112,20 @@ export function IdDocumentsStep() {
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           className={cn(
-            "mx-auto flex w-full max-w-[790px] flex-col items-center rounded-xl border-2 border-dashed bg-[#FAFBFC] px-6 py-7 text-center transition-colors",
-            isDragging ? "border-brand-green bg-[#E6F5F0]" : "border-[#D1D5DB]"
+            "mx-auto flex w-full max-w-[790px] flex-col items-center rounded-xl border-2 border-dashed bg-surface-alt px-6 py-7 text-center transition-colors",
+            isDragging ? "border-brand-green bg-brand-tint" : "border-gray-300"
           )}
         >
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#4a5568] shadow-sm">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-ink-soft shadow-sm">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
               <path d="M2 7a2 2 0 0 1 2-2h4l2 2h10a2 2 0 0 1 2 2v1H2Z" />
               <path d="M2 10h20l-1.5 8.5a2 2 0 0 1-2 1.5H5.5a2 2 0 0 1-2-1.5L2 10Z" />
             </svg>
           </div>
 
-          <p className="mt-5 text-[14px] font-medium text-[#1a2b3c]">Drag and drop files here</p>
-          <p className="mt-1 text-[14px] text-[#4a5568]">Or</p>
-          <p className="mt-1 text-[14px] font-medium text-[#1a2b3c]">Click Browse files to select a file</p>
+          <p className="mt-5 text-[14px] font-medium text-ink">Drag and drop files here</p>
+          <p className="mt-1 text-[14px] text-ink-soft">Or</p>
+          <p className="mt-1 text-[14px] font-medium text-ink">Click Browse files to select a file</p>
 
           <Button type="button" variant="brandOutline" size="md" onClick={() => inputRef.current?.click()} className="mt-4 gap-1.5">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">

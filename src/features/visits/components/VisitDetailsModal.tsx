@@ -1,10 +1,8 @@
-"use client";
-
 import Link from "next/link";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { getFarmer } from "@/features/farmers/data";
+import { getFarmer } from "@/features/farmers";
 import { VISIT_TIMELINE } from "../data";
 import type { VisitRecord } from "../types";
 import { VisitFarmerCard } from "./VisitFarmerCard";
@@ -56,17 +54,17 @@ export function VisitDetailsModal({ visit, onClose, onReschedule }: VisitDetails
       <div className="flex flex-col gap-4">
         <VisitFarmerCard visit={visit} phone={farmer?.phone} />
 
-        <div className="grid grid-cols-1 overflow-hidden rounded-lg border border-[#E5E7EB] md:grid-cols-2">
+        <div className="grid grid-cols-1 overflow-hidden rounded-lg border border-line md:grid-cols-2">
           {/* Visit information */}
-          <section className="border-b border-[#E5E7EB] md:border-b-0 md:border-r">
-            <h3 className="border-b border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-[14.5px] font-semibold text-[#1a2b3c]">
+          <section className="border-b border-line md:border-b-0 md:border-r">
+            <h3 className="border-b border-line bg-surface px-4 py-3 text-[14.5px] font-semibold text-ink">
               Visit Information
             </h3>
             <dl>
               {info.map((row) => (
-                <div key={row.label} className="flex items-center justify-between gap-4 border-b border-[#E5E7EB] px-4 py-3.5 last:border-0">
-                  <dt className={cn("text-[#475569]", row.small ? "text-[12.5px]" : "text-[14px]")}>{row.label}</dt>
-                  <dd className={cn("text-[14px] font-semibold", row.highlight ? "text-brand-green" : "text-[#1a2b3c]")}>{row.value}</dd>
+                <div key={row.label} className="flex items-center justify-between gap-4 border-b border-line px-4 py-3.5 last:border-0">
+                  <dt className={cn("text-slate-600", row.small ? "text-[12.5px]" : "text-[14px]")}>{row.label}</dt>
+                  <dd className={cn("text-[14px] font-semibold", row.highlight ? "text-brand-green" : "text-ink")}>{row.value}</dd>
                 </div>
               ))}
             </dl>
@@ -74,7 +72,7 @@ export function VisitDetailsModal({ visit, onClose, onReschedule }: VisitDetails
 
           {/* Status timeline */}
           <section>
-            <h3 className="border-b border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-[14.5px] font-semibold text-[#1a2b3c]">
+            <h3 className="border-b border-line bg-surface px-4 py-3 text-[14.5px] font-semibold text-ink">
               Status timeline
             </h3>
             <ol className="px-4 py-4">
@@ -85,16 +83,16 @@ export function VisitDetailsModal({ visit, onClose, onReschedule }: VisitDetails
                     <span
                       className={cn(
                         "absolute left-0 top-1.5 h-3 w-3 rounded-full border-2",
-                        entry.done ? "border-brand-green bg-brand-green" : "border-[#CBD5E1] bg-white",
+                        entry.done ? "border-brand-green bg-brand-green" : "border-slate-300 bg-white",
                       )}
                     />
-                    {!isLast && <span className="absolute bottom-0 left-[5px] top-[18px] w-px bg-[#E2E8F0]" />}
+                    {!isLast && <span className="absolute bottom-0 left-[5px] top-[18px] w-px bg-slate-200" />}
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className={cn("text-[14px]", entry.done ? "font-semibold text-[#1a2b3c]" : "text-[#475569]")}>{entry.label}</p>
-                        {entry.by && <p className="mt-0.5 text-[13px] text-[#64748b]">{entry.by}</p>}
+                        <p className={cn("text-[14px]", entry.done ? "font-semibold text-ink" : "text-slate-600")}>{entry.label}</p>
+                        {entry.by && <p className="mt-0.5 text-[13px] text-muted">{entry.by}</p>}
                       </div>
-                      <p className="shrink-0 text-[12.5px] text-[#64748b]">{entry.when}</p>
+                      <p className="shrink-0 text-[12.5px] text-muted">{entry.when}</p>
                     </div>
                   </li>
                 );

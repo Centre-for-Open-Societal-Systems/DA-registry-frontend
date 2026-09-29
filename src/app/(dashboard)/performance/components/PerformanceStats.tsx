@@ -1,7 +1,7 @@
 
 import type { ReactNode } from "react";
 import { StatCard } from "@/components/ui/StatCard";
-import { PERFORMANCE_STATS, type PerformanceStat } from "@/features/performance/data";
+import { PERFORMANCE_STATS, type PerformanceStat } from "@/features/performance";
 
 const ICONS: Record<PerformanceStat["icon"], ReactNode> = {
   calendar: (

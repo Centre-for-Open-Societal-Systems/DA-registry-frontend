@@ -12,12 +12,12 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-zinc-900 text-white hover:bg-zinc-700",
   secondary: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200",
-  outline: "border border-zinc-200 bg-white text-[#1a2b3c] hover:bg-zinc-50",
+  outline: "border border-zinc-200 bg-white text-ink hover:bg-zinc-50",
   ghost: "text-zinc-900 hover:bg-zinc-100",
   brand: "bg-brand-green font-semibold text-white hover:bg-brand-green-dark",
-  brandOutline: "border border-brand-green bg-white font-semibold text-brand-green hover:bg-[#F0FAF5]",
-  danger: "bg-[#DC2626] font-semibold text-white hover:bg-[#B91C1C]",
-  dangerOutline: "border border-[#DC2626] bg-white font-semibold text-[#DC2626] hover:bg-[#FFF1F1]",
+  brandOutline: "border border-brand-green bg-white font-semibold text-brand-green hover:bg-brand-wash",
+  danger: "bg-danger font-semibold text-white hover:bg-red-700",
+  dangerOutline: "border border-danger bg-white font-semibold text-danger hover:bg-danger-wash",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

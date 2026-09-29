@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { StatCard } from "@/components/ui/StatCard";
-import { PERFORMANCE_STATS, type PerformanceStat } from "@/features/performance/supervisorData";
+import { SUPERVISOR_PERFORMANCE_STATS, type SupervisorPerformanceStat } from "@/features/performance";
 
-const ICONS: Record<PerformanceStat["icon"], ReactNode> = {
+const ICONS: Record<SupervisorPerformanceStat["icon"], ReactNode> = {
   calendar: (
     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" />
@@ -33,7 +33,7 @@ const ICONS: Record<PerformanceStat["icon"], ReactNode> = {
 export function SupervisorPerformanceStats() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-      {PERFORMANCE_STATS.map((stat) => (
+      {SUPERVISOR_PERFORMANCE_STATS.map((stat) => (
         <StatCard
           key={stat.key}
           label={stat.label}

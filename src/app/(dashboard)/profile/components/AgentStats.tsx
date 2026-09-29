@@ -1,5 +1,5 @@
 import { StatCard } from "@/components/ui/StatCard";
-import { AGENT_STATS } from "@/features/farmers/agentProfile";
+import { AGENT_STATS } from "@/features/farmers";
 
 // Smaller round icon tiles than the default StatCard, per the profile mockup.
 const TILE = "h-10 w-10 rounded-full";
@@ -14,7 +14,7 @@ export function AgentStats() {
         value={s.yearsOfService}
         hint={s.serviceSince}
         accent="border-l-brand-green"
-        tile={`${TILE} bg-[#E6F5F0] text-brand-green`}
+        tile={`${TILE} bg-brand-tint text-brand-green`}
         icon={
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="9" />
@@ -26,8 +26,8 @@ export function AgentStats() {
         label="Kebeles assigned"
         value={String(s.kebelesAssigned)}
         hint={s.kebeles}
-        accent="border-l-[#2563EB]"
-        tile={`${TILE} bg-[#E6F0FD] text-[#2563EB]`}
+        accent="border-l-blue-600"
+        tile={`${TILE} bg-info-tint text-blue-600`}
         icon={
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 2l4 4-4 4-4-4 4-4z" />
@@ -39,8 +39,8 @@ export function AgentStats() {
         label="Certifications"
         value={String(s.certifications)}
         hint={`${s.certificationsPending} pending verification`}
-        accent="border-l-[#7C3AED]"
-        tile={`${TILE} bg-[#F3E8FF] text-[#7C3AED]`}
+        accent="border-l-violet-600"
+        tile={`${TILE} bg-purple-100 text-violet-600`}
         icon={
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
@@ -52,8 +52,8 @@ export function AgentStats() {
         label="Performance tier"
         value={s.performanceTier}
         hint={s.performanceNote}
-        accent="border-l-[#F59E0B]"
-        tile={`${TILE} bg-[#FEF3C7] text-[#D97706]`}
+        accent="border-l-amber-500"
+        tile={`${TILE} bg-amber-100 text-amber-600`}
         icon={
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z" />

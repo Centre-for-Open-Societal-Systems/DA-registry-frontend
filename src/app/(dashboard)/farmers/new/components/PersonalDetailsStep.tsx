@@ -2,13 +2,13 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { FormField } from "@/components/ui/FormField";
-import { ProfilePhotoUpload } from "@/features/farmers/components/ProfilePhotoUpload";
+import { ProfilePhotoUpload } from "@/features/farmers";
 
 export function PersonalDetailsStep() {
   return (
     <Card className="min-h-[480px] p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-      <div className="border-b border-[#E5E7EB] px-5 py-3.5">
-        <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Personal details</h2>
+      <div className="border-b border-line px-5 py-3.5">
+        <h2 className="text-[15px] font-semibold text-ink">Personal details</h2>
       </div>
 
       <form className="grid grid-cols-1 gap-8 px-5 py-5 lg:grid-cols-[250px_1fr]" onSubmit={(e) => e.preventDefault()}>

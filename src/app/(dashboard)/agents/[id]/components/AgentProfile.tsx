@@ -13,9 +13,10 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { StatCard } from "@/components/ui/StatCard";
 import { useAuthStore } from "@/store/useAuthStore";
-import { ACTIVE_TONE, APPROVAL_TONE, FAYDA_TONE, ONBOARDING_QUEUE, PUBLICATION_TONE, SYNC_EVENTS } from "@/features/agents/data";
-import type { Agent } from "@/features/agents/types";
+import { ACTIVE_TONE, APPROVAL_TONE, FAYDA_TONE, ONBOARDING_QUEUE, PUBLICATION_TONE, SYNC_EVENTS } from "@/features/agents";
+import type { Agent } from "@/features/agents";
 import { downloadCsv } from "@/lib/download";
+import { BackLink } from "@/components/ui/BackLink";
 
 type Tab = "overview" | "activity" | "documents" | "history";
 
@@ -47,8 +48,8 @@ const DOC_TONE = { Verified: "green", "Agrilearn-auto": "blue", "Pending verific
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div>
-      <dt className="text-[12px] font-medium uppercase tracking-wider text-[#64748b]">{label}</dt>
-      <dd className={mono ? "mt-1 font-mono text-[13.5px] text-[#1a2b3c]" : "mt-1 text-[14px] text-[#1a2b3c]"}>{value}</dd>
+      <dt className="text-[12px] font-medium uppercase tracking-wider text-muted">{label}</dt>
+      <dd className={mono ? "mt-1 font-mono text-[13.5px] text-ink" : "mt-1 text-[14px] text-ink"}>{value}</dd>
     </div>
   );
 }
@@ -67,10 +68,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <Link href="/agents" className="inline-flex w-fit items-center gap-2.5 text-[15px] font-medium text-[#1a2b3c] transition-colors hover:text-brand-green">
-        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-        Back to Agents
-      </Link>
+      <BackLink href="/agents" label="Back to Agents" />
 
       {/* Header */}
       <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
@@ -79,17 +77,17 @@ export function AgentProfile({ agent }: { agent: Agent }) {
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-green text-[20px] font-bold text-white">{initials}</div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-[20px] font-semibold tracking-tight text-[#1a2b3c] sm:text-[22px]">{agent.fullName}</h1>
+                <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">{agent.fullName}</h1>
                 <Pill tone={ACTIVE_TONE[agent.activeStatus]} dot>{agent.activeStatus}</Pill>
                 <Pill tone={FAYDA_TONE[agent.faydaStatus]}>Fayda {agent.faydaStatus}</Pill>
               </div>
-              <p className="mt-1 text-[13.5px] text-[#4a5568]">
+              <p className="mt-1 text-[13.5px] text-ink-soft">
                 <span className="font-mono">{agent.daId}</span> · {agent.specialisation} · {agent.kebele === "—" ? "Unassigned" : `${agent.kebele}, ${agent.woreda}`} · {agent.region}
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <button type="button" onClick={() => setCorrectionOpen(true)} className="inline-flex h-9 items-center whitespace-nowrap rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green transition-colors hover:bg-[#F0FAF5]">Suggest correction</button>
+            <button type="button" onClick={() => setCorrectionOpen(true)} className="inline-flex h-9 items-center whitespace-nowrap rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green transition-colors hover:bg-brand-wash">Suggest correction</button>
             {canInitiateLifecycle && (
               <span title="Available in Part 2 — DA lifecycle transitions (transfer, promotion, leave, retirement…).">
                 <button type="button" disabled aria-disabled="true" title="Available in Part 2" className="inline-flex h-9 cursor-not-allowed items-center gap-2 whitespace-nowrap rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white opacity-50">
@@ -102,10 +100,10 @@ export function AgentProfile({ agent }: { agent: Agent }) {
       </Card>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Linked farmers" value={agent.farmerCount.toLocaleString()} hint="From Farmer Registry" accent="border-l-brand-green" tile="bg-[#E6F5F0] text-brand-green" icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z" /></svg>} />
-        <StatCard label="Approval" value={agent.approvalStatus} accent="border-l-[#2563EB]" tile="bg-[#EFF6FF] text-[#2563EB]" icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" /></svg>} />
-        <StatCard label="MoA publication" value={agent.moaPublication} hint="Separate from approval" accent="border-l-[#D97706]" tile="bg-[#FFF7EB] text-[#D97706]" icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>} />
-        <StatCard label="In service since" value={agent.joinedAt.split(" ").slice(-1)[0]} hint={agent.joinedAt} accent="border-l-[#7C3AED]" tile="bg-[#F5F3FF] text-[#7C3AED]" icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>} />
+        <StatCard label="Linked farmers" value={agent.farmerCount.toLocaleString()} hint="From Farmer Registry" accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z" /></svg>} />
+        <StatCard label="Approval" value={agent.approvalStatus} accent="border-l-blue-600" tile="bg-blue-50 text-blue-600" icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" /></svg>} />
+        <StatCard label="MoA publication" value={agent.moaPublication} hint="Separate from approval" accent="border-l-amber-600" tile="bg-warning-wash text-amber-600" icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>} />
+        <StatCard label="In service since" value={agent.joinedAt.split(" ").slice(-1)[0]} hint={agent.joinedAt} accent="border-l-violet-600" tile="bg-violet-50 text-violet-600" icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>} />
       </div>
 
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
@@ -123,10 +121,10 @@ export function AgentProfile({ agent }: { agent: Agent }) {
               <Field label="Specialisation" value={agent.specialisation} />
               <Field label="Source" value={agent.source} />
             </dl>
-            <div className="rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-4">
-              <h3 className="text-[13.5px] font-semibold text-[#1a2b3c]">Kebele assignment</h3>
+            <div className="rounded-lg border border-line bg-surface p-4">
+              <h3 className="text-[13.5px] font-semibold text-ink">Kebele assignment</h3>
               {agent.kebele === "—" ? (
-                <p className="mt-2 text-[13.5px] text-[#4a5568]">Not assigned. <Link href="/assignments" className="font-semibold text-brand-green hover:underline">Assign a kebele</Link> once onboarding is approved.</p>
+                <p className="mt-2 text-[13.5px] text-ink-soft">Not assigned. <Link href="/assignments" className="font-semibold text-brand-green hover:underline">Assign a kebele</Link> once onboarding is approved.</p>
               ) : (
                 <dl className="mt-3 grid grid-cols-2 gap-3">
                   <Field label="Kebele" value={agent.kebele} />
@@ -144,52 +142,52 @@ export function AgentProfile({ agent }: { agent: Agent }) {
         )}
 
         {tab === "activity" && (
-          <ul className="divide-y divide-[#F1F3F4]">
+          <ul className="divide-y divide-line-soft">
             {ACTIVITY.map((a) => (
               <li key={a.at} className="flex gap-4 px-5 py-3.5">
-                <span className="w-40 shrink-0 text-[12.5px] text-[#64748b]">{a.at}</span>
-                <span className="text-[14px] text-[#1a2b3c]">{a.text}</span>
+                <span className="w-40 shrink-0 text-[12.5px] text-muted">{a.at}</span>
+                <span className="text-[14px] text-ink">{a.text}</span>
               </li>
             ))}
           </ul>
         )}
 
         {tab === "documents" && (
-          <ul className="divide-y divide-[#F1F3F4]">
+          <ul className="divide-y divide-line-soft">
             {DOCUMENTS.map((d) => (
               <li key={d.name} className="flex flex-col gap-2 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-[14px] font-medium text-[#1a2b3c]">{d.name}</p>
-                  <p className="text-[12.5px] text-[#64748b]">{d.date}</p>
+                  <p className="text-[14px] font-medium text-ink">{d.name}</p>
+                  <p className="text-[12.5px] text-muted">{d.date}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Pill tone={DOC_TONE[d.state]}>{d.state}</Pill>
-                  <button type="button" onClick={() => setViewDoc(d)} className="rounded-md border border-zinc-200 px-2.5 py-1 text-[12.5px] font-medium text-[#334155] hover:bg-zinc-50">View</button>
+                  <button type="button" onClick={() => setViewDoc(d)} className="rounded-md border border-zinc-200 px-2.5 py-1 text-[12.5px] font-medium text-slate-700 hover:bg-zinc-50">View</button>
                 </div>
               </li>
             ))}
-            <li className="px-5 py-3 text-[12.5px] text-[#64748b]">Agrilearn certificates sync automatically and are read-only. External uploads route to the Woreda officer for verification (FR-07b).</li>
+            <li className="px-5 py-3 text-[12.5px] text-muted">Agrilearn certificates sync automatically and are read-only. External uploads route to the Woreda officer for verification (FR-07b).</li>
           </ul>
         )}
 
         {tab === "history" && (
           <div className="p-5">
-            <h3 className="text-[13.5px] font-semibold text-[#1a2b3c]">Audit trail</h3>
-            <ol className="mt-3 space-y-3 border-l-2 border-[#E5E7EB] pl-4">
-              {(onboarding?.audit ?? [{ actor: "MoA sync", role: "System", action: "Record received and published", at: agent.joinedAt }]).map((e, i) => (
-                <li key={i} className="relative">
+            <h3 className="text-[13.5px] font-semibold text-ink">Audit trail</h3>
+            <ol className="mt-3 space-y-3 border-l-2 border-line pl-4">
+              {(onboarding?.audit ?? [{ actor: "MoA sync", role: "System", action: "Record received and published", at: agent.joinedAt }]).map((e) => (
+                <li key={`${e.at}-${e.actor}-${e.action}`} className="relative">
                   <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-brand-green" />
-                  <p className="text-[13.5px] text-[#1a2b3c]"><span className="font-semibold">{e.actor}</span> <span className="text-[#64748b]">({e.role})</span> — {e.action}</p>
-                  {e.note && <p className="text-[13px] italic text-[#4a5568]">“{e.note}”</p>}
-                  <p className="text-[12px] text-[#94A3B8]">{e.at}</p>
+                  <p className="text-[13.5px] text-ink"><span className="font-semibold">{e.actor}</span> <span className="text-muted">({e.role})</span> — {e.action}</p>
+                  {e.note && <p className="text-[13px] italic text-ink-soft">“{e.note}”</p>}
+                  <p className="text-[12px] text-subtle">{e.at}</p>
                 </li>
               ))}
             </ol>
             {syncEvents.length > 0 && (
               <>
-                <h3 className="mt-6 text-[13.5px] font-semibold text-[#1a2b3c]">Registry sync events</h3>
-                <ul className="mt-2 space-y-1.5 text-[13px] text-[#4a5568]">
-                  {syncEvents.map((s) => <li key={s.id}><span className="font-mono text-[12px]">{s.id}</span> · {s.direction} · {s.outcome} — {s.detail} <span className="text-[#94A3B8]">({s.at})</span></li>)}
+                <h3 className="mt-6 text-[13.5px] font-semibold text-ink">Registry sync events</h3>
+                <ul className="mt-2 space-y-1.5 text-[13px] text-ink-soft">
+                  {syncEvents.map((s) => <li key={s.id}><span className="font-mono text-[12px]">{s.id}</span> · {s.direction} · {s.outcome} — {s.detail} <span className="text-subtle">({s.at})</span></li>)}
                 </ul>
               </>
             )}
@@ -235,7 +233,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
             <Field label="Verification ID" value={viewDoc.verificationId} mono />
             <Field label="Status" value={viewDoc.date} />
           </dl>
-          <p className="mt-4 text-[12.5px] text-[#64748b]">
+          <p className="mt-4 text-[12.5px] text-muted">
             {viewDoc.state === "Agrilearn-auto"
               ? "Synced automatically from Agrilearn and read-only — corrections are made in Agrilearn."
               : viewDoc.state === "Verified"

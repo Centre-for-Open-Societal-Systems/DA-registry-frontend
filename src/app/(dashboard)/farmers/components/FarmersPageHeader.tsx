@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { PageTabs } from "@/components/ui/PageTabs";
-import { FARMER_PAGE_TABS, TOTAL_FARMERS } from "@/features/farmers/data";
+import { FARMER_PAGE_TABS, TOTAL_FARMERS } from "@/features/farmers";
 
 export function FarmersPageHeader() {
   return (
@@ -11,8 +11,8 @@ export function FarmersPageHeader() {
       {/* Title + actions */}
       <div className="flex flex-col gap-4 px-4 py-5 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-[20px] font-semibold tracking-tight text-[#1a2b3c] sm:text-[22px]">My Farmers</h1>
-          <p className="mt-1 text-[13.5px] text-[#4a5568]">
+          <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">My Farmers</h1>
+          <p className="mt-1 text-[13.5px] text-ink-soft">
             {TOTAL_FARMERS.toLocaleString()} farmers linked to you across your kebeles
           </p>
         </div>

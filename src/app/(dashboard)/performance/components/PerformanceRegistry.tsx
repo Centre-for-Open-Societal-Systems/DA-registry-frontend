@@ -28,7 +28,7 @@ import {
   PERFORMANCE_TIERS,
   type AgentPerformanceRow,
   type PerformanceTier,
-} from "@/features/performance/supervisorData";
+} from "@/features/performance";
 
 const SEARCH_PLACEHOLDER = searchPlaceholder(["Agent", "Kebele", "Tier", "Visits", "Quality score", "Training completion", "Status"]);
 
@@ -92,8 +92,8 @@ export function PerformanceRegistry({ tierFilter, onTierFilterChange }: Performa
       {/* Toolbar */}
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Agent performance registry</h2>
-          <p className="mt-0.5 text-[12.5px] text-[#4a5568]">Alphabetically sorted · Active woreda developmental field agents</p>
+          <h2 className="text-[15px] font-semibold text-ink">Agent performance registry</h2>
+          <p className="mt-0.5 text-[12.5px] text-ink-soft">Alphabetically sorted · Active woreda developmental field agents</p>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
@@ -113,7 +113,7 @@ export function PerformanceRegistry({ tierFilter, onTierFilterChange }: Performa
       </div>
 
       {tierFilter.size > 0 && (
-        <div className="mx-4 mb-3 flex flex-wrap items-center gap-2 text-[13px] text-[#4a5568]">
+        <div className="mx-4 mb-3 flex flex-wrap items-center gap-2 text-[13px] text-ink-soft">
           Showing tier{tierFilter.size > 1 ? "s" : ""}
           {[...tierFilter].map((code) => {
             const tier = tierOf(code);
@@ -131,7 +131,7 @@ export function PerformanceRegistry({ tierFilter, onTierFilterChange }: Performa
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1080px] border-collapse text-left">
           <thead>
-            <tr className="border-y border-[#E5E7EB] bg-[#F8FAFC] text-[13px] font-medium text-[#334155]">
+            <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
               <th className="whitespace-nowrap px-4 py-3 font-medium">
                 <FilterDropdown label="Agent" allLabel="All agents" options={PERFORMANCE_AGENT_OPTIONS} selected={filters.agent} onApply={setFilter("agent")} />
               </th>
@@ -150,7 +150,7 @@ export function PerformanceRegistry({ tierFilter, onTierFilterChange }: Performa
               <th className="px-4 py-3 text-center font-medium">Action</th>
             </tr>
           </thead>
-          <tbody className="text-[14px] text-[#334155]">
+          <tbody className="text-[14px] text-slate-700">
             {rows.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-6"><EmptyState title="No agents match the selected filters" hint="Clear a filter or try a different search." /></td>
@@ -159,8 +159,8 @@ export function PerformanceRegistry({ tierFilter, onTierFilterChange }: Performa
             {pageRows.map((r) => {
               const tier = tierOf(r.tier);
               return (
-                <tr key={r.id} className="border-b border-[#F1F3F4] transition-colors last:border-0 hover:bg-[#F8FAFC]">
-                  <td className="px-4 py-3.5 font-semibold text-[#334155]">{r.name}</td>
+                <tr key={r.id} className="border-b border-line-soft transition-colors last:border-0 hover:bg-surface">
+                  <td className="px-4 py-3.5 font-semibold text-slate-700">{r.name}</td>
                   <td className="px-4 py-3.5">{r.kebele}</td>
                   <td className="px-4 py-3.5">{tier && <Pill tone={TIER_TONE[tier.tone]}>{r.tier} · {tier.name}</Pill>}</td>
                   <td className="px-4 py-3.5">{r.visits}</td>
@@ -223,8 +223,8 @@ export function PerformanceRegistry({ tierFilter, onTierFilterChange }: Performa
                 ["Tier", viewingTier ? `${viewing.tier} · ${viewingTier.name}` : viewing.tier],
               ].map(([label, value]) => (
                 <div key={label}>
-                  <dt className="text-[12px] font-medium uppercase tracking-wider text-[#64748b]">{label}</dt>
-                  <dd className="mt-1 text-[14px] text-[#1a2b3c]">{value}</dd>
+                  <dt className="text-[12px] font-medium uppercase tracking-wider text-muted">{label}</dt>
+                  <dd className="mt-1 text-[14px] text-ink">{value}</dd>
                 </div>
               ))}
             </dl>
@@ -237,20 +237,20 @@ export function PerformanceRegistry({ tierFilter, onTierFilterChange }: Performa
               ].map((kpi) => (
                 <div key={kpi.label}>
                   <div className="flex items-center justify-between text-[13.5px]">
-                    <span className="font-medium text-[#1a2b3c]">{kpi.label}</span>
-                    <span className="font-semibold text-[#1a2b3c]">{kpi.value}</span>
+                    <span className="font-medium text-ink">{kpi.label}</span>
+                    <span className="font-semibold text-ink">{kpi.value}</span>
                   </div>
-                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#EEF2F5]">
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-line-soft">
                     <div className="h-full rounded-full bg-brand-green" style={{ width: `${kpi.pct}%` }} />
                   </div>
-                  {kpi.hint && <p className="mt-1 text-[12px] text-[#64748b]">{kpi.hint}</p>}
+                  {kpi.hint && <p className="mt-1 text-[12px] text-muted">{kpi.hint}</p>}
                 </div>
               ))}
             </div>
 
             {viewingTier && (
-              <p className="rounded-lg bg-[#F8FAFC] px-3 py-2.5 text-[12.5px] text-[#4a5568]">
-                <span className="font-semibold text-[#1a2b3c]">{viewing.tier} rule:</span> {viewingTier.rule}
+              <p className="rounded-lg bg-surface px-3 py-2.5 text-[12.5px] text-ink-soft">
+                <span className="font-semibold text-ink">{viewing.tier} rule:</span> {viewingTier.rule}
               </p>
             )}
           </div>

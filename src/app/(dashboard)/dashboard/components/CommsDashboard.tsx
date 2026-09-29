@@ -1,12 +1,10 @@
-"use client";
-
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Banner } from "@/components/ui/Banner";
 import { StatCard } from "@/components/ui/StatCard";
 import { Pill } from "@/components/ui/Pill";
 import { cn } from "@/lib/utils";
-import { ARTICLES, DISPATCHES, SIGNAL_TONE, SIGNALS } from "@/features/communication/data";
+import { ARTICLES, DISPATCHES, SIGNAL_TONE, SIGNALS } from "@/features/communication";
 import { DateRangeDropdown } from "./DateRangeDropdown";
 
 const icon = (d: string) => (
@@ -36,8 +34,8 @@ export function CommsDashboard() {
       {/* Header */}
       <Card className="relative z-50 flex w-full flex-col justify-between gap-4 px-4 py-5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] md:flex-row md:items-center">
         <div>
-          <h1 className="text-[20px] font-semibold tracking-tight text-[#1a2b3c] sm:text-[22px]">Broadcast &amp; Alerts</h1>
-          <p className="mt-1.5 text-[14px] text-[#4a5568]">
+          <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">Broadcast &amp; Alerts</h1>
+          <p className="mt-1.5 text-[14px] text-ink-soft">
             {newSignals.length} signal{newSignals.length === 1 ? "" : "s"} waiting to be dispatched · {DISPATCHES.length} sends in the last 30 days
           </p>
         </div>
@@ -51,34 +49,34 @@ export function CommsDashboard() {
 
       {/* Dispatch KPIs */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Signals to action" value={String(newSignals.length)} accent="border-l-[#EA580C]" tile="bg-[#FFF7EB] text-[#C2410C]" hint={`${SIGNALS.length} received in total`} icon={icon("M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0")} />
-        <StatCard label="Recipients reached" value={totals.delivered.toLocaleString()} accent="border-l-brand-green" tile="bg-[#E6F5F0] text-brand-green" hint={`${deliveryRate}% delivery rate`} icon={icon("M4 4h16v16H4zM4 7l8 6 8-6")} />
-        <StatCard label="Failed deliveries" value={String(totals.failed)} accent="border-l-[#DC2626]" tile="bg-[#FFF1F1] text-[#DC2626]" hint={`${totals.pending} still pending`} icon={icon("M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z")} />
-        <StatCard label="Knowledge articles" value={String(ARTICLES.length)} accent="border-l-[#2563EB]" tile="bg-[#EFF6FF] text-[#2563EB]" hint={`${ARTICLES.reduce((s, a) => s + a.sends, 0)} sends to date`} icon={icon("M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z")} />
+        <StatCard label="Signals to action" value={String(newSignals.length)} accent="border-l-orange-600" tile="bg-warning-wash text-orange-700" hint={`${SIGNALS.length} received in total`} icon={icon("M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0")} />
+        <StatCard label="Recipients reached" value={totals.delivered.toLocaleString()} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" hint={`${deliveryRate}% delivery rate`} icon={icon("M4 4h16v16H4zM4 7l8 6 8-6")} />
+        <StatCard label="Failed deliveries" value={String(totals.failed)} accent="border-l-danger" tile="bg-danger-wash text-danger" hint={`${totals.pending} still pending`} icon={icon("M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z")} />
+        <StatCard label="Knowledge articles" value={String(ARTICLES.length)} accent="border-l-blue-600" tile="bg-blue-50 text-blue-600" hint={`${ARTICLES.reduce((s, a) => s + a.sends, 0)} sends to date`} icon={icon("M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z")} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Incoming signals */}
         <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-          <div className="flex items-center justify-between border-b border-[#E5E7EB] px-5 py-3.5">
-            <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Incoming signals</h2>
+          <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+            <h2 className="text-[15px] font-semibold text-ink">Incoming signals</h2>
             <Link href="/alerts" className="text-[13px] font-semibold text-brand-green hover:underline">Open Alerts →</Link>
           </div>
-          <ul className="divide-y divide-[#F1F3F4]">
+          <ul className="divide-y divide-line-soft">
             {SIGNALS.map((s) => (
-              <li key={s.id} className="px-5 py-3.5 transition-colors hover:bg-[#F8FAFC]">
+              <li key={s.id} className="px-5 py-3.5 transition-colors hover:bg-surface">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-[14px] font-medium text-[#1a2b3c]">{s.title}</p>
-                    <p className="mt-1 text-[12.5px] leading-relaxed text-[#64748b]">{s.detail}</p>
-                    <p className="mt-1.5 text-[12px] text-[#94a3b8]">{s.receivedAt}</p>
+                    <p className="text-[14px] font-medium text-ink">{s.title}</p>
+                    <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{s.detail}</p>
+                    <p className="mt-1.5 text-[12px] text-subtle">{s.receivedAt}</p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1.5">
                     <Pill tone={SIGNAL_TONE[s.source]}>{s.source}</Pill>
                     <Pill tone={SEVERITY_TONE[s.severity]}>{s.severity}</Pill>
                   </div>
                 </div>
-                <p className={cn("mt-2 text-[12px] font-semibold", s.status === "New" ? "text-[#C2410C]" : "text-[#94a3b8]")}>{s.status}</p>
+                <p className={cn("mt-2 text-[12px] font-semibold", s.status === "New" ? "text-orange-700" : "text-subtle")}>{s.status}</p>
               </li>
             ))}
           </ul>
@@ -86,32 +84,32 @@ export function CommsDashboard() {
 
         {/* Recent dispatches */}
         <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-          <div className="flex items-center justify-between border-b border-[#E5E7EB] px-5 py-3.5">
-            <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Recent dispatches</h2>
+          <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+            <h2 className="text-[15px] font-semibold text-ink">Recent dispatches</h2>
             <Link href="/broadcast" className="text-[13px] font-semibold text-brand-green hover:underline">Open Broadcast →</Link>
           </div>
-          <ul className="divide-y divide-[#F1F3F4]">
+          <ul className="divide-y divide-line-soft">
             {DISPATCHES.map((d) => {
               const pct = Math.round((d.delivery.delivered / d.recipients) * 100);
               return (
-                <li key={d.id} className="px-5 py-3.5 transition-colors hover:bg-[#F8FAFC]">
+                <li key={d.id} className="px-5 py-3.5 transition-colors hover:bg-surface">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="line-clamp-2 text-[13.5px] text-[#1a2b3c]">{d.message}</p>
-                      <p className="mt-1.5 text-[12.5px] text-[#64748b]">
+                      <p className="line-clamp-2 text-[13.5px] text-ink">{d.message}</p>
+                      <p className="mt-1.5 text-[12.5px] text-muted">
                         {d.audience} · {d.channels.join(" + ")} · {d.recipients.toLocaleString()} recipients
                       </p>
-                      <p className="mt-1 text-[12px] text-[#94a3b8]">{d.dispatchedBy} · {d.dispatchedAt}</p>
+                      <p className="mt-1 text-[12px] text-subtle">{d.dispatchedBy} · {d.dispatchedAt}</p>
                     </div>
                     <Pill tone={SIGNAL_TONE[d.source]} className="shrink-0">{d.source}</Pill>
                   </div>
 
                   <div className="mt-2.5 flex items-center gap-3">
-                    <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E2E8F0]">
-                      <span className={cn("block h-full rounded-full", pct >= 95 ? "bg-brand-green" : pct >= 85 ? "bg-[#EA580C]" : "bg-[#DC2626]")} style={{ width: `${pct}%` }} />
+                    <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
+                      <span className={cn("block h-full rounded-full", pct >= 95 ? "bg-brand-green" : pct >= 85 ? "bg-orange-600" : "bg-danger")} style={{ width: `${pct}%` }} />
                     </span>
-                    <span className="shrink-0 text-[12.5px] text-[#64748b]">
-                      <strong className="font-semibold text-[#1a2b3c]">{pct}%</strong> delivered · {d.delivery.failed} failed{d.delivery.pending > 0 ? ` · ${d.delivery.pending} pending` : ""}
+                    <span className="shrink-0 text-[12.5px] text-muted">
+                      <strong className="font-semibold text-ink">{pct}%</strong> delivered · {d.delivery.failed} failed{d.delivery.pending > 0 ? ` · ${d.delivery.pending} pending` : ""}
                     </span>
                   </div>
                 </li>
@@ -123,20 +121,20 @@ export function CommsDashboard() {
 
       {/* Knowledge library reach */}
       <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-5 py-3.5">
-          <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Knowledge library — most sent</h2>
+        <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+          <h2 className="text-[15px] font-semibold text-ink">Knowledge library — most sent</h2>
           <Link href="/knowledge" className="text-[13px] font-semibold text-brand-green hover:underline">Open Knowledge Base →</Link>
         </div>
-        <ul className="divide-y divide-[#F1F3F4]">
+        <ul className="divide-y divide-line-soft">
           {[...ARTICLES].sort((a, b) => b.sends - a.sends).map((a) => (
-            <li key={a.id} className="flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-[#F8FAFC]">
+            <li key={a.id} className="flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-surface">
               <div className="min-w-0">
-                <p className="truncate text-[14px] font-medium text-[#1a2b3c]">{a.title}</p>
-                <p className="mt-0.5 text-[12.5px] text-[#64748b]">{a.category} · {a.author} · updated {a.updatedAt}</p>
+                <p className="truncate text-[14px] font-medium text-ink">{a.title}</p>
+                <p className="mt-0.5 text-[12.5px] text-muted">{a.category} · {a.author} · updated {a.updatedAt}</p>
               </div>
               <div className="flex shrink-0 items-center gap-3">
                 <Pill tone="slate">{a.languages.map((l) => l.toUpperCase()).join(" / ")}</Pill>
-                <span className="w-16 text-right text-[13px] text-[#4a5568]"><strong className="font-semibold text-[#1a2b3c]">{a.sends}</strong> sends</span>
+                <span className="w-16 text-right text-[13px] text-ink-soft"><strong className="font-semibold text-ink">{a.sends}</strong> sends</span>
               </div>
             </li>
           ))}

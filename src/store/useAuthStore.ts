@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Role } from "@/lib/rbac";
+import { clearAllDrafts } from "@/lib/drafts";
 
 export interface AuthUser {
   id: string;
@@ -33,7 +34,11 @@ export const useAuthStore = create<AuthState>()(
       hasHydrated: false,
       setUser: (user) => set({ user, isAuthenticated: true }),
       signIn: (user, role) => set({ user, role, isAuthenticated: true }),
-      logout: () => set({ user: null, isAuthenticated: false, role: DEFAULT_ROLE }),
+      logout: () => {
+        // Drafts hold farmer and visit personal data; none of it may outlive the session.
+        clearAllDrafts();
+        set({ user: null, isAuthenticated: false, role: DEFAULT_ROLE });
+      },
       setHasHydrated: (value) => set({ hasHydrated: value }),
     }),
     {

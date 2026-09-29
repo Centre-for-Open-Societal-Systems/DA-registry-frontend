@@ -11,9 +11,9 @@ export interface Certificate {
 }
 
 export const CERTIFICATE_BADGE: Record<CertificateStatus, { label: string; className: string }> = {
-  verified: { label: "Verified", className: "bg-[#E6F5F0] text-brand-green" },
-  auto: { label: "Agrilearn · Auto", className: "bg-[#E8F0FE] text-[#1D4ED8]" },
-  pending: { label: "Pending verification", className: "bg-[#FEF3C7] text-[#B45309]" },
+  verified: { label: "Verified", className: "bg-brand-tint text-brand-green" },
+  auto: { label: "Agrilearn · Auto", className: "bg-info-tint text-blue-700" },
+  pending: { label: "Pending verification", className: "bg-amber-100 text-amber-700" },
 };
 
 // Shared by the registration wizard (Step 4) and the agent's own profile until the qualifications API lands.

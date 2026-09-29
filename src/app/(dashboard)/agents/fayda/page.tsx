@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { ModuleStrip } from "@/features/agents/components/ModuleStrip";
+import { ModuleStrip } from "@/features/agents";
 import { FaydaVerification } from "./components/FaydaVerification";
 
 export const metadata: Metadata = {

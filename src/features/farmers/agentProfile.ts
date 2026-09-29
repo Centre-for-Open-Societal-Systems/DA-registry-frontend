@@ -44,8 +44,8 @@ export const LEAVE_YEAR = 2026;
 
 export const LEAVE_BALANCES: LeaveBalance[] = [
   { type: "Annual leave", entitlement: 20, used: 12, accent: "border-l-brand-green", bar: "bg-brand-green" },
-  { type: "Sick leave", entitlement: 15, used: 3, accent: "border-l-[#DC2626]", bar: "bg-[#C2410C]" },
-  { type: "Other / statutory", entitlement: 10, used: 0, accent: "border-l-[#2563EB]", bar: "bg-[#2563EB]" },
+  { type: "Sick leave", entitlement: 15, used: 3, accent: "border-l-danger", bar: "bg-orange-700" },
+  { type: "Other / statutory", entitlement: 10, used: 0, accent: "border-l-blue-600", bar: "bg-blue-600" },
 ];
 
 export type LeaveStatus = "Pending" | "Approved" | "Taken";

@@ -13,8 +13,8 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
-import { FAYDA_CHECKS, FAYDA_TONE } from "@/features/agents/data";
-import type { AuditEntry, FaydaCheck } from "@/features/agents/types";
+import { FAYDA_CHECKS, FAYDA_TONE } from "@/features/agents";
+import type { AuditEntry, FaydaCheck } from "@/features/agents";
 
 type Resolution = "Merge" | "Keep" | "Escalate";
 
@@ -91,20 +91,20 @@ export function FaydaVerification() {
   };
 
   const columns: Column<FaydaCheck>[] = [
-    { key: "daId", header: "DA-ID / ref", cell: (c) => <span className="font-mono text-[13px] font-medium text-[#1a2b3c]">{c.daId}</span> },
-    { key: "fayda", header: "Fayda ID", cell: (c) => <span className="whitespace-nowrap font-mono text-[13px] text-[#4a5568]">{c.faydaId}</span> },
+    { key: "daId", header: "DA-ID / ref", cell: (c) => <span className="font-mono text-[13px] font-medium text-ink">{c.daId}</span> },
+    { key: "fayda", header: "Fayda ID", cell: (c) => <span className="whitespace-nowrap font-mono text-[13px] text-ink-soft">{c.faydaId}</span> },
     { key: "reg", header: "Registry name", cell: (c) => c.registryName },
-    { key: "fname", header: "Fayda name", cell: (c) => <span className={c.faydaName !== "—" && c.faydaName !== c.registryName ? "font-medium text-[#DC2626]" : ""}>{c.faydaName}</span> },
-    { key: "dob", header: <FilterDropdown label="DOB" allLabel="All DOB checks" options={dobOptions} selected={filters.dob} onApply={setFilter("dob")} />, align: "center", cell: (c) => (c.result === "Pending" ? <span className="text-[#94A3B8]">—</span> : c.dobMatch ? <Pill tone="green">Match</Pill> : <Pill tone="red">Differs</Pill>) },
-    { key: "result", header: <FilterDropdown label="Result" allLabel="All results" options={resultOptions} selected={filters.result} onApply={setFilter("result")} />, cell: (c) => <div className="flex flex-col items-start gap-1"><Pill tone={FAYDA_TONE[c.result]} dot>{c.result}</Pill>{c.duplicateOf && <span className="text-[11.5px] text-[#DC2626]">Duplicate of {c.duplicateOf}</span>}</div> },
-    { key: "at", header: "Checked", cell: (c) => <span className="whitespace-nowrap text-[13px] text-[#64748b]">{c.checkedAt}</span> },
+    { key: "fname", header: "Fayda name", cell: (c) => <span className={c.faydaName !== "—" && c.faydaName !== c.registryName ? "font-medium text-danger" : ""}>{c.faydaName}</span> },
+    { key: "dob", header: <FilterDropdown label="DOB" allLabel="All DOB checks" options={dobOptions} selected={filters.dob} onApply={setFilter("dob")} />, align: "center", cell: (c) => (c.result === "Pending" ? <span className="text-subtle">—</span> : c.dobMatch ? <Pill tone="green">Match</Pill> : <Pill tone="red">Differs</Pill>) },
+    { key: "result", header: <FilterDropdown label="Result" allLabel="All results" options={resultOptions} selected={filters.result} onApply={setFilter("result")} />, cell: (c) => <div className="flex flex-col items-start gap-1"><Pill tone={FAYDA_TONE[c.result]} dot>{c.result}</Pill>{c.duplicateOf && <span className="text-[11.5px] text-danger">Duplicate of {c.duplicateOf}</span>}</div> },
+    { key: "at", header: "Checked", cell: (c) => <span className="whitespace-nowrap text-[13px] text-muted">{c.checkedAt}</span> },
     {
       key: "actions", header: "Actions", align: "center",
       cell: (c) => (
         <div className="flex items-center justify-center gap-1.5">
           {c.result === "Pending" && <RowAction icon="check" onClick={() => verify(c.daId)}>Verify</RowAction>}
           {c.result === "Mismatch" && <RowAction tone="solid" onClick={() => setSelected(c)}>Resolve</RowAction>}
-          {c.result === "Verified" && <span className="text-[12.5px] text-[#94A3B8]">—</span>}
+          {c.result === "Verified" && <span className="text-[12.5px] text-subtle">—</span>}
         </div>
       ),
     },
@@ -115,15 +115,15 @@ export function FaydaVerification() {
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-[15px] font-semibold text-[#1a2b3c]">Identity match queue</h2>
-            <p className="mt-0.5 text-[12.5px] text-[#4a5568]">Every DA record must be attributed to one verified Fayda identity — no duplicate or unverified registrations.</p>
+            <h2 className="text-[15px] font-semibold text-ink">Identity match queue</h2>
+            <p className="mt-0.5 text-[12.5px] text-ink-soft">Every DA record must be attributed to one verified Fayda identity — no duplicate or unverified registrations.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
 
             <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
 
-            <button type="button" onClick={() => { log("Bulk verification requested for all Pending records"); setNotice("Bulk verification requested for all Pending records."); }} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green hover:bg-[#F0FAF5]">Verify all pending</button>
+            <button type="button" onClick={() => { log("Bulk verification requested for all Pending records"); setNotice("Bulk verification requested for all Pending records."); }} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green hover:bg-brand-wash">Verify all pending</button>
           </div>
         </div>
         {notice && <Banner tone="success" className="mx-4 mb-3" onDismiss={() => setNotice(null)}>{notice}</Banner>}
@@ -153,12 +153,12 @@ export function FaydaVerification() {
       </Card>
 
       <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="border-b border-[#E5E7EB] px-4 py-4"><h2 className="text-[15px] font-semibold text-[#1a2b3c]">Audit trail</h2></div>
-        <ul className="divide-y divide-[#F1F3F4]">
-          {audit.map((a, i) => (
-            <li key={i} className="flex flex-col gap-0.5 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
-              <span className="w-40 shrink-0 text-[12.5px] text-[#64748b]">{a.at}</span>
-              <span className="text-[13.5px] text-[#1a2b3c]"><span className="font-semibold">{a.actor}</span> <span className="text-[#64748b]">({a.role})</span> — {a.action}</span>
+        <div className="border-b border-line px-4 py-4"><h2 className="text-[15px] font-semibold text-ink">Audit trail</h2></div>
+        <ul className="divide-y divide-line-soft">
+          {audit.map((a) => (
+            <li key={`${a.at}-${a.actor}-${a.action}`} className="flex flex-col gap-0.5 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
+              <span className="w-40 shrink-0 text-[12.5px] text-muted">{a.at}</span>
+              <span className="text-[13.5px] text-ink"><span className="font-semibold">{a.actor}</span> <span className="text-muted">({a.role})</span> — {a.action}</span>
             </li>
           ))}
         </ul>
@@ -173,16 +173,16 @@ export function FaydaVerification() {
             {selected.duplicateOf && <Button variant="brand" onClick={() => resolve(selected, "Merge")}>Merge into {selected.duplicateOf}</Button>}
           </>}
         >
-          <div className="grid grid-cols-2 gap-4 rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-4 text-[13.5px]">
-            <div><p className="text-[11.5px] font-semibold uppercase tracking-wider text-[#64748b]">Registry (import)</p><p className="mt-1 font-medium text-[#1a2b3c]">{selected.registryName}</p><p className="font-mono text-[12.5px] text-[#4a5568]">{selected.faydaId}</p></div>
-            <div><p className="text-[11.5px] font-semibold uppercase tracking-wider text-[#64748b]">Fayda (authority)</p><p className="mt-1 font-medium text-[#1a2b3c]">{selected.faydaName}</p><p className="text-[12.5px] text-[#DC2626]">Date of birth differs</p></div>
+          <div className="grid grid-cols-2 gap-4 rounded-lg border border-line bg-surface p-4 text-[13.5px]">
+            <div><p className="text-[11.5px] font-semibold uppercase tracking-wider text-muted">Registry (import)</p><p className="mt-1 font-medium text-ink">{selected.registryName}</p><p className="font-mono text-[12.5px] text-ink-soft">{selected.faydaId}</p></div>
+            <div><p className="text-[11.5px] font-semibold uppercase tracking-wider text-muted">Fayda (authority)</p><p className="mt-1 font-medium text-ink">{selected.faydaName}</p><p className="text-[12.5px] text-danger">Date of birth differs</p></div>
           </div>
-          <ul className="mt-4 space-y-1.5 text-[13px] text-[#4a5568]">
-            <li><span className="font-semibold text-[#1a2b3c]">Merge</span> — the proposal is a duplicate of an existing DA; keep the existing DA-ID and close this record.</li>
-            <li><span className="font-semibold text-[#1a2b3c]">Keep</span> — treat as a distinct person; the record remains flagged until Fayda confirms.</li>
-            <li><span className="font-semibold text-[#1a2b3c]">Escalate</span> — hand the evidence to the Fayda helpdesk; the record stays in Exception.</li>
+          <ul className="mt-4 space-y-1.5 text-[13px] text-ink-soft">
+            <li><span className="font-semibold text-ink">Merge</span> — the proposal is a duplicate of an existing DA; keep the existing DA-ID and close this record.</li>
+            <li><span className="font-semibold text-ink">Keep</span> — treat as a distinct person; the record remains flagged until Fayda confirms.</li>
+            <li><span className="font-semibold text-ink">Escalate</span> — hand the evidence to the Fayda helpdesk; the record stays in Exception.</li>
           </ul>
-          <p className="mt-3 text-[12.5px] text-[#64748b]">Fayda is the external identity authority — the registry never edits national identity data.</p>
+          <p className="mt-3 text-[12.5px] text-muted">Fayda is the external identity authority — the registry never edits national identity data.</p>
         </Modal>
       )}
     </>

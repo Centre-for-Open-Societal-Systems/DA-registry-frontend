@@ -1,5 +1,3 @@
-"use client";
-
 import type { FormEvent } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -54,7 +52,7 @@ export function AddDependentModal({ isOpen, onClose, onSubmit }: AddDependentMod
       }
     >
       <form id={FORM_ID} className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <p className="text-[13.5px] leading-snug text-[#4a5568]">
+        <p className="text-[13.5px] leading-snug text-ink-soft">
           New dependents are added here and routed to your Woreda Extension Officer for approval.
         </p>
 

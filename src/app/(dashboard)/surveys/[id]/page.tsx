@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSurveyTask } from "@/features/surveys/data";
+import { getSurveyTask } from "@/features/surveys";
 import { SurveyCapture } from "./components/SurveyCapture";
 
 export async function generateMetadata(props: PageProps<"/surveys/[id]">): Promise<Metadata> {

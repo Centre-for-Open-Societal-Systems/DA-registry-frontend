@@ -1,37 +1,32 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
-import { TopHeader } from "./TopHeader";
-import { SummarySection } from "./SummarySection";
-import { TodayPlanListSection } from "./TodayPlanListSection";
-import { QuickActionsSection } from "./QuickActionsSection";
-import { SupervisorDashboard } from "./SupervisorDashboard";
-import { ExecutiveDashboard } from "./ExecutiveDashboard";
-import { AdminDashboard } from "./AdminDashboard";
-import { CommsDashboard } from "./CommsDashboard";
+
+interface RoleDashboardProps {
+  supervisor: ReactNode;
+  executive: ReactNode;
+  admin: ReactNode;
+  comms: ReactNode;
+  /** DA — the field-agent home, and the fallback for any other role. */
+  agent: ReactNode;
+}
 
 // Role home varies (FSD §2.4): every role lands on the view built for its own job.
-export function RoleDashboard() {
+// The role lives in the client-side auth store, so only this switch runs on the client; the page renders each view.
+export function RoleDashboard({ supervisor, executive, admin, comms, agent }: RoleDashboardProps) {
   const role = useAuthStore((s) => s.role);
 
   switch (role) {
     case "Supervisor":
-      return <SupervisorDashboard />;
+      return supervisor;
     case "Executive":
-      return <ExecutiveDashboard />;
+      return executive;
     case "Admin":
-      return <AdminDashboard />;
+      return admin;
     case "CommsOfficer":
-      return <CommsDashboard />;
+      return comms;
     default:
-      // DA — the field-agent home.
-      return (
-        <div className="flex w-full flex-col gap-4">
-          <TopHeader />
-          <SummarySection />
-          <TodayPlanListSection />
-          <QuickActionsSection />
-        </div>
-      );
+      return agent;
   }
 }

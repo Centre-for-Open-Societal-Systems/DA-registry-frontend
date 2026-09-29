@@ -35,7 +35,7 @@ export function ConsentWithdrawalModal({ farmer, isOpen, onClose }: { farmer: Fa
       footer={done ? <Button variant="brand" onClick={close}>Done</Button> : (
         <>
           <Button variant="outline" onClick={close}>Keep consent</Button>
-          <Button className="bg-[#DC2626] text-white hover:bg-[#B91C1C]" onClick={() => setDone(true)}>Withdraw</Button>
+          <Button className="bg-danger text-white hover:bg-red-700" onClick={() => setDone(true)}>Withdraw</Button>
         </>
       )}
     >
@@ -49,20 +49,20 @@ export function ConsentWithdrawalModal({ farmer, isOpen, onClose }: { farmer: Fa
           <FormField label="Consent record" htmlFor="consent-id" required>
             <Select id="consent-id" value={consentId} onChange={(e) => setConsentId(e.target.value)}>{CONSENTS.map((c) => <option key={c.id} value={c.id}>{c.counterparty}</option>)}</Select>
           </FormField>
-          <div className="rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-3 text-[13px]">
-            <p className="text-[11.5px] font-semibold uppercase tracking-wider text-[#64748b]">Data categories shared</p>
+          <div className="rounded-lg border border-line bg-surface p-3 text-[13px]">
+            <p className="text-[11.5px] font-semibold uppercase tracking-wider text-muted">Data categories shared</p>
             <div className="mt-1.5 flex flex-wrap gap-1.5">{consent.categories.map((c) => <Pill key={c} tone="blue">{c}</Pill>)}</div>
-            <p className="mt-2 text-[#4a5568]">Valid until <span className="font-medium text-[#1a2b3c]">{consent.validTo}</span>{consent.openTx && <> · Open transaction: <span className="font-medium text-[#1a2b3c]">{consent.openTx}</span></>}</p>
+            <p className="mt-2 text-ink-soft">Valid until <span className="font-medium text-ink">{consent.validTo}</span>{consent.openTx && <> · Open transaction: <span className="font-medium text-ink">{consent.openTx}</span></>}</p>
           </div>
           <div>
-            <p className="text-[13.5px] font-semibold text-[#1a2b3c]">Withdrawing means:</p>
-            <ol className="mt-1.5 list-decimal space-y-1.5 pl-5 text-[13.5px] text-[#4a5568]">
+            <p className="text-[13.5px] font-semibold text-ink">Withdrawing means:</p>
+            <ol className="mt-1.5 list-decimal space-y-1.5 pl-5 text-[13.5px] text-ink-soft">
               <li>No further data is shared with {consent.counterparty} from the moment of withdrawal.</li>
-              <li>Data already shared remains with them under their own retention terms — <span className="font-semibold text-[#1a2b3c]">withdrawal is not deletion</span>.</li>
+              <li>Data already shared remains with them under their own retention terms — <span className="font-semibold text-ink">withdrawal is not deletion</span>.</li>
               <li>{consent.openTx ? <>The open transaction ({consent.openTx}) is marked withdrawn and cannot continue.</> : "Any open transaction depending on this consent is marked withdrawn and cannot continue."}</li>
               <li>A new consent must be captured before an equivalent transaction can be started again.</li>
             </ol>
-            <p className="mt-2 text-[12.5px] text-[#64748b]">Erasure requests are a separate right handled by the Farmer Registry, not by this application.</p>
+            <p className="mt-2 text-[12.5px] text-muted">Erasure requests are a separate right handled by the Farmer Registry, not by this application.</p>
           </div>
           <FormField label="Reason" htmlFor="consent-reason" required>
             <Select id="consent-reason" value={reason} onChange={(e) => setReason(e.target.value)}>{REASONS.map((r) => <option key={r}>{r}</option>)}</Select>

@@ -8,7 +8,7 @@ export function ExportButton({ label = "Export", onClick, disabled, className }:
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green transition-colors hover:bg-[#F0FAF5] disabled:cursor-not-allowed disabled:border-zinc-200 disabled:text-[#94A3B8] disabled:hover:bg-white",
+        "inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green transition-colors hover:bg-brand-wash disabled:cursor-not-allowed disabled:border-zinc-200 disabled:text-subtle disabled:hover:bg-white",
         className,
       )}
     >
