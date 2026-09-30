@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { Banner } from "@/components/ui/Banner";
@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/Select";
 import { FormField } from "@/components/ui/FormField";
 import { ProfilePhotoUpload } from "@/features/farmers";
 import { AGENT_PROFILE } from "@/features/farmers";
+import { cn } from "@/lib/utils";
 
 const [FIRST_NAME, ...REST] = AGENT_PROFILE.name.split(" ");
 
@@ -43,15 +44,6 @@ type EditableKey = (typeof EDITABLE)[number]["key"];
 
 const formatDate = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
-function ReadOnlyValue({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-[13px] text-muted">{label}</dt>
-      <dd className="mt-1 text-[14.5px] font-medium text-ink">{value || "—"}</dd>
-    </div>
-  );
-}
-
 // Identity fields are verified via Fayda and can't be edited here — shown greyed out.
 const LOCKED = "h-11 cursor-not-allowed border-zinc-200 bg-surface text-ink disabled:opacity-100";
 
@@ -64,14 +56,37 @@ function LockedField({ label, value, required }: { label: string; value: string;
   );
 }
 
+// Read-only view: the same field boxes as the form, filled and greyed, per the profile mockup.
+const READ = "flex h-11 items-center gap-2 rounded-md border border-zinc-200 bg-surface px-3 text-[14px] text-ink";
+
+const Chevron = () => (
+  <svg className="ml-auto h-4 w-4 shrink-0 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M6 9l6 6 6-6" />
+  </svg>
+);
+
+function ReadOnlyField({ label, required, children }: { label: string; required?: boolean; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <dt className="text-[14px] font-medium text-ink">
+        {label}
+        {required && <span className="ml-0.5 text-danger">*</span>}
+      </dt>
+      <dd>{children}</dd>
+    </div>
+  );
+}
+
 interface DemographicsSectionProps {
   editing: boolean;
+  /** Opens the edit form (read-only view only). */
+  onEdit?: () => void;
   onCancel: () => void;
   /** Called with the labels of the fields that changed. */
   onSubmit: (changed: string[]) => void;
 }
 
-export function DemographicsSection({ editing, onCancel, onSubmit }: DemographicsSectionProps) {
+export function DemographicsSection({ editing, onEdit, onCancel, onSubmit }: DemographicsSectionProps) {
   const p = CURRENT_PROFILE;
   const [error, setError] = useState<string | null>(null);
 
@@ -92,11 +107,18 @@ export function DemographicsSection({ editing, onCancel, onSubmit }: Demographic
   };
 
   const header = (
-    <div className="border-b border-line px-6 py-3.5">
-      <h2 className="text-[15px] font-semibold text-ink">Demographics &amp; personal details</h2>
-      <p className="mt-1 text-[12.5px] text-ink-soft">
-        {editing ? "Editing - changes are sent to your Woreda supervisor for approval" : "Your identity details"}
-      </p>
+    <div className="flex flex-col gap-3 border-b border-line px-6 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 className="text-[15px] font-semibold text-ink">Demographics &amp; personal details</h2>
+        <p className="mt-1 text-[12.5px] text-ink-soft">
+          {editing ? "Editing - changes are sent to your Woreda supervisor for approval" : "Your identity details"}
+        </p>
+      </div>
+      {!editing && onEdit && (
+        <Button type="button" variant="brand" size="md" className="w-fit" onClick={onEdit}>
+          Edit profile
+        </Button>
+      )}
     </div>
   );
 
@@ -155,27 +177,44 @@ export function DemographicsSection({ editing, onCancel, onSubmit }: Demographic
     );
   }
 
+  const [dialCode, ...number] = p.mobile.split(" ");
+
   return (
     <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
       {header}
-      <div className="grid animate-fade-in grid-cols-1 gap-6 px-5 py-5 lg:grid-cols-[215px_1fr] lg:gap-8">
+      <div className="grid animate-fade-in grid-cols-1 gap-6 px-6 py-5 lg:grid-cols-[215px_1fr] lg:gap-8">
         <div className="flex flex-col gap-2">
-          <span className="text-[13px] text-muted">Profile Photo</span>
-          <div className="h-24 w-24 overflow-hidden rounded-full bg-zinc-200">
-            <Image src={p.photo} alt={`${AGENT_PROFILE.name} profile photo`} width={96} height={96} className="h-full w-full object-cover" />
+          <span className="text-[14px] font-medium text-ink">Profile Photo</span>
+          <div className="flex flex-col items-center gap-3 rounded-lg border-2 border-dashed border-gray-300 px-4 py-6 text-center">
+            <div className="h-20 w-20 overflow-hidden rounded-full bg-zinc-200">
+              <Image src={p.photo} alt={`${AGENT_PROFILE.name} profile photo`} width={80} height={80} className="h-full w-full object-cover" />
+            </div>
+            <p className="text-[13px] text-muted">Change your photo from Edit profile. JPG or PNG up to 5MB.</p>
           </div>
         </div>
 
         <dl className="grid grid-cols-1 content-start gap-x-6 gap-y-5 md:grid-cols-2 xl:grid-cols-3">
-          <ReadOnlyValue label="First Name" value={p.firstName} />
-          <ReadOnlyValue label="Last Name" value={p.lastName} />
-          <ReadOnlyValue label="Mobile Phone" value={p.mobile} />
-          <ReadOnlyValue label="Email ID" value={p.email} />
-          <ReadOnlyValue label="Date of Birth" value={formatDate(p.dob)} />
-          <ReadOnlyValue label="Gender" value={GENDERS[p.gender]} />
-          <ReadOnlyValue label="ID Type" value={ID_TYPES[p.idType]} />
-          <ReadOnlyValue label="ID Number" value={p.idNumber} />
-          <ReadOnlyValue label="Language" value={LANGUAGES[p.language]} />
+          <ReadOnlyField label="First Name" required><div className={READ}>{p.firstName}</div></ReadOnlyField>
+          <ReadOnlyField label="Last Name" required><div className={READ}>{p.lastName}</div></ReadOnlyField>
+          <ReadOnlyField label="Mobile No." required>
+            <div className="flex gap-3">
+              <div className={cn(READ, "w-[84px] shrink-0")}>{dialCode}<Chevron /></div>
+              <div className={cn(READ, "min-w-0 flex-1")}>{number.join(" ")}</div>
+            </div>
+          </ReadOnlyField>
+          <ReadOnlyField label="Email ID" required><div className={cn(READ, "truncate")}>{p.email}</div></ReadOnlyField>
+          <ReadOnlyField label="Date of Birth" required>
+            <div className={READ}>
+              <svg className="h-4 w-4 shrink-0 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" />
+              </svg>
+              {formatDate(p.dob)}
+            </div>
+          </ReadOnlyField>
+          <ReadOnlyField label="Gender" required><div className={READ}>{GENDERS[p.gender]}<Chevron /></div></ReadOnlyField>
+          <ReadOnlyField label="ID Type"><div className={READ}>{ID_TYPES[p.idType]}</div></ReadOnlyField>
+          <ReadOnlyField label="ID Number"><div className={READ}>{p.idNumber}</div></ReadOnlyField>
+          <ReadOnlyField label="Language"><div className={READ}>{LANGUAGES[p.language]}<Chevron /></div></ReadOnlyField>
         </dl>
       </div>
     </Card>

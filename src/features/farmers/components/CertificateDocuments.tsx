@@ -4,6 +4,8 @@ import { useRef, useState, type ChangeEvent, type DragEvent, type RefObject } fr
 import { cn } from "@/lib/utils";
 import { CERTIFICATE_BADGE, certificateFromFile, type Certificate } from "../qualifications";
 
+const ACTION = "inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-[13px] font-semibold transition-colors";
+
 interface CertificateDocumentsProps {
   certificates: Certificate[];
   /** Called with the new pending records for every file dropped or browsed. */
@@ -48,7 +50,7 @@ export function CertificateDocuments({ certificates, onAdd, inputRef, className 
         {certificates.map((cert) => {
           const badge = CERTIFICATE_BADGE[cert.status];
           return (
-            <li key={cert.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-surface-alt px-3 py-3 last:border-b-0">
+            <li key={cert.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-white px-3 py-3 last:border-b-0">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-tint text-brand-green">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
@@ -67,18 +69,24 @@ export function CertificateDocuments({ certificates, onAdd, inputRef, className 
               </div>
 
               <div className="flex w-full items-center justify-between gap-3 pl-[52px] text-[13px] sm:w-auto sm:shrink-0 sm:flex-col sm:items-end sm:gap-1 sm:pl-0">
-                <span className="text-ink-soft">{cert.fileMeta ?? "—"}</span>
-                <div className="flex items-center gap-3 font-semibold">
+                <span className="text-[12px] text-muted">{cert.fileMeta ?? "—"}</span>
+                <div className="flex items-center gap-2">
                   <a
                     href={cert.url ?? "#"}
                     target={cert.url ? "_blank" : undefined}
                     rel="noreferrer"
                     onClick={(e) => { if (!cert.url) e.preventDefault(); }}
-                    className="text-brand-green hover:underline"
+                    className={cn(ACTION, "border-brand-border bg-brand-mint text-brand-green hover:bg-brand-tint")}
                   >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" />
+                    </svg>
                     View
                   </a>
-                  <button type="button" onClick={() => fileInput.current?.click()} className="text-ink-soft hover:text-ink">
+                  <button type="button" onClick={() => fileInput.current?.click()} className={cn(ACTION, "border-zinc-200 bg-white text-ink hover:bg-zinc-50")}>
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M21 12a9 9 0 11-3-6.7L21 8" /><path d="M21 3v5h-5" />
+                    </svg>
                     Replace
                   </button>
                 </div>

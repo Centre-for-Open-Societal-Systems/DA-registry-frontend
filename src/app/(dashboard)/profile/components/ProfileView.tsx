@@ -41,7 +41,7 @@ export function ProfileView() {
     <>
       <BackLink href="/dashboard" />
 
-      <AgentHeader pending={!!pending} onEdit={startEditing} />
+      <AgentHeader pending={!!pending} />
 
       {pending && (
         <Banner tone="success" title="Change submitted for approval" onDismiss={() => setPending(null)}>
@@ -50,7 +50,7 @@ export function ProfileView() {
       )}
 
       <AgentStats />
-      <DemographicsSection editing={false} onCancel={() => setEditing(false)} onSubmit={() => {}} />
+      <DemographicsSection editing={false} onEdit={startEditing} onCancel={() => setEditing(false)} onSubmit={() => {}} />
       <DependentsSection />
       <QualificationsSection />
       <LeaveSection />

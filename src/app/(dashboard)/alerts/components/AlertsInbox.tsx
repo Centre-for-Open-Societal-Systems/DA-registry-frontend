@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { Pill } from "@/components/ui/Pill";
 import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -35,11 +36,16 @@ export function AlertsInbox() {
   };
 
   return (
+    <>
+    <PageHeader
+      tabBar={<SegmentTabs<InboxTab> tabs={[{ key: "inbox", label: "Inbox", count: inbox.length }, { key: "handled", label: "Handled", count: handled.length }]} active={tab} onChange={setTab} />}
+      title="Alerts — inbox"
+      description="Inbound triage of knowledge snippets, emergency alerts, weather alerts (source only) and informational signals. Dismiss, or craft a response in Broadcast."
+    />
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_380px]">
       <div className="flex flex-col gap-4">
         {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
         <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-          <SegmentTabs<InboxTab> tabs={[{ key: "inbox", label: "Inbox", count: inbox.length }, { key: "handled", label: "Handled", count: handled.length }]} active={tab} onChange={setTab} />
           {list.length === 0 ? (
             <EmptyState title={tab === "inbox" ? "Inbox is clear" : "Nothing handled yet"} hint="Incoming knowledge, emergency, weather-source and informational signals land here." />
           ) : (
@@ -97,5 +103,6 @@ export function AlertsInbox() {
         )}
       </Card>
     </div>
+    </>
   );
 }

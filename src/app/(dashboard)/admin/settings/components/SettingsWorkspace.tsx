@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { Pill } from "@/components/ui/Pill";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
@@ -34,9 +35,13 @@ export function SettingsWorkspace() {
 
   return (
     <>
+      <PageHeader
+        tabBar={<SegmentTabs<Tab> tabs={[{ key: "sync", label: "Sync configuration" }, { key: "routing", label: "Routing" }, { key: "master", label: "Master data" }, { key: "audit", label: "Audit" }]} active={tab} onChange={setTab} />}
+        title="Settings"
+        description="Administrator configuration: MoA/Fayda sync, routing of proposals and issues, administrative master data, and the immutable audit log."
+      />
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        <SegmentTabs<Tab> tabs={[{ key: "sync", label: "Sync configuration" }, { key: "routing", label: "Routing" }, { key: "master", label: "Master data" }, { key: "audit", label: "Audit" }]} active={tab} onChange={setTab} />
 
         {tab === "sync" && (
           <div className="flex flex-col gap-5 p-5">

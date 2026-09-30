@@ -20,8 +20,8 @@ interface Dependent {
 
 const SAMPLE_DEPENDENTS: Dependent[] = [
   { id: "1", name: "Meselech Alemu", relationship: "Spouse", dateOfBirth: "1993-09-22", status: "Verified" },
-  { id: "2", name: "Yohannes Alemu", relationship: "Child", dateOfBirth: "2016-01-03", status: "Verified" },
-  { id: "3", name: "Hana Alemu", relationship: "Child", dateOfBirth: "2019-11-18", status: "Pending approval" },
+  { id: "2", name: "Yohannes Alemu", relationship: "Son", dateOfBirth: "2016-01-03", status: "Verified" },
+  { id: "3", name: "Hana Alemu", relationship: "Daughter", dateOfBirth: "2019-11-18", status: "Pending approval" },
 ];
 
 const STATUS_TONES: Record<DependentStatus, PillTone> = {
@@ -40,7 +40,7 @@ function formatDate(iso: string) {
 const COLUMNS: Column<Dependent>[] = [
   {
     key: "name",
-    header: "Name",
+    header: "Family Member Name",
     cell: (dep) => (
       <div className="flex items-center gap-2.5">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-[11px] font-semibold text-indigo-600">
@@ -71,11 +71,13 @@ export function DependentsSection() {
           <h2 className="text-[15px] font-semibold text-ink">Family members / dependents</h2>
           <p className="mt-1 text-[12.5px] text-ink-soft">Add or update dependents; new entries need approval</p>
         </div>
-        <Button type="button" variant="brand" size="md" onClick={() => setIsAdding(true)} className="w-fit shrink-0">
+        <Button type="button" variant="brandOutline" size="md" onClick={() => setIsAdding(true)} className="w-fit shrink-0">
           + Add dependent
         </Button>
       </div>
 
+      <div className="p-5">
+        <div className="overflow-hidden rounded-lg border border-line [&_thead_tr]:border-t-0">
       <DataTable
         columns={COLUMNS}
         rows={dependents}
@@ -85,6 +87,8 @@ export function DependentsSection() {
         emptyTitle="No dependents yet"
         emptyHint="Add a family member to start their approval."
       />
+        </div>
+      </div>
       <AddDependentModal isOpen={isAdding} onClose={() => setIsAdding(false)} onSubmit={handleAdd} />
     </Card>
   );

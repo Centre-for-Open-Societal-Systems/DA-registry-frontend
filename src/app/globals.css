@@ -49,6 +49,15 @@
   --color-success-ink: #0f5132;
   --color-info-tint: #e6f0fd;
   --color-violet-tint: #f1eafe;
+  /* Beneficiary segment cards (panel wash + left accent) */
+  --color-segment-green-wash: #e8f5e9;
+  --color-segment-green: #2e7d32;
+  --color-segment-blue-wash: #e3f2fd;
+  --color-segment-blue: #1565c0;
+  --color-segment-orange-wash: #fff3e0;
+  --color-segment-orange: #ef6c00;
+  --color-segment-purple-wash: #f3e5f5;
+  --color-segment-purple: #6a1b9a;
 
   /* Tailwind palette shades in use, pinned to their exact v3 hex (v4 defaults are OKLCH and render slightly differently). */
   --color-slate-100: #f1f5f9;

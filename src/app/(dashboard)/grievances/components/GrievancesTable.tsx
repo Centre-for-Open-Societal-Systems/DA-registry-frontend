@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { AdvancedFiltersButton } from "@/components/ui/AdvancedFiltersButton";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { RowAction } from "@/components/ui/RowAction";
 import { AdvancedFiltersDrawer, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
-import { cn } from "@/lib/utils";
 import {
   bucketOf,
   GRIEVANCE_CATEGORY_OPTIONS,
@@ -21,10 +22,14 @@ import { GrievancePriorityPill, GrievanceStatusPill } from "@/features/grievance
 import { GrievanceDetailModal } from "@/features/grievances";
 import type { Grievance } from "@/features/grievances";
 import { GrievanceStats, type StatKey } from "./GrievanceStats";
+import { RaiseGrievanceButton } from "./RaiseGrievanceButton";
+import { ServiceStatusBanner } from "./ServiceStatusBanner";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { TablePagination } from "@/components/ui/TablePagination";
 
 const SEARCH_PLACEHOLDER = searchPlaceholder(["Ticket ID", "Details", "Category", "Status", "Priority", "Submitted"]);
+
+type RaisedBy = "All" | "DA" | "Farmer";
 
 interface Filters extends FilterSelection {
   category: Set<string>;
@@ -40,7 +45,7 @@ export function GrievancesTable() {
   const [filters, setFilters] = useState<Filters>(EMPTY);
   const [query, setQuery] = useState("");
   // FR-12 raised-by filter: DA-originated vs farmer-originated (external service records both)
-  const [raisedBy, setRaisedBy] = useState<"All" | "DA" | "Farmer">("All");
+  const [raisedBy, setRaisedBy] = useState<RaisedBy>("All");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selected, setSelected] = useState<Grievance | null>(null);
   const [page, setPage] = useState(1);
@@ -67,11 +72,23 @@ export function GrievancesTable() {
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const start = rows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-  const end = Math.min(currentPage * pageSize, rows.length);
 
   return (
     <>
+      <PageHeader
+        tabBar={
+          <SegmentTabs<RaisedBy>
+            label="Raised by"
+            tabs={[{ key: "All", label: "All" }, { key: "DA", label: "Raised by DA" }, { key: "Farmer", label: "Raised by farmer" }]}
+            active={raisedBy}
+            onChange={(k) => { setRaisedBy(k); setPage(1); }}
+          />
+        }
+        title="Grievances"
+        description="Raise and track grievances for yourself or on behalf of a farmer. Triage and resolution happen in the external Grievance Service - this surface is read-only for case handling."
+        actions={<RaiseGrievanceButton className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md bg-brand-green px-5 text-[14px] font-semibold text-white transition-colors hover:bg-brand-green-dark" />}
+      />
+      <ServiceStatusBanner />
       <GrievanceStats
         active={bucket}
         onSelect={(key) => {
@@ -83,27 +100,12 @@ export function GrievancesTable() {
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
         {/* Toolbar */}
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <h2 className="text-[15px] font-semibold text-ink">Grievance Records</h2>
-            <span className="whitespace-nowrap rounded-full border border-line bg-surface px-3 py-0.5 text-[12.5px] text-ink-soft">
-              Showing {start}–{end} of {rows.length}
-            </span>
+          <div>
+            <h2 className="text-[16px] font-semibold text-ink">Grievance Records</h2>
+            <p className="mt-0.5 text-[13px] text-ink-soft">Track and manage all reported farmer grievances.</p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
-            {/* Segments fill the row on phones with short labels; full labels from sm up */}
-            <div role="group" aria-label="Raised by" className="flex h-9 items-center rounded-md border border-zinc-200 bg-surface p-0.5">
-              {(["All", "DA", "Farmer"] as const).map((k) => (
-                <button key={k} type="button" onClick={() => { setRaisedBy(k); setPage(1); }} className={cn("h-8 flex-1 whitespace-nowrap rounded px-3 text-[13px] font-medium transition-colors sm:flex-none", raisedBy === k ? "bg-white text-brand-green shadow-sm" : "text-ink-soft")}>
-                  {k === "All" ? "All" : (
-                    <>
-                      <span className="sm:hidden">{k === "DA" ? "By DA" : "By farmer"}</span>
-                      <span className="hidden sm:inline">{k === "DA" ? "Raised by DA" : "Raised by farmer"}</span>
-                    </>
-                  )}
-                </button>
-              ))}
-            </div>
             <SearchInput value={query} onChange={(value) => {
                 setQuery(value);
                 setPage(1);
@@ -119,10 +121,10 @@ export function GrievancesTable() {
             <colgroup>
               <col className="w-[180px]" />
               <col />
-              <col className="w-[110px]" />
-              <col className="w-[160px]" />
+              <col className="w-[120px]" />
               <col className="w-[110px]" />
               <col className="w-[135px]" />
+              <col className="w-[160px]" />
               <col className="w-[110px]" />
             </colgroup>
             <thead>
@@ -133,12 +135,12 @@ export function GrievancesTable() {
                   <FilterDropdown label="Category" allLabel="All categories" options={GRIEVANCE_CATEGORY_OPTIONS} selected={filters.category} onApply={setFilter("category")} />
                 </th>
                 <th className="px-4 py-3 font-medium">
-                  <FilterDropdown label="Status" allLabel="All statuses" options={GRIEVANCE_STATUS_OPTIONS} selected={filters.status} onApply={setFilter("status")} />
-                </th>
-                <th className="px-4 py-3 font-medium">
                   <FilterDropdown label="Priority" allLabel="All priorities" options={GRIEVANCE_PRIORITY_OPTIONS} selected={filters.priority} onApply={setFilter("priority")} />
                 </th>
                 <th className="px-4 py-3 font-medium">Submitted</th>
+                <th className="px-4 py-3 font-medium">
+                  <FilterDropdown label="Status" allLabel="All statuses" options={GRIEVANCE_STATUS_OPTIONS} selected={filters.status} onApply={setFilter("status")} />
+                </th>
                 <th className="px-4 py-3 text-center font-medium">Actions</th>
               </tr>
             </thead>
@@ -172,13 +174,13 @@ export function GrievancesTable() {
                     </p>
                   </td>
                   <td className="px-4 py-4 text-[13.5px]">{g.category}</td>
-                  <td className="px-4 py-4"><GrievanceStatusPill status={g.status} /></td>
                   <td className="px-4 py-4"><GrievancePriorityPill priority={g.priority} /></td>
                   <td className="whitespace-nowrap px-4 py-4 text-[13px] leading-snug text-slate-700">
                     {g.submittedAt.split(", ").slice(0, 2).join(", ")},
                     <br />
                     {g.submittedAt.split(", ")[2]}
                   </td>
+                  <td className="px-4 py-4"><GrievanceStatusPill status={g.status} /></td>
                   <td className="px-4 py-4 text-center">
                     <RowAction onClick={() => setSelected(g)} icon="view">View</RowAction>
                   </td>

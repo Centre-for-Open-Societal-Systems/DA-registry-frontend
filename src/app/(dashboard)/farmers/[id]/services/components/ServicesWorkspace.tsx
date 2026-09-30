@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { Pill } from "@/components/ui/Pill";
 import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { Banner } from "@/components/ui/Banner";
@@ -51,9 +52,13 @@ export function ServicesWorkspace({ farmer }: { farmer: Farmer }) {
 
   return (
     <>
+      <PageHeader
+        tabBar={<SegmentTabs<Tab> tabs={[{ key: "credit", label: "Credit" }, { key: "marketplace", label: "Marketplace" }]} active={tab} onChange={setTab} />}
+        title={`Services — ${farmer.name}`}
+        description="Credit and Marketplace are unrelated transactions with different counterparties and lifecycles, so they are kept on separate tabs."
+      />
       {notice && <Banner tone={notice.tone} onDismiss={() => setNotice(null)}>{notice.text}</Banner>}
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        <SegmentTabs<Tab> tabs={[{ key: "credit", label: "Credit" }, { key: "marketplace", label: "Marketplace" }]} active={tab} onChange={setTab} />
 
         {tab === "credit" && (
           <div className="flex flex-col gap-5 p-5">

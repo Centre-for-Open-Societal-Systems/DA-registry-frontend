@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Banner } from "@/components/ui/Banner";
 
-export const RELATIONSHIPS = ["Spouse", "Child", "Parent", "Sibling", "Other"];
+export const RELATIONSHIPS = ["Spouse", "Son", "Daughter", "Parent", "Sibling", "Other"];
 
 export interface NewDependent {
   name: string;

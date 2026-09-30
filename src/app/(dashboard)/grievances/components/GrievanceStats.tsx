@@ -9,12 +9,15 @@ export type StatKey = "All" | GrievanceBucket;
 interface StatDef {
   key: StatKey;
   tile: string;
+  /** Left accent bar, matching the tile colour. */
+  accent: string;
   icon: ReactNode;
 }
 
 const STATS: StatDef[] = [
   {
     key: "All",
+    accent: "border-l-blue-600",
     tile: "bg-info-tint text-blue-600",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -25,6 +28,7 @@ const STATS: StatDef[] = [
   },
   {
     key: "Pending",
+    accent: "border-l-orange-500",
     tile: "bg-orange-50 text-orange-600",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -34,6 +38,7 @@ const STATS: StatDef[] = [
   },
   {
     key: "In Progress",
+    accent: "border-l-blue-600",
     tile: "bg-info-tint text-blue-600",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
@@ -45,6 +50,7 @@ const STATS: StatDef[] = [
   },
   {
     key: "Under Review",
+    accent: "border-l-violet-600",
     tile: "bg-violet-tint text-violet-600",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -55,6 +61,7 @@ const STATS: StatDef[] = [
   },
   {
     key: "Resolved",
+    accent: "border-l-brand-green",
     tile: "bg-green-100 text-brand-green",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
@@ -64,6 +71,7 @@ const STATS: StatDef[] = [
   },
   {
     key: "Rejected",
+    accent: "border-l-danger",
     tile: "bg-danger-tint text-danger",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -89,8 +97,9 @@ export function GrievanceStats({ active, onSelect }: GrievanceStatsProps) {
           <button key={stat.key} type="button" onClick={() => onSelect(stat.key)} aria-pressed={isActive} className="text-left">
             <Card
               className={cn(
-                "group flex items-center justify-between gap-2 px-3 py-3.5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-md sm:px-4 sm:py-4",
-                isActive && "border-brand-green ring-1 ring-brand-green"
+                "group flex h-full items-center justify-between gap-2 border-l-4 px-3 py-3.5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-md sm:px-4 sm:py-4",
+                stat.accent,
+                isActive && "bg-surface ring-1 ring-brand-green"
               )}
             >
               <div className="min-w-0">

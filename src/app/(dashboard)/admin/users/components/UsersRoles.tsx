@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { AdvancedFiltersButton } from "@/components/ui/AdvancedFiltersButton";
 import { RowAction } from "@/components/ui/RowAction";
 import { DataTable, type Column } from "@/components/ui/DataTable";
@@ -128,25 +129,31 @@ export function UsersRoles() {
 
   return (
     <>
+      <PageHeader
+        tabBar={
+          <SegmentTabs<Tab>
+            tabs={[{ key: "users", label: "Users", count: users.length }, { key: "matrix", label: "RBAC matrix" }]}
+            active={tab}
+            onChange={setTab}
+          />
+        }
+        title="Users & Roles"
+        description="Cross-region administration of users, roles and Woreda/region scopes (Appendix B/D). Every assignment is audited."
+        actions={
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-brand-green-dark"
+        >
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Add user
+        </button>
+        }
+      />
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
       <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        <SegmentTabs<Tab>
-          tabs={[{ key: "users", label: "Users", count: users.length }, { key: "matrix", label: "RBAC matrix" }]}
-          active={tab}
-          onChange={setTab}
-          actions={
-            <button
-              type="button"
-              onClick={() => setAdding(true)}
-              className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-brand-green-dark"
-            >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-              Add user
-            </button>
-          }
-        />
         {tab === "users" ? (
           <>
             <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">

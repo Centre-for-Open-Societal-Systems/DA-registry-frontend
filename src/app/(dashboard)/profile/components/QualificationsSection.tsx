@@ -52,8 +52,8 @@ export function QualificationsSection() {
         </div>
 
         {/* Read-only learning summary mirrored from Agrilearn */}
-        <div className="flex flex-col gap-3 rounded-lg bg-blue-50 px-4 py-3.5 md:flex-row md:items-center">
-          <Pill tone="blue" className="w-fit shrink-0">Agrilearn</Pill>
+        <div className="flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3.5 md:flex-row md:items-center">
+          <Pill tone="blue" className="w-fit shrink-0 bg-white">Agrilearn</Pill>
           <div className="min-w-0 flex-1">
             <p className="text-[13.5px] font-semibold text-ink">
               Learning completion — {learning.completed} of {learning.assigned} assigned courses complete ·{" "}
@@ -63,7 +63,7 @@ export function QualificationsSection() {
           </div>
           <a
             href={learning.agrilearnUrl}
-            className="inline-flex shrink-0 items-center gap-1 text-[13px] font-semibold text-blue-700 hover:underline"
+            className="inline-flex h-9 w-fit shrink-0 items-center gap-1.5 rounded-md border border-blue-200 bg-white px-3 text-[13px] font-semibold text-blue-700 transition-colors hover:bg-blue-50"
           >
             View in Agrilearn
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

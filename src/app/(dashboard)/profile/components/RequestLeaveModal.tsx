@@ -53,7 +53,8 @@ export function RequestLeaveModal({ isOpen, onClose, onSubmit }: RequestLeaveMod
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (days === 0) return;
-    onSubmit({ type: leaveType, period: formatPeriod(from, to), days });
+    const reason = String(new FormData(e.currentTarget).get("reason") ?? "").trim();
+    onSubmit({ type: leaveType, period: formatPeriod(from, to), days, message: reason || undefined });
     onClose();
   };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { useAuthStore } from "@/store/useAuthStore";
 import { FeedbackWorkspace } from "./FeedbackWorkspace";
@@ -19,22 +19,17 @@ export function FeedbackTabs() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="flex flex-col gap-3 px-4 pt-5 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">Internal Feedback</h1>
-            <p className="mt-1 text-[13.5px] text-ink-soft">
-              Operational, equipment, payment/incentive, safety and data/system issues raised by DAs to their supervisor — distinct from farmer grievances and from performance feedback.
-            </p>
-          </div>
-        </div>
-        <SegmentTabs<Tab>
-          className="mt-3"
-          tabs={canRunQueue ? [{ key: "queue", label: "Issue queue" }, { key: "report", label: "Report an issue" }] : [{ key: "report", label: "Report an issue" }]}
-          active={active}
-          onChange={setTab}
-        />
-      </Card>
+      <PageHeader
+        tabBar={
+          <SegmentTabs<Tab>
+            tabs={canRunQueue ? [{ key: "queue", label: "Issue queue" }, { key: "report", label: "Report an issue" }] : [{ key: "report", label: "Report an issue" }]}
+            active={active}
+            onChange={setTab}
+          />
+        }
+        title="Internal Feedback"
+        description="Operational, equipment, payment/incentive, safety and data/system issues raised by DAs to their supervisor — distinct from farmer grievances and from performance feedback."
+      />
       {active === "report" ? <FeedbackWorkspace /> : <IssueQueue />}
     </div>
   );

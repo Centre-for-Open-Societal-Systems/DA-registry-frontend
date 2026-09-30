@@ -11,7 +11,7 @@ interface StatCardProps {
   /** Tailwind bg/text classes for the icon tile, e.g. "bg-brand-tint text-brand-green". */
   tile: string;
   /** Optional small line under the value, e.g. "Target: 10 visits". */
-  hint?: string;
+  hint?: ReactNode;
   /** Optional colour class for the value, defaults to the heading colour. */
   valueClassName?: string;
   className?: string;
@@ -25,7 +25,7 @@ export function StatCard({ label, value, icon, accent, tile, hint, valueClassNam
       <div className="min-w-0">
         <p className="text-[13.5px] text-ink-soft">{label}</p>
         <p className={cn("mt-1.5 text-[24px] font-semibold leading-none text-ink", valueClassName)}>{value}</p>
-        {hint && <p className="mt-1.5 text-[12px] text-muted">{hint}</p>}
+        {hint && <div className="mt-1.5 text-[12px] text-muted">{hint}</div>}
       </div>
       <div className={cn("flex h-14 w-14 shrink-0 items-center justify-center rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-y-1.5 group-hover:scale-[1.15] group-hover:shadow-sm", tile)}>{icon}</div>
     </Card>

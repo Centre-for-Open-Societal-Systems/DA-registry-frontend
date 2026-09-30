@@ -1,6 +1,5 @@
 import { Metadata } from "next";
-import { Card } from "@/components/ui/Card";
-import { PageTabs } from "@/components/ui/PageTabs";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { FARMER_PAGE_TABS } from "@/features/farmers";
 import { PlanVisitButton } from "@/features/farmers";
 import { VisitsStats } from "./components/VisitsStats";
@@ -14,19 +13,13 @@ export const metadata: Metadata = {
 export default function VisitsPage() {
   return (
     <div className="flex w-full flex-col gap-4">
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        <PageTabs tabs={FARMER_PAGE_TABS} activeHref="/visits" />
-        <div className="flex flex-col gap-4 px-4 py-5 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">Visits</h1>
-            <p className="mt-1 text-[13.5px] text-ink-soft">
-              Planned and completed field visits. Visits are planned from farmer availability the DA gathers offline - no
-              app-mandated routes.
-            </p>
-          </div>
-          <PlanVisitButton className="shrink-0" />
-        </div>
-      </Card>
+      <PageHeader
+        tabs={FARMER_PAGE_TABS}
+        activeHref="/visits"
+        title="Visits"
+        description="Planned and completed field visits. Visits are planned from farmer availability the DA gathers offline - no app-mandated routes."
+        actions={<PlanVisitButton className="shrink-0" />}
+      />
 
       <VisitsStats />
       <VisitsTable />

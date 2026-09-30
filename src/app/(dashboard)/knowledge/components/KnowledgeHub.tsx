@@ -44,41 +44,67 @@ export function KnowledgeHub() {
   return (
     <>
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => setCategory("")} className={cn("h-8 rounded-full border px-3 text-[13px] font-medium transition-colors", !category ? "border-brand-green bg-brand-wash text-brand-green" : "border-zinc-200 bg-white text-ink-soft hover:bg-zinc-50")}>All</button>
-            {ARTICLE_CATEGORIES.map((c) => (
-              <button key={c} type="button" onClick={() => setCategory(c === category ? "" : c)} className={cn("h-8 rounded-full border px-3 text-[13px] font-medium transition-colors", category === c ? "border-brand-green bg-brand-wash text-brand-green" : "border-zinc-200 bg-white text-ink-soft hover:bg-zinc-50")}>{c}</button>
+      <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+        {/* Category tabs, with search and Create snippet at the right end of the bar */}
+        <div className="flex flex-col gap-3 border-b border-line xl:flex-row xl:items-center xl:justify-between">
+          <div role="tablist" aria-label="Category" className="flex overflow-x-auto rounded-tl-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {["", ...ARTICLE_CATEGORIES].map((c) => {
+              const active = category === c;
+              return (
+                <button
+                  key={c || "all"}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setCategory(c)}
+                  className={cn(
+                    "shrink-0 whitespace-nowrap px-5 py-3.5 text-[14px] transition-colors",
+                    active ? "-mb-px border-b-2 border-brand-green bg-brand-wash font-semibold text-brand-green" : "text-ink-soft hover:bg-surface hover:text-ink",
+                  )}
+                >
+                  {c || "All"}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex flex-col gap-3 px-4 pb-3 sm:flex-row sm:items-center xl:pb-0 xl:pl-0">
+            <SearchInput value={query} onChange={setQuery} placeholder="Search by Articles…" className="sm:[&_input]:w-[190px]" />
+            {canCreate && (
+              <Button type="button" variant="brand" size="md" className="gap-2" onClick={() => setCreateOpen(true)}>
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                Create Snippet
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {visible.length === 0 ? (
+          <EmptyState title="No articles match" hint="Try another category or search term." />
+        ) : (
+          <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-2 xl:grid-cols-3">
+            {visible.map((a) => (
+              <Link
+                key={a.id}
+                href={`/knowledge/${a.id}`}
+                className="flex flex-col rounded-xl border border-line bg-white p-4 transition-all hover:border-brand-green/30 hover:shadow-md"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <Pill tone="green" className="font-semibold">{a.category}</Pill>
+                  <span className="text-[12px] text-muted">{a.languages.includes("am") ? "EN · አማ" : "EN"}</span>
+                </div>
+                <h3 className="mt-4 text-[18px] font-semibold leading-snug text-ink">{a.title}</h3>
+                <p className="mt-2 flex-1 text-[14px] leading-relaxed text-ink-soft">{a.summary}</p>
+                <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-3 text-[12.5px] text-muted">
+                  <span className="min-w-0">{a.author} • <span className="whitespace-nowrap">{a.updatedAt}</span></span>
+                  <span className="shrink-0 whitespace-nowrap font-semibold text-brand-green">{a.sends} sends</span>
+                </div>
+              </Link>
             ))}
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
-            <SearchInput value={query} onChange={setQuery} placeholder="Search articles…" />
-            {canCreate && <button type="button" onClick={() => setCreateOpen(true)} className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-brand-green-dark">Create snippet</button>}
-          </div>
-        </div>
+        )}
       </Card>
-
-      {visible.length === 0 ? (
-        <Card><EmptyState title="No articles match" hint="Try another category or search term." /></Card>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {visible.map((a) => (
-            <Link key={a.id} href={`/knowledge/${a.id}`} className="flex flex-col rounded-xl border border-line bg-white p-4 sm:p-5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] transition-all hover:border-brand-green/30 hover:shadow-sm">
-              <div className="flex items-center justify-between gap-2">
-                <Pill tone="green">{a.category}</Pill>
-                <span className="text-[12px] text-muted">{a.languages.includes("am") ? "EN · አማ" : "EN"}</span>
-              </div>
-              <h3 className="mt-3 text-[15.5px] font-semibold leading-snug text-ink">{a.title}</h3>
-              <p className="mt-1.5 flex-1 text-[13.5px] leading-relaxed text-ink-soft">{a.summary}</p>
-              <div className="mt-4 flex items-center justify-between gap-3 text-[12px] text-muted">
-                <span className="min-w-0">{a.author} · <span className="whitespace-nowrap">{a.updatedAt}</span></span>
-                <span className="shrink-0 whitespace-nowrap font-medium text-brand-green">{a.sends} sends</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
 
       <Modal isOpen={createOpen} onClose={() => setCreateOpen(false)} title="Create snippet" subtitle="A short, SMS-ready knowledge snippet farmers can act on" size="lg"
         footer={<><Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button><Button variant="brand" disabled={draft.title.trim().length < 3 || draft.snippet.trim().length < 10} onClick={create}>Create</Button></>}
