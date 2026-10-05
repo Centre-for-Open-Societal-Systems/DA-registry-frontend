@@ -67,7 +67,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Approvals", href: "/approvals", roles: ["Admin"], part: 1 },
       { title: "Registry Sync", href: "/registry-sync", roles: ["Admin"], part: 1 },
       { title: "Internal Feedback", href: "/feedback", roles: ["DA", "Supervisor", "Admin"], part: 1 },
-      { title: "Lifecycle", href: "/lifecycle", roles: ["Admin"], part: 2 },
     ],
   },
   {
@@ -76,7 +75,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Knowledge Base", href: "/knowledge", roles: ALL, part: 1 },
       { title: "Broadcast", href: "/broadcast", roles: ["CommsOfficer", "Admin"], part: 1 },
       { title: "Alerts", href: "/alerts", roles: ["CommsOfficer", "Admin", "Supervisor"], part: 1 },
-      { title: "Advisors", href: "/advisors", roles: ALL, part: 2 },
     ],
   },
   {
@@ -84,9 +82,6 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "My Performance", href: "/performance", roles: ["DA", "Supervisor"], part: 1 },
       { title: "Surveys", href: "/surveys", roles: ["DA", "Supervisor"], part: 1 },
-      { title: "KPIs", href: "/kpis", roles: OFFICERS, part: 2 },
-      { title: "Reviews", href: "/reviews", roles: OFFICERS, part: 2 },
-      { title: "Training", href: "/training", roles: ["DA", ...OFFICERS], part: 2 },
     ],
   },
   {
@@ -114,15 +109,15 @@ export function navForRole(role: Role): NavGroup[] {
 export const PAGE_TITLES: { prefix: string; title: string }[] = [
   { prefix: "/dashboard", title: "Dashboard" },
   { prefix: "/profile", title: "My Profile" },
-  { prefix: "/agents/daid", title: "DA-ID Management" },
-  { prefix: "/agents/fayda", title: "Fayda Verification" },
+  // DA-ID, Fayda and Registry sync are tabs of the Agents module, so the header keeps the parent title.
+  { prefix: "/agents/daid", title: "Agents" },
+  { prefix: "/agents/fayda", title: "Agents" },
   { prefix: "/agents/", title: "DA Profile" },
   { prefix: "/agents", title: "Agents" },
   { prefix: "/my-teams", title: "My Teams" },
   { prefix: "/approvals", title: "Approvals" },
-  { prefix: "/registry-sync", title: "Registry Sync" },
+  { prefix: "/registry-sync", title: "Agents" },
   { prefix: "/feedback", title: "Internal Feedback" },
-  { prefix: "/lifecycle", title: "Lifecycle" },
   { prefix: "/farmers/new", title: "Register Farmer" },
   { prefix: "/farmers/", title: "Farmer Profile" },
   { prefix: "/farmers", title: "My Farmers" },

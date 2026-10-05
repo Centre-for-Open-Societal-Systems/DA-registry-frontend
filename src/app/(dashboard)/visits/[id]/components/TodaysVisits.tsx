@@ -9,7 +9,7 @@ export function TodaysVisits({ visitId }: { visitId: string }) {
   const next = TODAYS_VISITS.find((v) => v.state !== "done");
 
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-hidden p-0 shadow-card">
       <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
         <div>
           <h3 className="text-[15px] font-semibold text-ink">Today&apos;s visits</h3>

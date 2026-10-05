@@ -1,17 +1,18 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { DATA_EXCEPTIONS, FAYDA_CHECKS, ISSUANCE_EVENTS, SYNC_EVENTS } from "../data";
+import { AGENTS, DATA_EXCEPTIONS, FAYDA_CHECKS, ISSUANCE_EVENTS, SYNC_EVENTS, TOTAL_AGENTS } from "../data";
 
-// Appendix C.2: the Agents master view carries a module strip → DAID / Fayda / Registry Sync.
+// Appendix C.2: the Agents master view carries a module strip → Master registry / DAID / Fayda / Registry Sync.
 // Also rendered on those sub-screens so the strip doubles as their local navigation.
 export function ModuleStrip({ activeHref }: { activeHref?: string }) {
   const modules = [
+    { href: "/agents", title: "Agents", stat: `${TOTAL_AGENTS.toLocaleString()} agents · ${AGENTS.filter((a) => a.approvalStatus === "Awaiting review").length} awaiting review` },
     { href: "/agents/daid", title: "DA-ID management", stat: `${ISSUANCE_EVENTS.filter((e) => e.state !== "Generated").length} in pipeline · ${DATA_EXCEPTIONS.length} exceptions` },
     { href: "/agents/fayda", title: "Fayda verification", stat: `${FAYDA_CHECKS.filter((c) => c.result !== "Verified").length} awaiting resolution` },
     { href: "/registry-sync", title: "Registry sync", stat: `${SYNC_EVENTS.filter((e) => e.outcome === "Failed").length} failed · ${SYNC_EVENTS.filter((e) => e.outcome === "Pending").length} pending` },
   ];
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {modules.map((m) => {
         const active = m.href === activeHref;
         return (
@@ -19,7 +20,7 @@ export function ModuleStrip({ activeHref }: { activeHref?: string }) {
             key={m.href}
             href={m.href}
             className={cn(
-              "flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] transition-colors",
+              "flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 shadow-card transition-colors",
               active ? "border-brand-green bg-brand-wash" : "border-line hover:border-brand-green/60",
             )}
           >

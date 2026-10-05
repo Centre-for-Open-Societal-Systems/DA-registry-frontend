@@ -66,9 +66,9 @@ export function BroadcastWorkspace() {
   const audienceOptions = optionsOf(history.map((d) => d.audience), AUDIENCES.map((a) => a.value));
   const channelOptions = optionsOf(history.flatMap((d) => d.channels), CHANNELS);
   const filterFields: FilterFieldConfig[] = [
-    { key: "source", label: "Source", allLabel: "All sources", placeholder: "All sources", options: sourceOptions },
-    { key: "audience", label: "Audience", allLabel: "All audiences", placeholder: "All audiences", options: audienceOptions },
-    { key: "channel", label: "Channels", allLabel: "All channels", placeholder: "All channels", options: channelOptions },
+    { key: "source", label: "Source", allLabel: "All sources", placeholder: "All Sources", options: sourceOptions },
+    { key: "audience", label: "Audience", allLabel: "All audiences", placeholder: "All Audiences", options: audienceOptions },
+    { key: "channel", label: "Channels", allLabel: "All channels", placeholder: "All Channels", options: channelOptions },
   ];
 
   const historyRows = history.filter(
@@ -104,7 +104,7 @@ export function BroadcastWorkspace() {
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
       {signal && <Banner tone="info" title={`Crafting a response to signal ${signal.id}`}>{signal.title} — received {signal.receivedAt}.</Banner>}
 
-      <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="shadow-card">
         <h2 className="text-[15px] font-semibold text-ink">Compose</h2>
         {!canDispatch && <p className="mt-1 text-[12.5px] text-muted">Only a Communications Officer or Administrator can dispatch. You can preview.</p>}
         <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
@@ -140,7 +140,7 @@ export function BroadcastWorkspace() {
         </div>
       </Card>
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-[15px] font-semibold text-ink">Dispatch history</h2>

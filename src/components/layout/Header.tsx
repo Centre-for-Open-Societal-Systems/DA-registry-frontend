@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { cn } from "@/lib/utils";
 import { UserProfile } from "@/components/layout/UserProfile";
+import { LanguageSelector } from "@/components/layout/LanguageSelector";
 import { SearchModal } from "@/components/layout/SearchModal";
 import { NOTIFICATIONS, NotificationsPanel } from "@/components/layout/NotificationsPanel";
 import { pageTitleFor } from "@/lib/rbac";
@@ -31,7 +31,7 @@ export function Header() {
   }, []);
 
   return (
-    <header className="relative z-[60] flex h-[66px] items-center justify-between gap-3 border-b border-zinc-200 bg-white px-4 shadow-sm md:px-6 lg:px-8">
+    <header className="relative z-[60] flex h-16 items-center justify-between gap-3 bg-white px-4 shadow-md md:px-6">
       <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <button
           type="button"
@@ -39,20 +39,21 @@ export function Header() {
           onClick={() => (window.matchMedia("(min-width: 1024px)").matches ? toggle() : toggleMobile())}
           aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
           aria-expanded={isOpen}
-          className="-ml-2 flex h-10 w-10 flex-col items-start justify-center gap-[5px] rounded-lg px-2.5 text-ink transition-colors duration-200 hover:bg-slate-100 hover:text-brand-green active:scale-95"
+          className="-ml-2 flex h-10 w-10 flex-col items-start justify-center gap-[5px] rounded-lg px-2.5 text-ink transition-colors duration-200 hover:bg-brand-green-bright hover:text-white active:scale-95"
         >
           <span className="block h-[2px] w-5 rounded-full bg-current transition-all duration-300 ease-in-out" />
           <span className={cn("block h-[2px] rounded-full bg-current transition-all duration-300 ease-in-out", isOpen ? "w-5" : "w-3")} />
           <span className="block h-[2px] w-5 rounded-full bg-current transition-all duration-300 ease-in-out" />
         </button>
-        <span className="truncate text-[15px] font-medium text-ink">{pageTitle}</span>
+        <h2 className="truncate text-[18px] font-bold tracking-tight text-ink sm:text-[22px]">{pageTitle}</h2>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+      {/* Right section — laid out like the Grievance Management portal header */}
+      <div className="flex shrink-0 items-center gap-3 lg:gap-5">
         {/* Search */}
-        <div className="relative hidden lg:block cursor-text" onClick={() => setIsSearchOpen(true)}>
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <svg className="h-4 w-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="relative hidden w-80 cursor-text lg:block xl:w-[400px]" onClick={() => setIsSearchOpen(true)}>
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+            <svg className="h-4 w-4 text-subtle" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -60,7 +61,7 @@ export function Header() {
             type="text"
             readOnly
             placeholder="Search portal..."
-            className="pointer-events-none h-9 w-[220px] cursor-text rounded-lg border border-zinc-200 bg-surface pl-9 pr-4 text-sm text-ink-soft placeholder:text-muted focus:outline-none"
+            className="pointer-events-none block w-full cursor-text rounded-lg border border-transparent bg-slate-100 py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-500 focus:outline-none"
           />
         </div>
         
@@ -69,7 +70,7 @@ export function Header() {
           type="button"
           onClick={() => setIsSearchOpen(true)}
           aria-label="Search portal"
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface text-ink-soft transition-colors hover:bg-zinc-100 lg:hidden"
+          className="flex items-center justify-center text-slate-500 transition-colors hover:text-slate-700 lg:hidden"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -78,33 +79,18 @@ export function Header() {
 
         <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
-        {/* Device sync queue (FR-08) — pending count links to /sync */}
-        <Link
-          href="/sync"
-          aria-label="Sync queue — 5 items awaiting sync"
-          title="Sync queue"
-          className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-surface text-ink-soft transition-colors hover:bg-zinc-100"
-        >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
-          </svg>
-          <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-amber-600 text-[11px] font-bold text-white">5</span>
-        </Link>
-
         {/* Notifications */}
-        <button 
+        <button
+          type="button"
           onClick={() => setIsNotificationsOpen(true)}
-          aria-label="Notifications"
-          className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-surface text-ink-soft transition-colors hover:bg-zinc-100"
+          aria-label={unreadCount > 0 ? `Notifications — ${unreadCount} unread` : "Notifications"}
+          className="relative text-slate-500 transition-colors hover:text-slate-700 focus:outline-none lg:ml-2"
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          <svg className="h-[22px] w-[22px]" fill="currentColor" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path fill="none" d="M10.3 21a1.94 1.94 0 003.4 0" />
           </svg>
-          {unreadCount > 0 && (
-            <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-danger text-[11px] font-bold text-white">
-              {unreadCount}
-            </span>
-          )}
+          {unreadCount > 0 && <span className="absolute -right-0.5 -top-0.5 block h-2.5 w-2.5 rounded-full border-2 border-white bg-red-600" />}
         </button>
 
         <NotificationsPanel
@@ -114,6 +100,11 @@ export function Header() {
           onMarkRead={(id) => setNotifications((list) => list.map((n) => (n.id === id ? { ...n, isUnread: false } : n)))}
           onMarkAllRead={() => setNotifications((list) => list.map((n) => ({ ...n, isUnread: false })))}
         />
+
+        {/* Vertical divider */}
+        <div className="mx-1 hidden h-7 w-px bg-zinc-200 md:block" />
+
+        <LanguageSelector className="hidden md:block" />
 
         {/* User Profile */}
         <UserProfile />

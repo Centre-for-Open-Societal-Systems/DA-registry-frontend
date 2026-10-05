@@ -9,34 +9,43 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
-  --font-mono: var(--font-geist-mono);
   /* Colors: use these tokens (text-ink, bg-surface, border-line …), never raw hex in class names.
      A new color gets a token here first. */
 
-  /* Brand */
-  --color-brand-green: #037957;
-  --color-brand-green-dark: #026146;
-  --color-brand-green-bright: #0b7a57; /* sidebar gradient top */
-  --color-brand-green-deep: #05392a; /* sidebar gradient bottom, tooltips */
-  --color-sidebar-scrollbar: #012519; /* darker than the sidebar so the thumb stands out */
+  /* Brand — matches the Grievance Management portal so the OpenAgriNet apps share one look */
+  --color-brand-green: #16a34a;
+  --color-brand-green-dark: #10883c;
+  --color-brand-green-bright: #0b8535; /* active nav pill, accents */
+  --color-brand-green-deep: #0e3b25; /* sidebar, tooltips */
   --color-brand-gold: #e3b755;
-  --color-brand-wash: #f0faf5; /* selected rows, soft green panels */
-  --color-brand-mint: #ebfaf2;
-  --color-brand-tint: #e6f5f0; /* icon tiles, verified pills */
-  --color-brand-border-soft: #d5ede4;
-  --color-brand-border: #a7e3c7;
+  --color-brand-wash: #f0fdf4; /* selected rows, soft green panels */
+  --color-brand-mint: #ecfdf3;
+  --color-brand-tint: #e6f4ea; /* icon tiles, verified pills */
+  --color-brand-border-soft: #dcfce7;
+  --color-brand-border: #99e8b5;
+
+  /* Sidebar */
+  --color-sidebar-line: #184d31;
+  --color-sidebar-hover: #144f33;
+  --color-sidebar-text: #a3cca8;
+  --color-sidebar-subtext: #91bf8a;
+  --color-sidebar-scrollbar: #2a6a47; /* lighter than the sidebar so the thumb stands out */
 
   /* Text */
-  --color-ink: #1a2b3c; /* headings and primary text */
+  --color-ink: #1e293b; /* headings and primary text */
   --color-ink-soft: #4a5568; /* body copy */
   --color-muted: #64748b; /* secondary text, labels */
   --color-subtle: #94a3b8; /* hints, timestamps, placeholders */
 
   /* Surfaces and lines */
-  --color-surface: #f8fafc; /* page background, table headers */
+  --color-page: #f3f4f6; /* app background behind the cards */
+  --color-surface: #f8fafc; /* table headers, input fills */
   --color-surface-alt: #fafbfc;
-  --color-line: #e5e7eb; /* card and input borders */
-  --color-line-soft: #f1f3f4; /* row dividers */
+  --color-line: #e5e7eb; /* input borders */
+  --color-line-soft: #f1f3f4; /* row dividers, card borders */
+
+  /* Card elevation (Grievance portal cards) */
+  --shadow-card: 0px 4px 6px -1px rgba(0, 0, 0, 0.05), 0px 2px 4px -1px rgba(0, 0, 0, 0.03);
 
   /* Status */
   --color-danger: #dc2626;

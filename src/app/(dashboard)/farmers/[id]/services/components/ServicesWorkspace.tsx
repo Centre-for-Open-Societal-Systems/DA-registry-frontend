@@ -58,7 +58,7 @@ export function ServicesWorkspace({ farmer }: { farmer: Farmer }) {
         description="Credit and Marketplace are unrelated transactions with different counterparties and lifecycles, so they are kept on separate tabs."
       />
       {notice && <Banner tone={notice.tone} onDismiss={() => setNotice(null)}>{notice.text}</Banner>}
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
 
         {tab === "credit" && (
           <div className="flex flex-col gap-5 p-5">

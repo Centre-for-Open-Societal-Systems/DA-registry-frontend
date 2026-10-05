@@ -33,12 +33,16 @@ export function TeamTable({ team, myDaId }: { team: Agent[]; myDaId: string }) {
   ];
 
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-      <div className="flex items-center gap-2.5 px-4 pt-4">
-        <h2 className="text-[15px] font-semibold text-ink">Team members</h2>
-        <span className="text-[13px] text-muted">{team.length} agents</span>
-      </div>
-      <DataTable searchable itemLabel="agents" columns={columns} rows={team} rowKey={(a) => a.daId} minWidth="960px" emptyTitle="No team members yet" emptyHint="You will see your Woreda colleagues here once your assignment is published." />
+    <Card className="overflow-hidden p-0 shadow-card">
+      <DataTable
+        searchable
+        title={
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-[15px] font-semibold text-ink">Team members</h2>
+            <span className="text-[13px] text-muted">{team.length} agents</span>
+          </div>
+        }
+        itemLabel="agents" columns={columns} rows={team} rowKey={(a) => a.daId} minWidth="960px" emptyTitle="No team members yet" emptyHint="You will see your Woreda colleagues here once your assignment is published." />
     </Card>
   );
 }

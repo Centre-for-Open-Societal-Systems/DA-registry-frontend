@@ -125,7 +125,7 @@ export function DemographicsSection({ editing, onEdit, onCancel, onSubmit }: Dem
   if (editing) {
     return (
       <form className="flex animate-fade-in flex-col gap-6" onSubmit={submit} onChange={() => setError(null)}>
-        <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="p-0 shadow-card">
           {header}
           <div className="flex flex-col gap-6 px-6 py-5">
             {error && <Banner tone="error">{error}</Banner>}
@@ -180,7 +180,7 @@ export function DemographicsSection({ editing, onEdit, onCancel, onSubmit }: Dem
   const [dialCode, ...number] = p.mobile.split(" ");
 
   return (
-    <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="p-0 shadow-card">
       {header}
       <div className="grid animate-fade-in grid-cols-1 gap-6 px-6 py-5 lg:grid-cols-[215px_1fr] lg:gap-8">
         <div className="flex flex-col gap-2">

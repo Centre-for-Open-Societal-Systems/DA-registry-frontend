@@ -25,8 +25,8 @@ const LANGUAGE_OPTIONS = optionsOf(SURVEY_TASKS.flatMap((s) => s.languages));
 const STATUS_OPTIONS = optionsOf(SURVEY_TASKS.map((s) => s.status), Object.keys(STATUS_TONE));
 
 const FILTER_FIELDS: FilterFieldConfig[] = [
-  { key: "type", label: "Survey type", allLabel: "All survey types", placeholder: "All types", options: TYPE_OPTIONS },
-  { key: "language", label: "Languages", allLabel: "All languages", placeholder: "All languages", options: LANGUAGE_OPTIONS },
+  { key: "type", label: "Survey type", allLabel: "All survey types", placeholder: "All Types", options: TYPE_OPTIONS },
+  { key: "language", label: "Languages", allLabel: "All languages", placeholder: "All Languages", options: LANGUAGE_OPTIONS },
   { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: STATUS_OPTIONS },
 ];
 
@@ -82,7 +82,7 @@ export function SurveyTasks() {
   ];
 
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-hidden p-0 shadow-card">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div>

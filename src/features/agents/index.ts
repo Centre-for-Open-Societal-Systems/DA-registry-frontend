@@ -5,3 +5,4 @@ export * from "./team";
 export * from "./types";
 export * from "./components/ExceptionsPanel";
 export * from "./components/ModuleStrip";
+export * from "./components/AgentsPageHeader";

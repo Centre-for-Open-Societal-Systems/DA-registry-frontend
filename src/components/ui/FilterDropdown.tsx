@@ -175,7 +175,7 @@ export function FilterDropdown({
           aria-haspopup="dialog"
           aria-expanded={isOpen}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-md py-0.5 pr-1 text-left font-medium transition-colors hover:text-ink",
+            "inline-flex items-center gap-1.5 rounded-md py-0.5 pr-1 text-left font-semibold transition-colors hover:text-slate-700",
             isActive && "text-brand-green",
           )}
         >

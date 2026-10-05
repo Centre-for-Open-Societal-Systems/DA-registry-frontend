@@ -16,11 +16,11 @@ import {
   type TierThresholds,
 } from "@/features/performance";
 
-const TONES: Record<PerformanceTier["tone"], { chip: string; link: string }> = {
-  green: { chip: "bg-brand-mint text-brand-green", link: "text-brand-green" },
-  blue: { chip: "bg-blue-50 text-blue-700", link: "text-blue-700" },
-  amber: { chip: "bg-warning-wash text-orange-700", link: "text-orange-700" },
-  red: { chip: "bg-danger-wash text-danger", link: "text-danger" },
+const TONES: Record<PerformanceTier["tone"], { chip: string }> = {
+  green: { chip: "bg-brand-mint text-brand-green" },
+  blue: { chip: "bg-blue-50 text-blue-700" },
+  amber: { chip: "bg-warning-wash text-orange-700" },
+  red: { chip: "bg-danger-wash text-danger" },
 };
 
 // The editable thresholds, grouped by the tier whose rule they define.
@@ -50,7 +50,7 @@ function validate(d: Draft): { value?: TierThresholds; error?: string } {
 }
 
 // Tiers are computed by the backend aggregation engine; supervisors can tune the rule thresholds for the next period.
-export function PerformanceTiers({ onViewTier }: { onViewTier?: (tier: TierCode) => void }) {
+export function PerformanceTiers() {
   const [thresholds, setThresholds] = useState<TierThresholds>(DEFAULT_TIER_THRESHOLDS);
   const [configOpen, setConfigOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(() => toDraft(DEFAULT_TIER_THRESHOLDS));
@@ -77,7 +77,7 @@ export function PerformanceTiers({ onViewTier }: { onViewTier?: (tier: TierCode)
   };
 
   return (
-    <Card className="px-4 py-4 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="px-4 py-4 shadow-card">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <h2 className="text-[15px] font-semibold text-ink">Performance tiers</h2>
@@ -114,10 +114,6 @@ export function PerformanceTiers({ onViewTier }: { onViewTier?: (tier: TierCode)
                 <p className="text-[11.5px] font-medium uppercase tracking-wide text-slate-700">Rule</p>
                 <p className="mt-1.5 text-[12.5px] leading-snug text-ink">{rules[tier.code]}</p>
               </div>
-
-              <button type="button" onClick={() => onViewTier?.(tier.code)} className={cn("mt-3 self-start text-[12.5px] font-semibold hover:underline", tone.link)}>
-                View {tier.count} DAs →
-              </button>
             </div>
           );
         })}

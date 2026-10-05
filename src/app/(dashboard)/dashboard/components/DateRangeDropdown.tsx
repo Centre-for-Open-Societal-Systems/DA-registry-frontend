@@ -12,9 +12,16 @@ const RANGES = [
   "Custom range",
 ];
 
-export function DateRangeDropdown() {
+interface DateRangeDropdownProps {
+  /** Options to pick from; defaults to the dashboard ranges. */
+  ranges?: readonly string[];
+  defaultValue?: string;
+  onChange?: (range: string) => void;
+}
+
+export function DateRangeDropdown({ ranges = RANGES, defaultValue = "Last 30 days", onChange }: DateRangeDropdownProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState("Last 30 days");
+  const [selected, setSelected] = useState(defaultValue);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close on outside click
@@ -51,16 +58,19 @@ export function DateRangeDropdown() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-[280px] bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-zinc-100 z-99999999 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 border border-line">
           <div className="flex flex-col">
-            {RANGES.map((range, idx) => {
+            {ranges.map((range, idx) => {
               const isSelected = selected === range;
               return (
                 <button
                   key={range}
-                  onClick={() => setSelected(range)}
+                  onClick={() => {
+                    setSelected(range);
+                    onChange?.(range);
+                  }}
                   className={cn(
                     "flex items-center gap-4 px-5 py-3 text-left text-[15px] transition-colors",
                     isSelected ? "bg-brand-mint text-brand-green font-semibold" : "text-ink hover:bg-zinc-50",
-                    idx !== RANGES.length - 1 && "border-b border-zinc-100"
+                    idx !== ranges.length - 1 && "border-b border-zinc-100"
                   )}
                 >
                   {/* Radio Icon */}

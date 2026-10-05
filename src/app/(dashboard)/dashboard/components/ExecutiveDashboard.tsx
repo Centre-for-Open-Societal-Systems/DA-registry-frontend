@@ -24,8 +24,8 @@ const STATUSES: KebeleStatus[] = ["On track", "Watch", "At risk"];
 const WOREDA_OPTIONS: FilterOption[] = WOREDA_ROLLUPS.map((w) => ({ value: w.woreda, label: w.woreda, count: w.kebeles }));
 const STATUS_OPTIONS: FilterOption[] = STATUSES.map((s) => ({ value: s, label: s, count: WOREDA_ROLLUPS.filter((w) => w.status === s).length }));
 const FILTER_FIELDS: FilterFieldConfig[] = [
-  { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All woredas", options: WOREDA_OPTIONS },
-  { key: "status", label: "Status", allLabel: "All statuses", placeholder: "All statuses", options: STATUS_OPTIONS },
+  { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All Woredas", options: WOREDA_OPTIONS },
+  { key: "status", label: "Status", allLabel: "All statuses", placeholder: "All Statuses", options: STATUS_OPTIONS },
 ];
 
 interface WoredaFilters extends FilterSelection {
@@ -70,10 +70,10 @@ export function ExecutiveDashboard() {
   return (
     <div className="flex w-full flex-col gap-4">
       {/* Header */}
-      <Card className="relative z-50 flex w-full flex-col justify-between gap-4 px-4 py-5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] md:flex-row md:items-center">
+      <Card className="relative z-50 flex w-full flex-col justify-between gap-4 px-4 py-5 shadow-card md:flex-row md:items-center">
         <div>
           <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">{r.region} Region — Programme Overview</h1>
-          <p className="mt-1.5 text-[14px] text-ink-soft">
+          <p className="hidden mt-1.5 text-[14px] text-ink-soft">
             {r.woredas} woredas · {r.kebeles} kebeles · updated {r.updatedAt}
           </p>
         </div>
@@ -92,7 +92,7 @@ export function ExecutiveDashboard() {
       </div>
 
       {/* Woreda league table */}
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         {/* Toolbar */}
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
@@ -131,17 +131,17 @@ export function ExecutiveDashboard() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[880px] border-collapse text-left">
             <thead>
-              <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
-                <th className="whitespace-nowrap px-4 py-3 font-medium">
+              <tr className="border-y border-line bg-surface text-[14px] font-semibold text-slate-500">
+                <th className="whitespace-nowrap px-4 py-3 font-semibold">
                   <FilterDropdown label="Woreda" allLabel="All woredas" options={WOREDA_OPTIONS} selected={filters.woreda} onApply={setFilter("woreda")} />
                 </th>
-                <th className="px-4 py-3 font-medium">Farmers</th>
-                <th className="px-4 py-3 text-center font-medium">Kebeles</th>
-                <th className="px-4 py-3 text-center font-medium">Agents</th>
-                <th className="px-4 py-3 font-medium">Visit coverage</th>
-                <th className="px-4 py-3 text-center font-medium">Data quality</th>
-                <th className="px-4 py-3 text-center font-medium">Grievances</th>
-                <th className="whitespace-nowrap px-4 py-3 text-right font-medium">
+                <th className="px-4 py-3 font-semibold">Farmers</th>
+                <th className="px-4 py-3 text-center font-semibold">Kebeles</th>
+                <th className="px-4 py-3 text-center font-semibold">Agents</th>
+                <th className="px-4 py-3 font-semibold">Visit coverage</th>
+                <th className="px-4 py-3 text-center font-semibold">Data quality</th>
+                <th className="px-4 py-3 text-center font-semibold">Grievances</th>
+                <th className="whitespace-nowrap px-4 py-3 text-right font-semibold">
                   <FilterDropdown label="Status" allLabel="All statuses" options={STATUS_OPTIONS} selected={filters.status} onApply={setFilter("status")} />
                 </th>
               </tr>
@@ -197,7 +197,7 @@ export function ExecutiveDashboard() {
 
       {/* Watchlist + quick links */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] lg:col-span-2">
+        <Card className="p-0 shadow-card lg:col-span-2">
           <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
             <h2 className="text-[15px] font-semibold text-ink">Kebeles needing attention</h2>
             <span className="text-[12.5px] text-muted">{REGION_WATCHLIST.length} of {r.kebeles}</span>
@@ -218,7 +218,7 @@ export function ExecutiveDashboard() {
           </ul>
         </Card>
 
-        <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="p-0 shadow-card">
           <div className="border-b border-line px-5 py-3.5">
             <h2 className="text-[15px] font-semibold text-ink">Go to</h2>
           </div>

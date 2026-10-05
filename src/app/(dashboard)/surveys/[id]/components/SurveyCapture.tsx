@@ -80,7 +80,7 @@ export function SurveyCapture({ task }: { task: SurveyTask }) {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
         {/* Task context */}
-        <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="shadow-card">
           <h1 className="text-[18px] font-semibold leading-tight text-ink">{task.name}</h1>
           <div className="mt-2 flex flex-wrap gap-1.5"><Pill tone="blue">Template {task.templateVersion}</Pill><Pill tone="slate">{task.type}</Pill><Pill tone="green">~{task.estMinutes} min</Pill></div>
           <dl className="mt-4 space-y-2 text-[13px]">
@@ -109,7 +109,7 @@ export function SurveyCapture({ task }: { task: SurveyTask }) {
         </Card>
 
         {/* Capture */}
-        <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="overflow-hidden p-0 shadow-card">
           {status === "Synced" || status === "Queued" ? (
             <div className="p-5">
               <Banner tone={status === "Synced" ? "success" : "warning"} title={status === "Synced" ? "Response synced" : "Response queued on this device"}>

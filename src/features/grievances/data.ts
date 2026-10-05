@@ -82,14 +82,22 @@ export function bucketOf(status: GrievanceStatus): GrievanceBucket {
   }
 }
 
-export const GRIEVANCE_STATS: Record<"All" | GrievanceBucket, number> = GRIEVANCES.reduce(
-  (acc, g) => {
-    acc.All += 1;
-    acc[bucketOf(g.status)] += 1;
-    return acc;
-  },
-  { All: 0, Pending: 0, "In Progress": 0, "Under Review": 0, Resolved: 0, Rejected: 0 },
-);
+/** Stat-card order; the table's Status column and filter use the same buckets so the two always agree. */
+export const GRIEVANCE_BUCKETS: GrievanceBucket[] = ["Pending", "In Progress", "Under Review", "Resolved", "Rejected"];
+
+/** Stat-card counts for a set of records (pass the table's filtered rows so the cards match the table). */
+export function grievanceStatsFor(list: Grievance[]): Record<"All" | GrievanceBucket, number> {
+  return list.reduce(
+    (acc, g) => {
+      acc.All += 1;
+      acc[bucketOf(g.status)] += 1;
+      return acc;
+    },
+    { All: 0, Pending: 0, "In Progress": 0, "Under Review": 0, Resolved: 0, Rejected: 0 },
+  );
+}
+
+export const GRIEVANCE_STATS = grievanceStatsFor(GRIEVANCES);
 
 function toOptions<T extends string>(values: T[]): FilterOption[] {
   const counts = new Map<T, number>();
@@ -98,7 +106,7 @@ function toOptions<T extends string>(values: T[]): FilterOption[] {
 }
 
 export const GRIEVANCE_CATEGORY_OPTIONS = toOptions(GRIEVANCES.map((g) => g.category));
-export const GRIEVANCE_STATUS_OPTIONS = toOptions(GRIEVANCES.map((g) => g.status));
+export const GRIEVANCE_STATUS_OPTIONS: FilterOption[] = GRIEVANCE_BUCKETS.map((b) => ({ value: b, label: b, count: GRIEVANCE_STATS[b] }));
 export const GRIEVANCE_PRIORITY_OPTIONS: FilterOption[] = (["Critical", "High", "Medium", "Low"] as GrievancePriority[]).map((p) => ({
   value: p,
   label: p,
@@ -108,10 +116,10 @@ export const GRIEVANCE_PRIORITY_OPTIONS: FilterOption[] = (["Critical", "High", 
 export const GRIEVANCE_REGION_OPTIONS = toOptions(GRIEVANCES.map((g) => g.region));
 
 export const GRIEVANCE_FILTER_FIELDS: FilterFieldConfig[] = [
-  { key: "category", label: "Category", allLabel: "All categories", placeholder: "All categories", options: GRIEVANCE_CATEGORY_OPTIONS },
-  { key: "status", label: "Status", allLabel: "All statuses", placeholder: "All statuses", options: GRIEVANCE_STATUS_OPTIONS },
-  { key: "priority", label: "Priority", allLabel: "All priorities", placeholder: "All priorities", options: GRIEVANCE_PRIORITY_OPTIONS },
-  { key: "region", label: "Region", allLabel: "All regions", placeholder: "All regions", options: GRIEVANCE_REGION_OPTIONS },
+  { key: "category", label: "Category", allLabel: "All categories", placeholder: "All Categories", options: GRIEVANCE_CATEGORY_OPTIONS },
+  { key: "status", label: "Status", allLabel: "All statuses", placeholder: "All Statuses", options: GRIEVANCE_STATUS_OPTIONS },
+  { key: "priority", label: "Priority", allLabel: "All priorities", placeholder: "All Priorities", options: GRIEVANCE_PRIORITY_OPTIONS },
+  { key: "region", label: "Region", allLabel: "All regions", placeholder: "All Regions", options: GRIEVANCE_REGION_OPTIONS },
 ];
 
 // ---------------------------------------------------------------------------

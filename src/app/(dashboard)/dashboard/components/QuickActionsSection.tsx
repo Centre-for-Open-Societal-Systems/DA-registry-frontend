@@ -10,12 +10,9 @@ export function QuickActionsSection() {
   ];
 
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-      <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+    <Card className="overflow-hidden p-0 shadow-card">
+      <div className="border-b border-line px-5 py-3.5">
         <h3 className="text-[15px] font-semibold text-ink">Quick actions</h3>
-        <Link href="/profile" className="inline-flex h-9 items-center whitespace-nowrap rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-brand-green-dark">
-          My profile
-        </Link>
       </div>
       <div className="grid grid-cols-1 gap-4 px-4 py-4 md:grid-cols-2 xl:grid-cols-4">
         {actions.map((act) => (

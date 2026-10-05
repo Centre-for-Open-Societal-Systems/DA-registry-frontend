@@ -44,7 +44,7 @@ export function KnowledgeHub() {
   return (
     <>
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
-      <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="p-0 shadow-card">
         {/* Category tabs, with search and Create snippet at the right end of the bar */}
         <div className="flex flex-col gap-3 border-b border-line xl:flex-row xl:items-center xl:justify-between">
           <div role="tablist" aria-label="Category" className="flex overflow-x-auto rounded-tl-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

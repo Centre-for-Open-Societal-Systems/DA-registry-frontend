@@ -40,7 +40,7 @@ export function UserProfile() {
     <div className="relative w-fit" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2.5 py-1 pl-1 pr-3.5 border transition-colors duration-200 bg-white group active:scale-[0.98] w-full ${isOpen ? 'rounded-t-[20px] rounded-b-none border-zinc-200 border-b-transparent shadow-[0_-4px_10px_-5px_rgba(0,0,0,0.05)] relative z-[61]' : 'rounded-full border-zinc-200 hover:border-zinc-300 hover:shadow-sm'
+        className={`flex items-center gap-3 py-1.5 pl-1.5 pr-4 border transition-all duration-300 bg-white group active:scale-[0.98] w-full ${isOpen ? 'rounded-t-[20px] rounded-b-none border-zinc-200 border-b-transparent shadow-[0_-4px_10px_-5px_rgba(0,0,0,0.05)] relative z-[61]' : 'rounded-full border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-md'
           }`}
       >
         <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-gold text-[13px] font-bold text-brand-green-deep shadow-inner">
@@ -58,14 +58,14 @@ export function UserProfile() {
           )}
         </div>
         <div className="hidden text-left sm:block">
-          <p className="text-[14px] font-semibold leading-tight text-ink">
+          <p className="text-[14px] font-bold leading-tight text-gray-900">
             {name}
           </p>
-          <p className="mt-0.5 text-[12.5px] leading-tight text-muted">
+          <p className="mt-0.5 text-[13px] font-medium leading-tight text-gray-600">
             {ROLE_LABELS[role]}
           </p>
         </div>
-        <svg className={`w-4 h-4 text-ink ml-1.5 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'rotate-180' : 'group-hover:translate-y-[2px]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+        <svg className={`w-4 h-4 text-slate-700 ml-1 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'rotate-180' : 'group-hover:translate-y-[2px]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>

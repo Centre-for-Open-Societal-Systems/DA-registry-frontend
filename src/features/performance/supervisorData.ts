@@ -131,10 +131,10 @@ export const PERFORMANCE_TIER_OPTIONS: FilterOption[] = PERFORMANCE_TIERS.map((t
 }));
 
 export const PERFORMANCE_FILTER_FIELDS: FilterFieldConfig[] = [
-  { key: "agent", label: "Agent", allLabel: "All agents", placeholder: "All agents", options: PERFORMANCE_AGENT_OPTIONS },
-  { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All kebeles", options: PERFORMANCE_KEBELE_OPTIONS },
+  { key: "agent", label: "Agent", allLabel: "All agents", placeholder: "All Agents", options: PERFORMANCE_AGENT_OPTIONS },
+  { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All Kebeles", options: PERFORMANCE_KEBELE_OPTIONS },
   { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: PERFORMANCE_STATUS_OPTIONS },
-  { key: "tier", label: "Tier", allLabel: "All tiers", placeholder: "All tiers", options: PERFORMANCE_TIER_OPTIONS },
+  { key: "tier", label: "Tier", allLabel: "All tiers", placeholder: "All Tiers", options: PERFORMANCE_TIER_OPTIONS },
 ];
 
 // KPI entry / import form options

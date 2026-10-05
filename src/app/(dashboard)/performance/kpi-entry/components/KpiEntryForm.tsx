@@ -30,7 +30,7 @@ export function KpiEntryForm() {
       )}
 
       {/* Footer actions */}
-      <Card className="flex flex-col-reverse gap-3 px-5 py-4 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center sm:justify-between">
+      <Card className="flex flex-col-reverse gap-3 px-5 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between">
         <Button type="button" variant="outline" onClick={k.saveDraft}>
           Save Draft
         </Button>
