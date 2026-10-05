@@ -5,7 +5,7 @@ const LIFECYCLE = ["Draft", "Queued", "Submitted", "New", "In Review", "Assigned
 
 export function IssueLifecycle() {
   return (
-    <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="p-0 shadow-card">
       <div className="border-b border-line px-5 py-3.5">
         <h3 className="text-[15px] font-semibold text-ink">Issue lifecycle</h3>
         <p className="mt-0.5 text-[13px] text-ink-soft">

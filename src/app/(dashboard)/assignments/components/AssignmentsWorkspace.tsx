@@ -20,7 +20,7 @@ import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } f
 import { useAuthStore } from "@/store/useAuthStore";
 import { KEBELES, WOREDAS } from "@/features/agents";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
-import { AGENT_STATUS_TONE, ASSIGNMENT_TONE, ASSIGNMENTS, KEBELE_COVERAGE, type AgentAssignment, type AssociationMode, type Geofence } from "@/features/assignments";
+import { AGENT_STATUS_TONE, ASSIGNMENT_TONE, ASSIGNMENTS, KEBELE_COVERAGE, supervisorAssignmentsFor, type AgentAssignment, type AssociationMode, type Geofence } from "@/features/assignments";
 
 const icon = (d: string) => <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>;
 
@@ -66,7 +66,7 @@ const pruneKebeles = (next: AgentFilters): AgentFilters => {
 const COVERAGE_WOREDA_OPTIONS = optionsOf(KEBELE_COVERAGE.map((k) => k.woreda));
 const COVERAGE_OPTIONS = optionsOf(KEBELE_COVERAGE.map((k) => k.coverage), COVERAGE_STATES);
 const COVERAGE_FILTER_FIELDS: FilterFieldConfig[] = [
-  { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All woredas", options: COVERAGE_WOREDA_OPTIONS },
+  { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All Woredas", options: COVERAGE_WOREDA_OPTIONS },
   { key: "coverage", label: "Coverage", allLabel: "All coverage states", placeholder: "All", options: COVERAGE_OPTIONS },
 ];
 
@@ -89,6 +89,8 @@ const runGeofence = (kebele: string): { result: Geofence; reason?: string } =>
 export function AssignmentsWorkspace() {
   const role = useAuthStore((s) => s.role);
   const canAssign = role === "Supervisor" || role === "Admin";
+  const isDA = role === "DA";
+  const user = useAuthStore((s) => s.user);
   const [rows, setRows] = useState<AgentAssignment[]>(ASSIGNMENTS);
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<AgentFilters>(EMPTY_AGENT_FILTERS);
@@ -99,26 +101,29 @@ export function AssignmentsWorkspace() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [outcome, setOutcome] = useState<{ tone: "success" | "warning"; title: string; body: string } | null>(null);
 
+  // A DA sees only the assignment their supervisor made for them; officers see (and edit) every row.
+  const scoped = useMemo(() => (isDA ? supervisorAssignmentsFor(user?.name ?? "") : rows), [isDA, user, rows]);
+
   const setFilter = (key: keyof AgentFilters) => (next: Set<string>) => setFilters((prev) => pruneKebeles({ ...prev, [key]: next }));
   const setCoverageFilter = (key: keyof CoverageFilters) => (next: Set<string>) => setCoverageFilters((prev) => ({ ...prev, [key]: next }));
 
-  const woredaOptions = optionsOf(rows.map((r) => r.woreda), WOREDAS);
+  const woredaOptions = optionsOf(scoped.map((r) => r.woreda), WOREDAS);
   const kebeleOptions = optionsOf(
-    rows.filter((r) => has(filters.woreda, r.woreda)).map((r) => r.kebele ?? NO_KEBELE),
+    scoped.filter((r) => has(filters.woreda, r.woreda)).map((r) => r.kebele ?? NO_KEBELE),
     kebelesFor(filters.woreda),
     (k) => (k === NO_KEBELE ? "No kebele yet" : k),
   );
-  const statusOptions = optionsOf(rows.map((r) => r.status), STATUSES);
-  const assignmentOptions = optionsOf(rows.map((r) => r.assignmentStatus), ASSIGNMENT_STATES);
+  const statusOptions = optionsOf(scoped.map((r) => r.status), STATUSES);
+  const assignmentOptions = optionsOf(scoped.map((r) => r.assignmentStatus), ASSIGNMENT_STATES);
   const filterFields: FilterFieldConfig[] = [
-    { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All woredas", options: woredaOptions },
-    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All kebeles", options: kebeleOptions },
+    { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All Woredas", options: woredaOptions },
+    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All Kebeles", options: kebeleOptions },
     { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: statusOptions },
     { key: "assignment", label: "Assignment", allLabel: "All assignment states", placeholder: "All", options: assignmentOptions },
   ];
 
   const visible = useMemo(() => {
-    return rows.filter(
+    return scoped.filter(
       (r) =>
         has(filters.woreda, r.woreda) &&
         has(filters.kebele, r.kebele ?? NO_KEBELE) &&
@@ -126,12 +131,13 @@ export function AssignmentsWorkspace() {
         has(filters.assignment, r.assignmentStatus) &&
         matchesQuery(query, r),
     );
-  }, [rows, query, filters]);
+  }, [scoped, query, filters]);
 
   const coverageRows = KEBELE_COVERAGE.filter(
     (k) => has(coverageFilters.woreda, k.woreda) && has(coverageFilters.coverage, k.coverage) && matchesQuery(coverageQuery, k),
   );
 
+  const mine = isDA ? scoped[0] : undefined;
   const kebelesCovered = new Set(rows.filter((r) => r.kebele).map((r) => r.kebele)).size;
   const unassigned = rows.filter((r) => r.status === "Unassigned").length;
   const assigned = rows.filter((r) => r.farmers > 0);
@@ -149,7 +155,7 @@ export function AssignmentsWorkspace() {
     setRows((prev) =>
       prev.map((r) =>
         r.daId === draft.daId
-          ? { ...r, woreda: draft.woreda, kebele: draft.kebele, farmers: check.result === "In-boundary" ? farmers : r.farmers, status: r.status === "Unassigned" ? "Active" : r.status, assignmentStatus: check.result === "In-boundary" ? "Effective" : "Flagged", effectiveDate: draft.effectiveDate, geofence: check.result, geofenceReason: check.reason, mode: draft.mode }
+          ? { ...r, woreda: draft.woreda, kebele: draft.kebele, farmers: check.result === "In-boundary" ? farmers : r.farmers, status: r.status === "Unassigned" ? "Active" : r.status, assignmentStatus: check.result === "In-boundary" ? "Effective" : "Flagged", effectiveDate: draft.effectiveDate, geofence: check.result, geofenceReason: check.reason, mode: draft.mode, assignedBy: user?.name }
           : r,
       ),
     );
@@ -181,6 +187,7 @@ export function AssignmentsWorkspace() {
         </span>
       ),
       cell: (r) => <div className="flex flex-col items-start gap-1"><Pill tone={AGENT_STATUS_TONE[r.status]} dot>{r.status}</Pill><Pill tone={ASSIGNMENT_TONE[r.assignmentStatus]}>{r.assignmentStatus}{r.geofence === "Out-of-bounds" ? " · out-of-bounds" : ""}</Pill></div> },
+    { key: "assignedBy", header: "Assigned by", cell: (r) => r.assignedBy ?? <span className="text-subtle">—</span> },
     {
       key: "actions", header: "Actions", align: "center",
       cell: (r) => (
@@ -194,18 +201,27 @@ export function AssignmentsWorkspace() {
 
   return (
     <>
+      {isDA ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="My kebele" value={mine?.kebele ?? "—"} hint={mine ? `${mine.woreda} woreda` : "Not assigned yet"} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0zM12 13a3 3 0 100-6 3 3 0 000 6z")} />
+          <StatCard label="Linked farmers" value={(mine?.farmers ?? 0).toLocaleString()} accent="border-l-blue-600" tile="bg-blue-50 text-blue-600" icon={icon("M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z")} />
+          <StatCard label="Effective since" value={mine?.effectiveDate ?? "—"} accent="border-l-amber-600" tile="bg-warning-wash text-amber-600" icon={icon("M8 3v4M16 3v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z")} />
+          <StatCard label="Assigned by" value={mine?.assignedBy ?? "—"} hint="Woreda supervisor" accent="border-l-violet-600" tile="bg-violet-50 text-violet-600" icon={icon("M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM17 11l2 2 4-4")} />
+        </div>
+      ) : (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Agents" value={String(rows.length)} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z")} />
         <StatCard label="Kebeles covered" value={String(kebelesCovered)} accent="border-l-blue-600" tile="bg-blue-50 text-blue-600" icon={icon("M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0zM12 13a3 3 0 100-6 3 3 0 000 6z")} />
         <StatCard label="Unassigned" value={String(unassigned)} accent="border-l-amber-600" tile="bg-warning-wash text-amber-600" icon={icon("M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 11l-4 4M18 11l4 4")} />
         <StatCard label="Average load" value={avgLoad.toLocaleString()} hint="farmers per assigned agent" accent="border-l-violet-600" tile="bg-violet-50 text-violet-600" icon={icon("M18 20V10M12 20V4M6 20v-6")} />
       </div>
+      )}
 
       {outcome && <Banner tone={outcome.tone} title={outcome.title} onDismiss={() => setOutcome(null)}>{outcome.body}</Banner>}
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <h2 className="text-[15px] font-semibold text-ink">Agents by Kebele and Woreda</h2>
+          <h2 className="text-[15px] font-semibold text-ink">{isDA ? "My assignment from supervisor" : "Agents by Kebele and Woreda"}</h2>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
             <AdvancedFiltersButton activeCount={countActive(filters)} onClick={() => setIsFiltersOpen(true)} />
@@ -231,8 +247,9 @@ export function AssignmentsWorkspace() {
         />
       </Card>
 
-      {/* Read-only Kebele coverage summary — managed separately (§3.5). */}
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      {/* Read-only Kebele coverage summary — managed separately (§3.5); not part of what a DA receives from their supervisor. */}
+      {!isDA && (
+      <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink">Kebele coverage summary <Pill tone="slate">Read-only</Pill></h2>
@@ -272,6 +289,7 @@ export function AssignmentsWorkspace() {
           }
         />
       </Card>
+      )}
 
       {draft && (
         <Modal isOpen onClose={() => setDraft(null)} title={rows.find((r) => r.daId === draft.daId)?.kebele ? "Reassign agent" : "Assign agent"} subtitle={`${rows.find((r) => r.daId === draft.daId)?.agent} · ${draft.daId}`} size="lg"

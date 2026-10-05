@@ -27,7 +27,8 @@ import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { TablePagination, usePagination } from "@/components/ui/TablePagination";
 import { RowAction } from "@/components/ui/RowAction";
 import { Banner } from "@/components/ui/Banner";
-import { downloadCsv, fileDate, type CsvColumn } from "@/lib/download";
+import { fileDate, type CsvColumn } from "@/lib/download";
+import { downloadTable, formatLabel } from "@/lib/export";
 import type { Farmer } from "@/features/farmers";
 
 const SEARCH_PLACEHOLDER = searchPlaceholder(["Farmer Details", "Kebele", "Crop", "Registered date", "Status"]);
@@ -77,7 +78,7 @@ export function FarmersTable() {
     });
 
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-hidden p-0 shadow-card">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2.5">
@@ -93,11 +94,10 @@ export function FarmersTable() {
           <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
 
           <ExportButton
-            label="Export Report"
             disabled={rows.length === 0}
-            onClick={() => {
-              downloadCsv(`farmers-report-${fileDate()}.csv`, rows, EXPORT_COLUMNS);
-              setNotice(`Exported ${rows.length} farmer${rows.length === 1 ? "" : "s"} matching the current search and filters (CSV).`);
+            onExport={(format) => {
+              downloadTable(format, `farmers-report-${fileDate()}`, rows, EXPORT_COLUMNS, "Farmers report");
+              setNotice(`Exported ${rows.length} farmer${rows.length === 1 ? "" : "s"} matching the current search and filters (${formatLabel(format)}).`);
             }}
           />
         </div>
@@ -109,22 +109,22 @@ export function FarmersTable() {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px] border-collapse text-left">
           <thead>
-            <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
-              <th className="w-16 px-6 py-3">
+            <tr className="border-y border-line bg-surface text-[14px] font-semibold text-slate-500">
+              <th className="w-14 px-4 py-3 align-middle">
                 <Checkbox checked={allSelected} onChange={toggleAll} aria-label="Select all farmers" />
               </th>
-              <th className="px-4 py-3 font-medium">Farmer Details</th>
-              <th className="px-4 py-3 font-medium">
+              <th className="px-4 py-3 font-semibold">Farmer Details</th>
+              <th className="px-4 py-3 font-semibold">
                 <FilterDropdown label="Kebele" allLabel="All kebeles" options={KEBELE_OPTIONS} selected={filters.kebele} onApply={setColumnFilter("kebele")} />
               </th>
-              <th className="px-4 py-3 font-medium">
+              <th className="px-4 py-3 font-semibold">
                 <FilterDropdown label="Crop" allLabel="All crops" options={CROP_OPTIONS} selected={filters.crop} onApply={setColumnFilter("crop")} />
               </th>
-              <th className="px-4 py-3 text-center font-medium">Registered date</th>
-              <th className="px-4 py-3 text-center font-medium">
+              <th className="px-4 py-3 text-center font-semibold">Registered date</th>
+              <th className="px-4 py-3 text-center font-semibold">
                 <FilterDropdown label="Status" allLabel="All Status" options={STATUS_OPTIONS} selected={filters.status} onApply={setColumnFilter("status")} />
               </th>
-              <th className="px-4 py-3 text-center font-medium">Action</th>
+              <th className="px-4 py-3 text-center font-semibold">Action</th>
             </tr>
           </thead>
           <tbody className="text-[14px] text-slate-700">
@@ -143,7 +143,7 @@ export function FarmersTable() {
                     isSelected ? "bg-brand-wash" : "hover:bg-surface",
                   )}
                 >
-                  <td className="px-4 py-3.5">
+                  <td className="w-14 px-4 py-3.5 align-middle">
                     <Checkbox
                       checked={isSelected}
                       onChange={() => toggleOne(farmer.id)}

@@ -12,7 +12,8 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { ExportButton } from "@/components/ui/ExportButton";
-import { downloadCsv, fileDate } from "@/lib/download";
+import { fileDate } from "@/lib/download";
+import { downloadTable, formatLabel } from "@/lib/export";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -55,9 +56,9 @@ export function SyncEvents() {
   const directionOptions = optionsOf(events.map((e) => e.direction), DIRECTIONS);
   const outcomeOptions = optionsOf(events.map((e) => e.outcome), OUTCOMES);
   const filterFields: FilterFieldConfig[] = [
-    { key: "entity", label: "Entity", allLabel: "All entities", placeholder: "All entities", options: entityOptions },
-    { key: "direction", label: "Direction", allLabel: "All directions", placeholder: "All directions", options: directionOptions },
-    { key: "outcome", label: "Outcome", allLabel: "All outcomes", placeholder: "All outcomes", options: outcomeOptions },
+    { key: "entity", label: "Entity", allLabel: "All entities", placeholder: "All Entities", options: entityOptions },
+    { key: "direction", label: "Direction", allLabel: "All directions", placeholder: "All Directions", options: directionOptions },
+    { key: "outcome", label: "Outcome", allLabel: "All outcomes", placeholder: "All Outcomes", options: outcomeOptions },
   ];
 
   const rows = events.filter(
@@ -98,11 +99,11 @@ export function SyncEvents() {
         <StatCard label="Last batch" value="01 Sep" hint="42 received · 40 accepted" accent="border-l-blue-600" tile="bg-blue-50 text-blue-600" icon={icon("M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15")} />
       </div>
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         {/* Toolbar */}
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-[15px] font-semibold text-ink">Sync events</h2>
+            <h2 className="text-[15px] font-semibold text-ink">Registry sync</h2>
             <p className="mt-0.5 text-[12.5px] text-ink-soft">Registry-sync (OAN ⇄ MoA) is distinct from device-sync (app ⇄ server, see Sync queue).</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
@@ -112,8 +113,8 @@ export function SyncEvents() {
 
             {role === "Admin" && <button type="button" onClick={() => setReconcileOpen(true)} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white hover:bg-brand-green-dark">Bulk reconcile</button>}
             <ExportButton
-              onClick={() => {
-                downloadCsv(`registry-sync-events-${fileDate()}.csv`, rows, [
+              onExport={(format) => {
+                downloadTable(format, `registry-sync-events-${fileDate()}`, rows, [
                   { header: "Event ID", value: (e) => e.id },
                   { header: "Entity", value: (e) => e.entityType },
                   { header: "Reference", value: (e) => e.entityRef },
@@ -122,8 +123,8 @@ export function SyncEvents() {
                   { header: "Retries", value: (e) => e.retryCount },
                   { header: "Detail", value: (e) => e.detail },
                   { header: "At", value: (e) => e.at },
-                ]);
-                setNotice(`Reconciliation report exported — ${rows.length} events (CSV).`);
+                ], "Registry sync events");
+                setNotice(`Reconciliation report exported — ${rows.length} events (${formatLabel(format)}).`);
               }}
             />
           </div>

@@ -1,12 +1,20 @@
+"use client";
+
 import { StatCard } from "@/components/ui/StatCard";
-import { VISIT_STATS } from "@/features/visits";
+import { useAuthStore } from "@/store/useAuthStore";
+import { VISIT_STATS, supervisorVisitsFor, visitStatsFor } from "@/features/visits";
 
 export function VisitsStats() {
+  // A DA's figures cover only the visits their supervisor assigned to them.
+  const isDA = useAuthStore((s) => s.role === "DA");
+  const daName = useAuthStore((s) => s.user?.name ?? "");
+  const stats = isDA ? visitStatsFor(supervisorVisitsFor(daName)) : VISIT_STATS;
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <StatCard
         label="Planned this week"
-        value={String(VISIT_STATS.plannedThisWeek)}
+        value={String(stats.plannedThisWeek)}
         accent="border-l-blue-600"
         tile="bg-info-tint text-blue-600"
         icon={
@@ -18,7 +26,7 @@ export function VisitsStats() {
       />
       <StatCard
         label="Completed"
-        value={String(VISIT_STATS.completed)}
+        value={String(stats.completed)}
         accent="border-l-brand-green"
         tile="bg-brand-tint text-brand-green"
         valueClassName="text-brand-green"
@@ -31,7 +39,7 @@ export function VisitsStats() {
       />
       <StatCard
         label="Missed / rescheduled"
-        value={String(VISIT_STATS.missed)}
+        value={String(stats.missed)}
         accent="border-l-danger"
         tile="bg-danger-tint text-danger"
         valueClassName="text-orange-700"
@@ -44,7 +52,7 @@ export function VisitsStats() {
       />
       <StatCard
         label="On-time rate"
-        value={VISIT_STATS.onTimeRate}
+        value={stats.onTimeRate}
         accent="border-l-brand-green"
         tile="bg-brand-tint text-brand-green"
         icon={

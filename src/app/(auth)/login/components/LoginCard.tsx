@@ -94,7 +94,7 @@ export function LoginCard() {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-bold text-zinc-700" htmlFor="email">Email address</label>
-            <Input id="email" name="email" type="email" placeholder="Enter your email address" required className="bg-white transition-shadow duration-300 hover:border-emerald-400 focus:shadow-[0_0_0_3px_rgba(5,150,105,0.1)]" />
+            <Input id="email" name="email" type="email" placeholder="Enter your email address" required className="bg-white transition-shadow duration-300 hover:border-emerald-400 focus:shadow-[0_0_0_3px_rgba(22,163,74,0.12)]" />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -105,7 +105,7 @@ export function LoginCard() {
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               required
-              className="bg-white transition-shadow duration-300 hover:border-emerald-400 focus:shadow-[0_0_0_3px_rgba(5,150,105,0.1)]"
+              className="bg-white transition-shadow duration-300 hover:border-emerald-400 focus:shadow-[0_0_0_3px_rgba(22,163,74,0.12)]"
               endAdornment={
                 <button
                   type="button"
@@ -135,7 +135,7 @@ export function LoginCard() {
                   type="checkbox"
                   name="remember"
                   defaultChecked
-                  className="peer h-[18px] w-[18px] cursor-pointer appearance-none rounded border-2 border-zinc-300 bg-white transition-all duration-300 checked:border-brand-green checked:bg-brand-green group-hover:border-emerald-500 group-hover:shadow-[0_0_0_4px_rgba(4,120,87,0.1)] group-active:scale-95"
+                  className="peer h-[18px] w-[18px] cursor-pointer appearance-none rounded border-2 border-zinc-300 bg-white transition-all duration-300 checked:border-brand-green checked:bg-brand-green group-hover:border-emerald-500 group-hover:shadow-[0_0_0_4px_rgba(22,163,74,0.12)] group-active:scale-95"
                 />
                 <svg
                   className="pointer-events-none absolute h-3.5 w-3.5 scale-50 text-white opacity-0 transition-all duration-300 ease-out peer-checked:scale-100 peer-checked:opacity-100"

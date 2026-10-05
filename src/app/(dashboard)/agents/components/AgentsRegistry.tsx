@@ -9,6 +9,7 @@ import { RowAction } from "@/components/ui/RowAction";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { Pill } from "@/components/ui/Pill";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { Switch } from "@/components/ui/Switch";
 import { Banner } from "@/components/ui/Banner";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -16,9 +17,10 @@ import { ExportButton } from "@/components/ui/ExportButton";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { useAuthStore } from "@/store/useAuthStore";
-import { ACTIVE_TONE, AGENTS, APPROVAL_TONE, FAYDA_TONE, KEBELES, TOTAL_AGENTS, WOREDAS } from "@/features/agents";
+import { ACTIVE_TONE, AGENTS, APPROVAL_TONE, FAYDA_TONE, KEBELES, WOREDAS } from "@/features/agents";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
-import { downloadCsv, downloadTemplate, fileDate, type CsvColumn } from "@/lib/download";
+import { downloadTemplate, fileDate, type CsvColumn } from "@/lib/download";
+import { downloadTable, formatLabel } from "@/lib/export";
 import type { Agent } from "@/features/agents";
 
 const FAYDA = ["Verified", "Pending", "Mismatch"];
@@ -77,6 +79,14 @@ const kebelesFor = (woredas: Set<string>) => [
   UNASSIGNED,
 ];
 
+// "14 Sep 2026, 09:12" → ["14 Sep 2026,", "09:12 AM"] for the two-line Last Updated cell.
+const splitStamp = (stamp: string): [string, string] => {
+  const [date, time = ""] = stamp.split(", ");
+  const [h, m] = time.split(":").map(Number);
+  if (!time || Number.isNaN(h) || Number.isNaN(m)) return [date, time];
+  return [`${date},`, `${String(h % 12 || 12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`];
+};
+
 // Drops kebele selections that no longer belong to the chosen woredas.
 const pruneKebeles = (next: Filters): Filters => {
   const allowed = new Set(kebelesFor(next.woreda));
@@ -93,6 +103,8 @@ export function AgentsRegistry() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  // Registry access switched off from the Action column (mock: kept in memory until the API exists).
+  const [disabledIds, setDisabledIds] = useState<Set<string>>(new Set());
 
   const activeFilterCount = Object.values(filters).filter((set) => set.size > 0).length;
   const setFilter = (key: keyof Filters) => (next: Set<string>) => setFilters((prev) => pruneKebeles({ ...prev, [key]: next }));
@@ -100,8 +112,8 @@ export function AgentsRegistry() {
   const inWoredas = AGENTS.filter((a) => filters.woreda.size === 0 || filters.woreda.has(a.woreda));
   const kebeleOptions = optionsOf(inWoredas.map((a) => a.kebele), kebelesFor(filters.woreda), (k) => (k === UNASSIGNED ? "Unassigned" : k));
   const filterFields: FilterFieldConfig[] = [
-    { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All woredas", options: WOREDA_OPTIONS },
-    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All kebeles", options: kebeleOptions },
+    { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All Woredas", options: WOREDA_OPTIONS },
+    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All Kebeles", options: kebeleOptions },
     { key: "fayda", label: "Fayda status", allLabel: "All Fayda statuses", placeholder: "All", options: FAYDA_OPTIONS },
     { key: "active", label: "Active status", allLabel: "All active statuses", placeholder: "All", options: ACTIVE_OPTIONS },
     { key: "tier", label: "Education tier", allLabel: "All tiers", placeholder: "All", options: TIER_OPTIONS },
@@ -123,37 +135,50 @@ export function AgentsRegistry() {
   }, [query, filters]);
 
   const columns: Column<Agent>[] = [
-    { key: "daId", header: "DA-ID", cell: (a) => <span className="font-mono text-[13px] font-medium text-ink">{a.daId}</span> },
-    { key: "name", header: "Full Name", cell: (a) => <Link href={`/agents/${a.daId}`} className="font-medium text-ink hover:text-brand-green">{a.fullName}</Link> },
-    { key: "fayda", header: "Fayda ID", cell: (a) => <span className="whitespace-nowrap font-mono text-[13px] text-ink-soft">{a.faydaId}</span> },
-    { key: "faydaStatus", header: <FilterDropdown label="Fayda Status" allLabel="All Fayda statuses" options={FAYDA_OPTIONS} selected={filters.fayda} onApply={setFilter("fayda")} />, cell: (a) => <Pill tone={FAYDA_TONE[a.faydaStatus]} dot>{a.faydaStatus}</Pill> },
-    { key: "active", header: <FilterDropdown label="Active Status" allLabel="All active statuses" options={ACTIVE_OPTIONS} selected={filters.active} onApply={setFilter("active")} />, cell: (a) => <Pill tone={ACTIVE_TONE[a.activeStatus]} dot>{a.activeStatus}</Pill> },
+    { key: "daId", header: "DA-ID", cell: (a) => <span className="font-semibold text-ink">{a.daId.replace(/-(?=d+$)/, "-​")}</span> },
+    { key: "name", header: "Full Name", cell: (a) => <Link href={`/agents/${a.daId}`} className="whitespace-nowrap text-ink hover:text-brand-green">{a.fullName}</Link> },
+    { key: "fayda", header: "Fayda ID", cell: (a) => <span className="whitespace-nowrap text-ink">{a.faydaId}</span> },
+    { key: "faydaStatus", header: <FilterDropdown label="Fayda Status" allLabel="All Fayda statuses" options={FAYDA_OPTIONS} selected={filters.fayda} onApply={setFilter("fayda")} />, align: "center", cell: (a) => <Pill tone={FAYDA_TONE[a.faydaStatus]}>{a.faydaStatus}</Pill> },
+    { key: "active", header: <FilterDropdown label="Active Status" allLabel="All active statuses" options={ACTIVE_OPTIONS} selected={filters.active} onApply={setFilter("active")} />, align: "center", cell: (a) => <Pill tone={ACTIVE_TONE[a.activeStatus]}>{a.activeStatus}</Pill> },
     { key: "tier", header: <FilterDropdown label="Education Tier" allLabel="All tiers" options={TIER_OPTIONS} selected={filters.tier} onApply={setFilter("tier")} />, cell: (a) => a.educationTier },
-    { key: "kebele", header: <FilterDropdown label="Assigned Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setFilter("kebele")} />, cell: (a) => (a.kebele === UNASSIGNED ? <span className="text-subtle">Unassigned</span> : <span>{a.kebele}<span className="block text-[12px] text-muted">{a.woreda}</span></span>) },
-    { key: "farmers", header: "Farmer Count", align: "right", cell: (a) => a.farmerCount.toLocaleString() },
-    { key: "approval", header: <FilterDropdown label="Approval Status" allLabel="All approval statuses" options={APPROVAL_OPTIONS} selected={filters.approval} onApply={setFilter("approval")} />, cell: (a) => <Pill tone={APPROVAL_TONE[a.approvalStatus]}>{a.approvalStatus}</Pill> },
-    { key: "updated", header: "Last Updated", cell: (a) => <span className="whitespace-nowrap text-[13px] text-muted">{a.updatedAt}</span> },
+    { key: "kebele", header: <FilterDropdown label="Assigned Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setFilter("kebele")} />, cell: (a) => (a.kebele === UNASSIGNED ? <span className="text-subtle">Unassigned</span> : <span className="whitespace-nowrap">{a.kebele}<span className="block text-[12px] text-muted">{a.woreda}</span></span>) },
+    { key: "farmers", header: "Farmer Count", cell: (a) => a.farmerCount.toLocaleString() },
+    { key: "approval", header: <FilterDropdown label="Approval Status" allLabel="All approval statuses" options={APPROVAL_OPTIONS} selected={filters.approval} onApply={setFilter("approval")} />, align: "center", cell: (a) => <Pill tone={APPROVAL_TONE[a.approvalStatus]}>{a.approvalStatus}</Pill> },
+    { key: "updated", header: "Last Updated", cell: (a) => { const [date, time] = splitStamp(a.updatedAt); return <span className="block whitespace-nowrap leading-snug text-ink">{date}<span className="block">{time}</span></span>; } },
     {
-      key: "actions", header: "Actions", align: "center",
-      cell: (a) => (
-        <div className="flex items-center justify-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-          <RowAction href={`/agents/${a.daId}`} icon="view">View</RowAction>
-          {canEdit && <RowAction href={`/agents/${a.daId}?edit=1`} tone="neutral" icon="edit">Edit</RowAction>}
-        </div>
-      ),
+      key: "actions", header: "Action", align: "center",
+      cell: (a) => {
+        const enabled = !disabledIds.has(a.daId);
+        return (
+          <div className="flex items-center justify-center gap-2.5" onClick={(e) => e.stopPropagation()}>
+            <RowAction href={`/agents/${a.daId}`} icon="view">View</RowAction>
+            <Switch
+              checked={enabled}
+              disabled={!canEdit}
+              label={`${enabled ? "Deactivate" : "Activate"} ${a.fullName}`}
+              onChange={(on) => {
+                setDisabledIds((prev) => {
+                  const next = new Set(prev);
+                  if (on) next.delete(a.daId);
+                  else next.add(a.daId);
+                  return next;
+                });
+                setNotice(`${a.fullName} (${a.daId}) ${on ? "activated" : "deactivated"} in the registry.`);
+              }}
+            />
+          </div>
+        );
+      },
     },
   ];
 
   return (
     <>
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        {/* Toolbar */}
-        <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-[15px] font-semibold text-ink">Master registry</h2>
-            <span className="text-[13px] text-muted">{rows.length} of {TOTAL_AGENTS.toLocaleString()} agents</span>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <Card className="overflow-hidden p-0 shadow-card">
+        {/* Toolbar — the title never wraps; the controls stay one group that sits beside it when it fits and drops below as a whole when it doesn't. */}
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4">
+          <h2 className="shrink-0 whitespace-nowrap text-[16px] font-semibold text-ink">Master registry</h2>
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
 
             <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
@@ -169,10 +194,12 @@ export function AgentsRegistry() {
               </>
             )}
             <ExportButton
+              label="Export"
+              icon={false}
               disabled={rows.length === 0}
-              onClick={() => {
-                downloadCsv(`da-registry-${fileDate()}.csv`, rows, CSV_COLUMNS);
-                setNotice(`Exported ${rows.length} agent${rows.length === 1 ? "" : "s"} matching the current filters (CSV).`);
+              onExport={(format) => {
+                downloadTable(format, `da-registry-${fileDate()}`, rows, CSV_COLUMNS, "DA master registry");
+                setNotice(`Exported ${rows.length} agent${rows.length === 1 ? "" : "s"} matching the current filters (${formatLabel(format)}).`);
               }}
             />
           </div>
@@ -181,7 +208,7 @@ export function AgentsRegistry() {
         {notice && <Banner tone="success" className="mx-4 mb-3" onDismiss={() => setNotice(null)}>{notice}</Banner>}
 
         <div>
-          <DataTable itemLabel="agents" columns={columns} rows={rows} rowKey={(a) => a.daId} minWidth="1280px" onRowClick={(a) => router.push(`/agents/${a.daId}`)} emptyTitle="No agents match the selected filters" emptyHint="Clear a filter or try a different search." />
+          <DataTable itemLabel="DA identifiers" columns={columns} rows={rows} rowKey={(a) => a.daId} minWidth="1280px" onRowClick={(a) => router.push(`/agents/${a.daId}`)} emptyTitle="No agents match the selected filters" emptyHint="Clear a filter or try a different search." />
         </div>
 
         <AdvancedFiltersDrawer

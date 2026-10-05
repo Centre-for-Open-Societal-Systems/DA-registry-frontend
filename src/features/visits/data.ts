@@ -35,6 +35,7 @@ const visit = (
   kebele: string,
   purpose: string,
   status: VisitRecord["status"],
+  assignedBy?: string,
 ): VisitRecord => ({
   id,
   date,
@@ -49,6 +50,7 @@ const visit = (
   status,
   plotRef: "BT-0472",
   durationMin: 45,
+  assignedBy,
 });
 
 export const VISITS: VisitRecord[] = [
@@ -62,7 +64,37 @@ export const VISITS: VisitRecord[] = [
   visit("v-1008", "Sep 14, 2026", "09:20", "Bekele N.", FARMERS.abebe, "Bako Tibe", "Input advisory", "Completed"),
   visit("v-1009", "Sep 15, 2026", "10:00", "Chaltu D.", FARMERS.lelise, "Bako Tibe", "Soil sampling", "Planned"),
   visit("v-1010", "Sep 16, 2026", "08:45", "Dawit M.", FARMERS.abebe, "Gedo", "Follow-up", "Confirmed"),
+  // Assigned by the Woreda supervisor to the demo DA (Tadesse Alemu) — the only visits the DA sees.
+  visit("v-1011", "Sep 08, 2026", "08:30", "Tadesse A.", FARMERS.lelise, "Bako Tibe", "Crop inspection", "Completed", "Almaz Tesfaye"),
+  visit("v-1012", "Sep 10, 2026", "10:00", "Tadesse A.", FARMERS.abebe, "Bako Tibe", "Pest follow-up", "Missed", "Almaz Tesfaye"),
+  visit("v-1013", "Sep 15, 2026", "09:00", "Tadesse A.", FARMERS.chaltu, "Bako Tibe", "Input advisory", "Confirmed", "Almaz Tesfaye"),
+  visit("v-1014", "Sep 17, 2026", "14:00", "Tadesse A.", FARMERS.lelise, "Bako Tibe", "Harvest survey", "Planned", "Almaz Tesfaye"),
 ];
+
+/** Short agent label used in the visits table, e.g. "Tadesse Alemu" -> "Tadesse A.". */
+const shortName = (name: string) => {
+  const [first, last] = name.split(" ");
+  return last ? `${first} ${last[0]}.` : first;
+};
+
+/** Visits a supervisor assigned to the given DA — the DA's view of the Visits page. */
+export function supervisorVisitsFor(daName: string): VisitRecord[] {
+  const agent = shortName(daName);
+  return VISITS.filter((v) => v.assignedBy && v.agent === agent);
+}
+
+/** Stat-card figures for a set of visits (the DA's stats are computed from their assigned visits). */
+export function visitStatsFor(visits: VisitRecord[]) {
+  const count = (status: VisitRecord["status"]) => visits.filter((v) => v.status === status).length;
+  const completed = count("Completed");
+  const missed = count("Missed");
+  return {
+    plannedThisWeek: count("Planned") + count("Confirmed"),
+    completed,
+    missed,
+    onTimeRate: completed + missed === 0 ? "—" : `${Math.round((completed / (completed + missed)) * 100)}%`,
+  };
+}
 
 export function getVisit(id: string): VisitRecord | undefined {
   return VISITS.find((v) => v.id === id);
@@ -73,6 +105,7 @@ export const VISIT_AGENT_OPTIONS: FilterOption[] = [
   { value: "Bekele N.", label: "Bekele Negash", count: 1188 },
   { value: "Chaltu D.", label: "Chaltu Dinkesa", count: 964 },
   { value: "Dawit M.", label: "Dawit Mekonnen", count: 840 },
+  { value: "Tadesse A.", label: "Tadesse Alemu", count: 4 },
 ];
 
 export const VISIT_KEBELE_OPTIONS: FilterOption[] = [
@@ -93,7 +126,7 @@ export const VISIT_STATUS_OPTIONS: FilterOption[] = [
 // Fields shown in the Advanced Filters drawer on the Visits page.
 export const VISIT_FILTER_FIELDS: FilterFieldConfig[] = [
   { key: "agent", label: "Agent", allLabel: "All agents", placeholder: "All Agent", options: VISIT_AGENT_OPTIONS },
-  { key: "kebele", label: "kebele", allLabel: "All kebeles", placeholder: "All kebele", options: VISIT_KEBELE_OPTIONS },
+  { key: "kebele", label: "kebele", allLabel: "All kebeles", placeholder: "All Kebele", options: VISIT_KEBELE_OPTIONS },
   { key: "status", label: "Status", allLabel: "All Status", placeholder: "All", options: VISIT_STATUS_OPTIONS },
 ];
 

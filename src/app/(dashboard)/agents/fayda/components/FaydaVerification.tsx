@@ -57,7 +57,7 @@ export function FaydaVerification() {
   const resultOptions = optionsOf(checks.map((c) => c.result), RESULTS);
   const duplicateOptions = optionsOf(checks.map(duplicateOf), DUPLICATE);
   const filterFields: FilterFieldConfig[] = [
-    { key: "result", label: "Result", allLabel: "All results", placeholder: "All results", options: resultOptions },
+    { key: "result", label: "Result", allLabel: "All results", placeholder: "All Results", options: resultOptions },
     { key: "dob", label: "DOB", allLabel: "All DOB checks", placeholder: "All", options: dobOptions },
     { key: "duplicate", label: "Duplicate", allLabel: "All records", placeholder: "All", options: duplicateOptions },
   ];
@@ -112,10 +112,10 @@ export function FaydaVerification() {
 
   return (
     <>
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-[15px] font-semibold text-ink">Identity match queue</h2>
+            <h2 className="text-[15px] font-semibold text-ink">Fayda verification</h2>
             <p className="mt-0.5 text-[12.5px] text-ink-soft">Every DA record must be attributed to one verified Fayda identity — no duplicate or unverified registrations.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
@@ -152,7 +152,7 @@ export function FaydaVerification() {
         />
       </Card>
 
-      <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="p-0 shadow-card">
         <div className="border-b border-line px-4 py-4"><h2 className="text-[15px] font-semibold text-ink">Audit trail</h2></div>
         <ul className="divide-y divide-line-soft">
           {audit.map((a) => (

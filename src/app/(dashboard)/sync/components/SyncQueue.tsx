@@ -50,7 +50,7 @@ export function SyncQueue() {
   const entityOptions = optionsOf(items.map((i) => i.entity));
   const statusOptions = optionsOf(items.map((i) => i.status), Object.keys(QUEUE_TONE));
   const filterFields: FilterFieldConfig[] = [
-    { key: "entity", label: "Item", allLabel: "All items", placeholder: "All items", options: entityOptions },
+    { key: "entity", label: "Item", allLabel: "All items", placeholder: "All Items", options: entityOptions },
     { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: statusOptions },
   ];
 
@@ -146,7 +146,7 @@ export function SyncQueue() {
 
       {outcome && <Banner tone={outcome.tone} title={outcome.title} onDismiss={() => setOutcome(null)}>{outcome.body}</Banner>}
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-[15px] font-semibold text-ink">Device sync queue</h2>
@@ -199,7 +199,7 @@ export function SyncQueue() {
           <p className="text-[13.5px] text-ink-soft">This record changed on the device and on the server. Choose per field for a merge, or take one side entirely. Each choice leads to a distinct outcome — nothing is silently lost.</p>
           <div className="mt-4 overflow-hidden rounded-lg border border-line">
             <table className="w-full text-left text-[13.5px]">
-              <thead className="bg-surface text-[12.5px] text-slate-700"><tr><th className="px-3 py-2 font-medium">Field</th><th className="px-3 py-2 font-medium">Device (mine)</th><th className="px-3 py-2 font-medium">Server</th><th className="px-3 py-2 text-center font-medium">Merge uses</th></tr></thead>
+              <thead className="bg-surface text-[12.5px] text-slate-700"><tr><th className="px-3 py-2 font-semibold">Field</th><th className="px-3 py-2 font-semibold">Device (mine)</th><th className="px-3 py-2 font-semibold">Server</th><th className="px-3 py-2 text-center font-semibold">Merge uses</th></tr></thead>
               <tbody>
                 {(selected.conflicts ?? []).map((c: FieldConflict) => {
                   const same = c.device === c.server;

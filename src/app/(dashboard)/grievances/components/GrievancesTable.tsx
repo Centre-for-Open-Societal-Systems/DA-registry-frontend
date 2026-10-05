@@ -17,8 +17,9 @@ import {
   GRIEVANCE_PRIORITY_OPTIONS,
   GRIEVANCE_STATUS_OPTIONS,
   GRIEVANCES,
+  grievanceStatsFor,
 } from "@/features/grievances";
-import { GrievancePriorityPill, GrievanceStatusPill } from "@/features/grievances";
+import { GrievanceBucketPill, GrievancePriorityPill } from "@/features/grievances";
 import { GrievanceDetailModal } from "@/features/grievances";
 import type { Grievance } from "@/features/grievances";
 import { GrievanceStats, type StatKey } from "./GrievanceStats";
@@ -31,6 +32,13 @@ const SEARCH_PLACEHOLDER = searchPlaceholder(["Ticket ID", "Details", "Category"
 
 type RaisedBy = "All" | "DA" | "Farmer";
 
+// Table heading follows the active "Raised by" tab.
+const RAISED_BY_HEADINGS: Record<RaisedBy, { title: string; description: string }> = {
+  All: { title: "All Grievances", description: "Track and manage all reported grievances." },
+  DA: { title: "Raised by DA", description: "Grievances you raised for yourself or on behalf of a farmer." },
+  Farmer: { title: "Raised by Farmer", description: "Grievances farmers raised directly." },
+};
+
 interface Filters extends FilterSelection {
   category: Set<string>;
   status: Set<string>;
@@ -41,7 +49,6 @@ interface Filters extends FilterSelection {
 const EMPTY: Filters = { category: new Set(), status: new Set(), priority: new Set(), region: new Set() };
 
 export function GrievancesTable() {
-  const [bucket, setBucket] = useState<StatKey>("All");
   const [filters, setFilters] = useState<Filters>(EMPTY);
   const [query, setQuery] = useState("");
   // FR-12 raised-by filter: DA-originated vs farmer-originated (external service records both)
@@ -58,16 +65,20 @@ export function GrievancesTable() {
     setPage(1);
   };
 
-  const rows = GRIEVANCES.filter(
+  // Every filter except status: the stat cards count these rows, so each card's number is exactly
+  // what the table shows once that card (or the matching Status filter) is selected.
+  const scoped = GRIEVANCES.filter(
     (g) =>
-      (bucket === "All" || bucketOf(g.status) === bucket) &&
       (raisedBy === "All" || g.raisedBy === raisedBy) &&
       (filters.category.size === 0 || filters.category.has(g.category)) &&
-      (filters.status.size === 0 || filters.status.has(g.status)) &&
       (filters.priority.size === 0 || filters.priority.has(g.priority)) &&
       (filters.region.size === 0 || filters.region.has(g.region)) &&
       matchesQuery(query, g),
   );
+  const rows = scoped.filter((g) => filters.status.size === 0 || filters.status.has(bucketOf(g.status)));
+  const stats = grievanceStatsFor(scoped);
+  // The cards and the Status filter share one selection; a multi-status filter highlights no single card.
+  const activeCard: StatKey = filters.status.size === 0 ? "All" : filters.status.size === 1 ? ([...filters.status][0] as StatKey) : "All";
 
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -90,19 +101,17 @@ export function GrievancesTable() {
       />
       <ServiceStatusBanner />
       <GrievanceStats
-        active={bucket}
-        onSelect={(key) => {
-          setBucket(key);
-          setPage(1);
-        }}
+        active={activeCard}
+        counts={stats}
+        onSelect={(key) => setFilter("status")(key === "All" ? new Set() : new Set([key]))}
       />
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         {/* Toolbar */}
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-[16px] font-semibold text-ink">Grievance Records</h2>
-            <p className="mt-0.5 text-[13px] text-ink-soft">Track and manage all reported farmer grievances.</p>
+            <h2 className="text-[16px] font-semibold text-ink">{RAISED_BY_HEADINGS[raisedBy].title}</h2>
+            <p className="mt-0.5 text-[13px] text-ink-soft">{RAISED_BY_HEADINGS[raisedBy].description}</p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
@@ -128,20 +137,20 @@ export function GrievancesTable() {
               <col className="w-[110px]" />
             </colgroup>
             <thead>
-              <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
-                <th className="whitespace-nowrap px-4 py-3 font-medium">Ticket ID</th>
-                <th className="px-4 py-3 font-medium">Details</th>
-                <th className="px-4 py-3 font-medium">
+              <tr className="border-y border-line bg-surface text-[14px] font-semibold text-slate-500">
+                <th className="whitespace-nowrap px-4 py-3 font-semibold">Ticket ID</th>
+                <th className="px-4 py-3 font-semibold">Details</th>
+                <th className="px-4 py-3 font-semibold">
                   <FilterDropdown label="Category" allLabel="All categories" options={GRIEVANCE_CATEGORY_OPTIONS} selected={filters.category} onApply={setFilter("category")} />
                 </th>
-                <th className="px-4 py-3 font-medium">
+                <th className="px-4 py-3 font-semibold">
                   <FilterDropdown label="Priority" allLabel="All priorities" options={GRIEVANCE_PRIORITY_OPTIONS} selected={filters.priority} onApply={setFilter("priority")} />
                 </th>
-                <th className="px-4 py-3 font-medium">Submitted</th>
-                <th className="px-4 py-3 font-medium">
+                <th className="px-4 py-3 font-semibold">Submitted</th>
+                <th className="px-4 py-3 font-semibold">
                   <FilterDropdown label="Status" allLabel="All statuses" options={GRIEVANCE_STATUS_OPTIONS} selected={filters.status} onApply={setFilter("status")} />
                 </th>
-                <th className="px-4 py-3 text-center font-medium">Actions</th>
+                <th className="px-4 py-3 text-center font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="text-[14px] text-slate-700">
@@ -180,7 +189,11 @@ export function GrievancesTable() {
                     <br />
                     {g.submittedAt.split(", ")[2]}
                   </td>
-                  <td className="px-4 py-4"><GrievanceStatusPill status={g.status} /></td>
+                  <td className="px-4 py-4">
+                    <GrievanceBucketPill bucket={bucketOf(g.status)} />
+                    {/* Service sub-status (e.g. Submitted, Assigned) when it differs from the card bucket */}
+                    {g.status !== bucketOf(g.status) && <p className="mt-1 text-[12px] text-muted">{g.status}</p>}
+                  </td>
                   <td className="px-4 py-4 text-center">
                     <RowAction onClick={() => setSelected(g)} icon="view">View</RowAction>
                   </td>

@@ -10,7 +10,7 @@ export function SummarySection() {
 
         {/* Farm Visits — opens the visits list */}
         <Link href="/visits" className="block rounded-xl focus-visible:outline-2 focus-visible:outline-brand-green">
-        <Card className="group flex h-[128px] flex-col justify-between overflow-hidden p-4 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] border-l-4 border-l-blue-500 transition-shadow hover:shadow-md">
+        <Card className="group flex h-[128px] flex-col justify-between overflow-hidden p-4 shadow-card border-l-4 border-l-blue-500 transition-shadow hover:shadow-md">
           <div className="flex flex-col justify-between h-full">
             <div className="flex justify-between items-start">
               <div>
@@ -37,7 +37,7 @@ export function SummarySection() {
         </Link>
 
         {/* Tasks */}
-        <Card className="group flex h-[128px] flex-col justify-between overflow-hidden p-4 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] border-l-4 border-l-violet-500 transition-shadow hover:shadow-md">
+        <Card className="group flex h-[128px] flex-col justify-between overflow-hidden p-4 shadow-card border-l-4 border-l-violet-500 transition-shadow hover:shadow-md">
           <div className="flex justify-between items-start h-full">
             <div className="flex flex-col justify-between h-full">
               <div>
@@ -65,7 +65,7 @@ export function SummarySection() {
         </Card>
 
         {/* Sync Status */}
-        <Card className="group flex h-[128px] flex-col justify-between overflow-hidden p-4 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] border-l-4 border-l-brand-green transition-shadow hover:shadow-md">
+        <Card className="group flex h-[128px] flex-col justify-between overflow-hidden p-4 shadow-card border-l-4 border-l-brand-green transition-shadow hover:shadow-md">
           <div className="flex justify-between items-start h-full">
             <div className="flex flex-col justify-between h-full">
               <div>

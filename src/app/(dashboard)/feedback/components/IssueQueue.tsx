@@ -92,11 +92,11 @@ export function IssueQueue() {
   const assigneeOptions = optionsOf(issues.map((i) => i.assignee), ASSIGNEES);
   const woredaOptions = optionsOf(issues.map((i) => i.woreda), WOREDAS);
   const filterFields: FilterFieldConfig[] = [
-    { key: "category", label: "Category", allLabel: "All categories", placeholder: "All categories", options: categoryOptions },
-    { key: "severity", label: "Severity", allLabel: "All severities", placeholder: "All severities", options: severityOptions },
+    { key: "category", label: "Category", allLabel: "All categories", placeholder: "All Categories", options: categoryOptions },
+    { key: "severity", label: "Severity", allLabel: "All severities", placeholder: "All Severities", options: severityOptions },
     { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: statusOptions },
-    { key: "assignee", label: "Assignee", allLabel: "All assignees", placeholder: "All assignees", options: assigneeOptions },
-    { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All woredas", options: woredaOptions },
+    { key: "assignee", label: "Assignee", allLabel: "All assignees", placeholder: "All Assignees", options: assigneeOptions },
+    { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All Woredas", options: woredaOptions },
   ];
 
   const rows = useMemo(() => {
@@ -189,7 +189,7 @@ export function IssueQueue() {
         <StatCard label="Resolved (30d)" value={String(stats.resolved30)} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M20 6L9 17l-5-5")} />
       </div>
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-[15px] font-semibold text-ink">Issue queue — Bako Tibe</h2>

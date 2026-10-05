@@ -125,10 +125,10 @@ export function BeneficiariesWorkspace() {
   const segmentOptions = optionsOf(linked.map((b) => b.segmentId), SEGMENTS.map((s) => s.id), segmentName);
   const statusOptions = optionsOf(linked.map((b) => b.status), STATUSES);
   const filterFields: FilterFieldConfig[] = [
-    { key: "farmer", label: "Farmer", allLabel: "All farmers", placeholder: "All farmers", options: farmerOptions },
-    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All kebeles", options: kebeleOptions },
-    { key: "crop", label: "Primary crop", allLabel: "All crops", placeholder: "All crops", options: cropOptions },
-    { key: "segment", label: "Segment", allLabel: "All segments", placeholder: "All segments", options: segmentOptions },
+    { key: "farmer", label: "Farmer", allLabel: "All farmers", placeholder: "All Farmers", options: farmerOptions },
+    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All Kebeles", options: kebeleOptions },
+    { key: "crop", label: "Primary crop", allLabel: "All crops", placeholder: "All Crops", options: cropOptions },
+    { key: "segment", label: "Segment", allLabel: "All segments", placeholder: "All Segments", options: segmentOptions },
     { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: statusOptions },
   ];
 
@@ -191,17 +191,17 @@ export function BeneficiariesWorkspace() {
       header: <FilterDropdown label="Status" allLabel="All Status" options={statusOptions} selected={filters.status} onApply={setFilter("status")} />,
       cell: (b) => <Pill tone={b.status === "Enrolled" ? "green" : "amber"} className="font-semibold">{b.status}</Pill>,
     },
-    {
-      key: "actions",
-      header: "Action",
-      align: "center",
-      cell: (b) =>
-        canEditRules ? (
-          <RowAction tone="danger" icon="remove" onClick={() => setRemoving(b)} className="bg-danger-wash">Remove</RowAction>
-        ) : (
-          <span className="text-[12.5px] text-subtle">—</span>
-        ),
-    },
+    // Only Supervisor/Admin can remove a link; for other roles the column would be all dashes, so it is left out.
+    ...(canEditRules
+      ? [
+          {
+            key: "actions",
+            header: "Action",
+            align: "center",
+            cell: (b) => <RowAction tone="danger" icon="remove" onClick={() => setRemoving(b)} className="bg-danger-wash">Remove</RowAction>,
+          } satisfies Column<Beneficiary>,
+        ]
+      : []),
   ];
 
   return (
@@ -248,7 +248,6 @@ export function BeneficiariesWorkspace() {
                 <span className="flex min-h-[46px] flex-1 items-center rounded-md border border-line bg-white px-3 py-2 text-[12px] leading-snug text-ink-soft">{s.rule}</span>
                 <span className={cn("shrink-0 text-[24px] font-semibold", style.count)}>{s.members}</span>
               </div>
-              {canEditRules && <span className="text-[12px] font-semibold text-brand-green">Edit rule</span>}
             </button>
           );
         })}
@@ -256,7 +255,7 @@ export function BeneficiariesWorkspace() {
 
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-[16px] font-semibold text-ink">{singleSegment ? segmentName(singleSegment) : "All beneficiaries"}</h2>

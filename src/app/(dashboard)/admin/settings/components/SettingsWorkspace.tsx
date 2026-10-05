@@ -7,7 +7,8 @@ import { Pill } from "@/components/ui/Pill";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { ExportButton } from "@/components/ui/ExportButton";
-import { downloadCsv, fileDate } from "@/lib/download";
+import { fileDate } from "@/lib/download";
+import { downloadTable, formatLabel } from "@/lib/export";
 import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
@@ -24,6 +25,13 @@ const AUDIT_LOG = [
 
 type Tab = "sync" | "routing" | "master" | "audit";
 
+const TABS: { key: Tab; label: string }[] = [
+  { key: "sync", label: "Sync configuration" },
+  { key: "routing", label: "Routing" },
+  { key: "master", label: "Master data" },
+  { key: "audit", label: "Audit" },
+];
+
 // Administration › Settings: routing, sync configuration, master data (§3.1.1 Admin function) + audit access.
 export function SettingsWorkspace() {
   const [tab, setTab] = useState<Tab>("sync");
@@ -36,15 +44,16 @@ export function SettingsWorkspace() {
   return (
     <>
       <PageHeader
-        tabBar={<SegmentTabs<Tab> tabs={[{ key: "sync", label: "Sync configuration" }, { key: "routing", label: "Routing" }, { key: "master", label: "Master data" }, { key: "audit", label: "Audit" }]} active={tab} onChange={setTab} />}
         title="Settings"
         description="Administrator configuration: MoA/Fayda sync, routing of proposals and issues, administrative master data, and the immutable audit log."
       />
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      {/* Tabs sit at the top of the settings card, with the active tab's form below them. */}
+      <Card className="overflow-hidden p-0 shadow-card">
+        <SegmentTabs<Tab> label="Settings sections" tabs={TABS} active={tab} onChange={setTab} />
 
         {tab === "sync" && (
-          <div className="flex flex-col gap-5 p-5">
+          <div className="flex flex-col gap-5 px-4 py-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField label="MoA master registry endpoint" htmlFor="s-moa" hint="Governed API contract v2 — versioned and auditable."><Input id="s-moa" value={sync.moaBase} onChange={(e) => setSync({ ...sync, moaBase: e.target.value })} /></FormField>
               <FormField label="Sync schedule" htmlFor="s-sched" hint="Batch must complete within 30 minutes (NFR)."><Select id="s-sched" value={sync.schedule} onChange={(e) => setSync({ ...sync, schedule: e.target.value })}><option>Every hour</option><option>Every 6 hours</option><option>Daily at 06:00</option></Select></FormField>
@@ -53,19 +62,19 @@ export function SettingsWorkspace() {
               <FormField label="Fayda outage fallback" htmlFor="s-fayda" hint="Applies to DA authentication during Fayda outages (FR-01)."><Select id="s-fayda" value={sync.faydaFallback} onChange={(e) => setSync({ ...sync, faydaFallback: e.target.value })}><option>OTP via registered mobile</option><option>Officer-attested temporary credential</option></Select></FormField>
               <FormField label="Device-sync conflict policy" htmlFor="s-conflict" hint="Unresolved conflicts are always recorded for supervisor attention (FR-08)."><Select id="s-conflict" value={sync.conflict} onChange={(e) => setSync({ ...sync, conflict: e.target.value })}><option>Merge with review</option><option>Last-write-wins (timestamp)</option></Select></FormField>
             </div>
-            <div className="flex justify-end"><Button variant="brand" onClick={() => save("Sync configuration")}>Save</Button></div>
+            <div className="flex justify-end"><Button variant="brand" size="lg" className="px-8" onClick={() => save("Sync configuration")}>Save</Button></div>
           </div>
         )}
 
         {tab === "routing" && (
-          <div className="flex flex-col gap-5 p-5">
+          <div className="flex flex-col gap-5 px-4 py-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField label="Onboarding proposals route to" htmlFor="r-onb"><Input id="r-onb" value={routing.onboarding} onChange={(e) => setRouting({ ...routing, onboarding: e.target.value })} /></FormField>
               <FormField label="Internal issues route to" htmlFor="r-iss" hint="No separate support-desk role (FR-13a)."><Input id="r-iss" value={routing.issues} onChange={(e) => setRouting({ ...routing, issues: e.target.value })} /></FormField>
               <FormField label="Grievances route to" htmlFor="r-grv"><Input id="r-grv" value={routing.grievances} readOnly className="bg-zinc-50" /></FormField>
               <FormField label="Broadcast approvals" htmlFor="r-bc"><Input id="r-bc" value={routing.broadcasts} onChange={(e) => setRouting({ ...routing, broadcasts: e.target.value })} /></FormField>
             </div>
-            <div className="flex justify-end"><Button variant="brand" onClick={() => save("Routing")}>Save</Button></div>
+            <div className="flex justify-end"><Button variant="brand" size="lg" className="px-8" onClick={() => save("Routing")}>Save</Button></div>
           </div>
         )}
 
@@ -92,13 +101,13 @@ export function SettingsWorkspace() {
                 <li key={at} className="flex flex-col gap-0.5 px-4 py-3 text-[13.5px] sm:flex-row sm:gap-4"><span className="w-44 shrink-0 text-[12.5px] text-muted">{at}</span><span className="text-ink"><span className="font-semibold">{actor}</span> — {action}</span></li>
               ))}
             </ul>
-            <ExportButton label="Export audit log" onClick={() => {
-                downloadCsv(`audit-log-${fileDate()}.csv`, AUDIT_LOG, [
+            <ExportButton onExport={(format) => {
+                downloadTable(format, `audit-log-${fileDate()}`, AUDIT_LOG, [
                   { header: "Timestamp", value: (r) => r[0] },
                   { header: "Actor", value: (r) => r[1] },
                   { header: "Action", value: (r) => r[2] },
-                ]);
-                setNotice(`Audit log exported — ${AUDIT_LOG.length} entries (CSV).`);
+                ], "Audit log");
+                setNotice(`Audit log exported — ${AUDIT_LOG.length} entries (${formatLabel(format)}).`);
               }} className="mt-4" />
           </div>
         )}

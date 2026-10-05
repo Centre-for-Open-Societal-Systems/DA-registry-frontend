@@ -10,7 +10,7 @@ import { REGISTRATION_STEPS } from "../steps";
 
 export function Stepper({ currentStep }: { currentStep: number }) {
   return (
-    <Card className="overflow-x-auto px-4 py-5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-x-auto px-4 py-5 shadow-card">
       <ol className="flex items-start justify-between md:min-w-[900px]">
         {REGISTRATION_STEPS.map((step, i) => {
           const stepNo = i + 1;

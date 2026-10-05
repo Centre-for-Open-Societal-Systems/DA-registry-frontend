@@ -87,8 +87,8 @@ export const REGISTRATION_KEBELE_OPTIONS = optionsFor((r) => r.kebele);
 export const REGISTRATION_STATUS_OPTIONS = optionsFor((r) => r.status);
 
 export const REGISTRATION_FILTER_FIELDS: FilterFieldConfig[] = [
-  { key: "agent", label: "Agent", allLabel: "All agents", placeholder: "All agents", options: REGISTRATION_AGENT_OPTIONS },
-  { key: "type", label: "Type", allLabel: "All types", placeholder: "All types", options: REGISTRATION_TYPE_OPTIONS },
-  { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All kebeles", options: REGISTRATION_KEBELE_OPTIONS },
+  { key: "agent", label: "Agent", allLabel: "All agents", placeholder: "All Agents", options: REGISTRATION_AGENT_OPTIONS },
+  { key: "type", label: "Type", allLabel: "All types", placeholder: "All Types", options: REGISTRATION_TYPE_OPTIONS },
+  { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All Kebeles", options: REGISTRATION_KEBELE_OPTIONS },
   { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: REGISTRATION_STATUS_OPTIONS },
 ];

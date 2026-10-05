@@ -12,7 +12,6 @@ import { FormField } from "@/components/ui/FormField";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { StatCard } from "@/components/ui/StatCard";
-import { useAuthStore } from "@/store/useAuthStore";
 import { ACTIVE_TONE, APPROVAL_TONE, FAYDA_TONE, ONBOARDING_QUEUE, PUBLICATION_TONE, SYNC_EVENTS } from "@/features/agents";
 import type { Agent } from "@/features/agents";
 import { downloadCsv } from "@/lib/download";
@@ -54,9 +53,8 @@ function Field({ label, value, mono }: { label: string; value: string; mono?: bo
   );
 }
 
-// Appendix C.2 "DA profile 360": tabs Overview / Activity / Documents / History; Suggest correction; Initiate lifecycle (Part 2 hand-off).
+// Appendix C.2 "DA profile 360": tabs Overview / Activity / Documents / History; Suggest correction.
 export function AgentProfile({ agent }: { agent: Agent }) {
-  const role = useAuthStore((s) => s.role);
   const [tab, setTab] = useState<Tab>("overview");
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -64,14 +62,13 @@ export function AgentProfile({ agent }: { agent: Agent }) {
   const initials = agent.fullName.split(" ").map((p) => p[0]).slice(0, 2).join("");
   const onboarding = ONBOARDING_QUEUE.find((o) => o.daId === agent.daId);
   const syncEvents = SYNC_EVENTS.filter((e) => e.entityRef.startsWith(agent.daId));
-  const canInitiateLifecycle = role === "Supervisor" || role === "Admin";
 
   return (
     <div className="flex w-full flex-col gap-4">
       <BackLink href="/agents" label="Back to Agents" />
 
       {/* Header */}
-      <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="shadow-card">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-green text-[20px] font-bold text-white">{initials}</div>
@@ -88,13 +85,6 @@ export function AgentProfile({ agent }: { agent: Agent }) {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <button type="button" onClick={() => setCorrectionOpen(true)} className="inline-flex h-9 items-center whitespace-nowrap rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green transition-colors hover:bg-brand-wash">Suggest correction</button>
-            {canInitiateLifecycle && (
-              <span title="Available in Part 2 — DA lifecycle transitions (transfer, promotion, leave, retirement…).">
-                <button type="button" disabled aria-disabled="true" title="Available in Part 2" className="inline-flex h-9 cursor-not-allowed items-center gap-2 whitespace-nowrap rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white opacity-50">
-                  Initiate lifecycle <span className="rounded bg-white/20 px-1.5 text-[10px] uppercase tracking-wider">Part 2</span>
-                </button>
-              </span>
-            )}
           </div>
         </div>
       </Card>
@@ -108,7 +98,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
 
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <SegmentTabs<Tab> tabs={[{ key: "overview", label: "Overview" }, { key: "activity", label: "Activity" }, { key: "documents", label: "Documents", count: DOCUMENTS.length }, { key: "history", label: "History" }]} active={tab} onChange={setTab} />
 
         {tab === "overview" && (

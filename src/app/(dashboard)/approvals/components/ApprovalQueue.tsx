@@ -46,7 +46,7 @@ export function ApprovalQueue({
 }: ApprovalQueueProps) {
   const ids = checkedInView.map((r) => r.id);
   return (
-    <Card className="flex flex-col overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="flex flex-col overflow-hidden p-0 shadow-card">
       {/* Bulk actions */}
       <div className="flex items-center justify-between gap-2 px-4 py-3">
         <label className="flex items-center gap-2.5 text-[13px] font-semibold text-brand-green">
