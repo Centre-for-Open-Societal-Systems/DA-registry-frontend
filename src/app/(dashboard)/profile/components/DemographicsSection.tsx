@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent, type ReactNode } from "react";
-import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
@@ -10,13 +9,16 @@ import { Select } from "@/components/ui/Select";
 import { FormField } from "@/components/ui/FormField";
 import { ProfilePhotoUpload } from "@/features/farmers";
 import { AGENT_PROFILE } from "@/features/farmers";
+import { PersonAvatar } from "@/components/ui/PersonAvatar";
 import { cn } from "@/lib/utils";
 
 const [FIRST_NAME, ...REST] = AGENT_PROFILE.name.split(" ");
 
+// Person avatar in place of a photo.
+const AVATAR = <PersonAvatar label={`${AGENT_PROFILE.name} avatar`} />;
+
 // Pre-filled with the signed-in agent's current profile until the profile API lands
 const CURRENT_PROFILE = {
-  photo: "/images/tadesse_profile.png",
   firstName: FIRST_NAME,
   lastName: REST.join(" "),
   mobile: AGENT_PROFILE.phone,
@@ -131,7 +133,7 @@ export function DemographicsSection({ editing, onEdit, onCancel, onSubmit }: Dem
             {error && <Banner tone="error">{error}</Banner>}
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[215px_1fr] lg:gap-10">
-              <ProfilePhotoUpload initialPreview={p.photo} name="photo" showActions={false} />
+              <ProfilePhotoUpload name="photo" showActions={false} fallback={AVATAR} />
 
               <div className="grid grid-cols-1 content-start gap-x-6 gap-y-5 md:grid-cols-2 xl:grid-cols-3">
                 <LockedField label="First Name" value={p.firstName} required />
@@ -187,7 +189,7 @@ export function DemographicsSection({ editing, onEdit, onCancel, onSubmit }: Dem
           <span className="text-[14px] font-medium text-ink">Profile Photo</span>
           <div className="flex flex-col items-center gap-3 rounded-lg border-2 border-dashed border-gray-300 px-4 py-6 text-center">
             <div className="h-20 w-20 overflow-hidden rounded-full bg-zinc-200">
-              <Image src={p.photo} alt={`${AGENT_PROFILE.name} profile photo`} width={80} height={80} className="h-full w-full object-cover" />
+              {AVATAR}
             </div>
             <p className="text-[13px] text-muted">Change your photo from Edit profile. JPG or PNG up to 5MB.</p>
           </div>

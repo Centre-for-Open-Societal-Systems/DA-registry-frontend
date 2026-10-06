@@ -38,7 +38,7 @@ export function AddDependentModal({ isOpen, onClose, onSubmit }: AddDependentMod
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Add dependent"
+      title="Add Dependent"
       bodyClassName="px-4 py-4"
       footer={
         <>

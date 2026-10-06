@@ -24,7 +24,7 @@ export function ContactAdminModal({ isOpen, onClose }: { isOpen: boolean; onClos
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={close} title="Request portal access" subtitle="Accounts are created by your Woreda or regional administrator — there is no self-registration.">
+    <Modal isOpen={isOpen} onClose={close} title="Request Portal Access" subtitle="Accounts are created by your Woreda or regional administrator — there is no self-registration.">
       {sentTo ? (
         <div className="flex flex-col gap-4">
           <Banner tone="success" title="Access request sent">

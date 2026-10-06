@@ -1,6 +1,6 @@
 import type { PillTone } from "@/components/ui/Pill";
 
-// FR-09d Farmer Satisfaction Surveys — DA-side response collection (Part 1). Design/deploy/analyse are Part 2.
+// FR-09d Farmer Satisfaction Surveys — DA-side response collection; Supervisors publish templates (see templates.ts). Analysis is Part 2.
 
 export type ResponseType = "consent" | "auto" | "lookup" | "rating" | "single" | "multi" | "text";
 

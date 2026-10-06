@@ -2,10 +2,12 @@
 
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { RowAction } from "@/components/ui/RowAction";
 import { cn } from "@/lib/utils";
+
+const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 
 interface UploadedDocument {
   id: string;
@@ -16,24 +18,30 @@ interface UploadedDocument {
 }
 
 const SAMPLE_DOCUMENTS: UploadedDocument[] = [
-  { id: "1", type: "ID Proof", fileName: "householdID.png", description: "Household ID added for 2 members" },
-  { id: "2", type: "ID Proof", fileName: "householdID.png", description: "Household ID added for 2 members" },
+  { id: "1", type: "Fayda ID", fileName: "fayda-id-front.jpg", description: "National ID (front) for the household head" },
+  { id: "2", type: "Household ID", fileName: "household-id.png", description: "Household ID covering 2 members" },
 ];
 
 export function IdDocumentsStep() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [documents, setDocuments] = useState<UploadedDocument[]>(SAMPLE_DOCUMENTS);
   const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const addFiles = (files: FileList | null) => {
     if (!files?.length) return;
-    const added = Array.from(files).map<UploadedDocument>((file) => ({
-      id: `${Date.now()}-${file.name}`,
-      type: "ID Proof",
-      fileName: file.name,
-      description: "Uploaded document",
-      url: URL.createObjectURL(file),
-    }));
+    const picked = Array.from(files);
+    const rejected = picked.filter((file) => !ACCEPTED_TYPES.includes(file.type) || file.size > MAX_SIZE_BYTES);
+    setError(rejected.length ? `${rejected.map((file) => file.name).join(", ")} skipped — use PDF, JPG or PNG up to 5 MB.` : null);
+    const added = picked
+      .filter((file) => !rejected.includes(file))
+      .map<UploadedDocument>((file) => ({
+        id: `${Date.now()}-${file.name}`,
+        type: "ID Proof",
+        fileName: file.name,
+        description: "Uploaded document",
+        url: URL.createObjectURL(file),
+      }));
     setDocuments((prev) => [...prev, ...added]);
   };
 
@@ -106,33 +114,38 @@ export function IdDocumentsStep() {
       </div>
 
       <div className="px-5 py-5">
-        {/* Drop zone */}
+        {/* Drop zone: the whole box opens the file picker */}
         <div
+          role="button"
+          tabIndex={0}
+          aria-label="Upload ID and documents"
+          onClick={() => inputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              inputRef.current?.click();
+            }
+          }}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           className={cn(
-            "mx-auto flex w-full max-w-[790px] flex-col items-center rounded-xl border-2 border-dashed bg-surface-alt px-6 py-7 text-center transition-colors",
-            isDragging ? "border-brand-green bg-brand-tint" : "border-gray-300"
+            "mx-auto flex w-full max-w-[790px] cursor-pointer flex-col items-center rounded-xl border-2 border-dashed px-6 py-8 text-center transition-colors focus:outline-none focus-visible:border-brand-green",
+            isDragging ? "border-brand-green bg-brand-tint" : "border-line bg-surface-alt hover:border-brand-green/50 hover:bg-brand-wash/40",
           )}
         >
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-ink-soft shadow-sm">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 7a2 2 0 0 1 2-2h4l2 2h10a2 2 0 0 1 2 2v1H2Z" />
-              <path d="M2 10h20l-1.5 8.5a2 2 0 0 1-2 1.5H5.5a2 2 0 0 1-2-1.5L2 10Z" />
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-tint text-brand-green">
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
             </svg>
-          </div>
+          </span>
 
-          <p className="mt-5 text-[14px] font-medium text-ink">Drag and drop files here</p>
-          <p className="mt-1 text-[14px] text-ink-soft">Or</p>
-          <p className="mt-1 text-[14px] font-medium text-ink">Click Browse files to select a file</p>
+          <p className="mt-4 text-[15px] font-semibold text-ink">
+            Drag and drop files here, or <span className="text-brand-green underline-offset-2 hover:underline">browse</span>
+          </p>
+          <p className="mt-1 text-[13px] text-muted">Fayda ID, household ID or land certificate · PDF, JPG or PNG up to 5 MB each</p>
 
-          <Button type="button" variant="brandOutline" size="md" onClick={() => inputRef.current?.click()} className="mt-4 gap-1.5">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            Browse Files
-          </Button>
+          {isDragging && <p className="mt-3 text-[13px] font-semibold text-brand-green">Drop to upload</p>}
 
           <input
             ref={inputRef}
@@ -143,6 +156,7 @@ export function IdDocumentsStep() {
             onChange={handleInputChange}
           />
         </div>
+        {error && <p className="mx-auto mt-2 max-w-[790px] text-[12.5px] text-danger">{error}</p>}
       </div>
 
       <DataTable
@@ -152,7 +166,7 @@ export function IdDocumentsStep() {
         minWidth="640px"
         itemLabel="documents"
         emptyTitle="No documents uploaded yet"
-        emptyHint="Drop files above or use Browse Files."
+        emptyHint="Drop files above or click the box to browse."
       />
     </Card>
   );

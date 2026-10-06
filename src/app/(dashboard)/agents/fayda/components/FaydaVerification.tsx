@@ -165,7 +165,7 @@ export function FaydaVerification() {
       </Card>
 
       {selected && (
-        <Modal isOpen onClose={() => setSelected(null)} title="Resolve identity mismatch" subtitle={`${selected.fullName} · ${selected.daId}`} size="lg"
+        <Modal isOpen onClose={() => setSelected(null)} title="Resolve Identity Mismatch" subtitle={`${selected.fullName} · ${selected.daId}`} size="lg"
           footer={<>
             <Button variant="outline" onClick={() => setSelected(null)}>Cancel</Button>
             <Button variant="outline" onClick={() => resolve(selected, "Escalate")}>Escalate to Fayda</Button>

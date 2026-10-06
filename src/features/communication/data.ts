@@ -28,6 +28,30 @@ export const ARTICLES: Article[] = [
 ];
 
 export const ARTICLE_CATEGORIES = Array.from(new Set(ARTICLES.map((a) => a.category)));
+
+export interface KnowledgeVideo {
+  id: string;
+  title: string;
+  category: Article["category"];
+  summary: string;
+  /** Opens on YouTube in a new tab. Topic searches until curated video links are supplied. */
+  url: string;
+  /** Cover photo in /public/images/knowledge (from Wikimedia Commons). */
+  image: string;
+  /** Photographer and licence, shown on the card as the licences require. */
+  imageCredit: string;
+}
+
+const youtubeSearch = (terms: string) => `https://www.youtube.com/results?search_query=${encodeURIComponent(terms)}`;
+
+// YouTube tab of the Knowledge Base: one video topic per article category.
+export const KNOWLEDGE_VIDEOS: KnowledgeVideo[] = [
+  { id: "yt-101", title: "Teff row planting in Ethiopia", category: "Crop production", summary: "Field demonstrations of row spacing, seed rate and shallow covering for teff.", url: youtubeSearch("teff row planting Ethiopia"), image: "/images/knowledge/teff-field.jpg", imageCredit: "Timothy A. Gonsalves · CC BY-SA 4.0" },
+  { id: "yt-102", title: "Fall armyworm scouting and control on maize", category: "Pest & disease", summary: "How to spot window-pane feeding and frass in the whorl, and when to act.", url: youtubeSearch("fall armyworm scouting maize Ethiopia"), image: "/images/knowledge/armyworm-spraying.jpg", imageCredit: "Tigana Chileshe · CC BY-SA 4.0" },
+  { id: "yt-103", title: "Livestock vaccination for cattle, sheep and goats", category: "Livestock", summary: "Anthrax, blackleg and PPR vaccination explained for smallholder herds.", url: youtubeSearch("cattle sheep goat vaccination anthrax blackleg PPR Ethiopia"), image: "/images/knowledge/cattle-herd.jpg", imageCredit: "Sonjamariavienna · CC BY-SA 4.0" },
+  { id: "yt-104", title: "Building and repairing soil bunds", category: "Soil & water", summary: "Soil and water conservation: laying out, compacting and repairing bunds.", url: youtubeSearch("soil bund construction soil water conservation Ethiopia"), image: "/images/knowledge/hillside-terraces.jpg", imageCredit: "USAID / Nena Terrell · Public domain" },
+  { id: "yt-105", title: "Farm credit and input loans for smallholders", category: "Markets & credit", summary: "How seasonal input loans work and how to plan repayment after harvest.", url: youtubeSearch("smallholder farmer input loan credit Ethiopia"), image: "/images/knowledge/grain-market.jpg", imageCredit: "David Stanley · CC BY 2.0" },
+];
 export const getArticle = (id: string) => ARTICLES.find((a) => a.id === id);
 
 export interface Signal {
@@ -60,6 +84,8 @@ export interface Dispatch {
   dispatchedBy: string;
   dispatchedAt: string;
   delivery: { delivered: number; failed: number; pending: number };
+  /** Evidence files (photos / PDFs) attached when the message was sent. */
+  evidence?: string[];
 }
 
 export const DISPATCHES: Dispatch[] = [

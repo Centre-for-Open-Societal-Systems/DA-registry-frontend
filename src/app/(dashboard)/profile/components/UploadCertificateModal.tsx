@@ -111,7 +111,7 @@ export function UploadCertificateModal({ isOpen, onClose, onSubmit }: UploadCert
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Upload certificate"
+      title="Upload Certificate"
       subtitle="Add an external certificate to your record"
       size="lg"
       bodyClassName="px-4 py-4 sm:px-6"

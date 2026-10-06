@@ -73,7 +73,7 @@ export const NAV_GROUPS: NavGroup[] = [
     title: "Communication",
     items: [
       { title: "Knowledge Base", href: "/knowledge", roles: ALL, part: 1 },
-      { title: "Broadcast", href: "/broadcast", roles: ["CommsOfficer", "Admin"], part: 1 },
+      { title: "Broadcast", href: "/broadcast", roles: ["DA", "CommsOfficer", "Admin"], part: 1 },
       { title: "Alerts", href: "/alerts", roles: ["CommsOfficer", "Admin", "Supervisor"], part: 1 },
     ],
   },

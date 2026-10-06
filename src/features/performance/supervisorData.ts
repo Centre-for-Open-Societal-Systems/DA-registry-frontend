@@ -101,16 +101,16 @@ export interface AgentPerformanceRow {
 }
 
 export const AGENT_PERFORMANCE: AgentPerformanceRow[] = [
-  { id: "p1", daId: "DA-OR-0412", name: "Almaz W.", kebele: "Bako Tibe", visits: 18, quality: 94, training: 100, status: "On track", tier: "T1" },
-  { id: "p2", daId: "DA-OR-0418", name: "Almaz W.", kebele: "Bako Tibe", visits: 14, quality: 78, training: 94, status: "Needs support", tier: "T2" },
-  { id: "p3", daId: "DA-OR-0431", name: "Bekele N.", kebele: "Koye Feche", visits: 11, quality: 91, training: 84, status: "Check in", tier: "T2" },
-  { id: "p4", daId: "DA-OR-0447", name: "Chaltu D.", kebele: "Dendi", visits: 20, quality: 86, training: 79, status: "On track", tier: "T3" },
-  { id: "p5", daId: "DA-OR-0452", name: "Almaz W.", kebele: "Bako Tibe", visits: 18, quality: 94, training: 100, status: "On track", tier: "T1" },
-  { id: "p6", daId: "DA-OR-0463", name: "Almaz W.", kebele: "Bako Tibe", visits: 14, quality: 78, training: 94, status: "Needs support", tier: "T2" },
-  { id: "p7", daId: "DA-OR-0470", name: "Bekele N.", kebele: "Koye Feche", visits: 11, quality: 91, training: 84, status: "Check in", tier: "T2" },
-  { id: "p8", daId: "DA-OR-0488", name: "Chaltu D.", kebele: "Dendi", visits: 20, quality: 86, training: 79, status: "On track", tier: "T3" },
-  { id: "p9", daId: "DA-OR-0491", name: "Almaz W.", kebele: "Bako Tibe", visits: 18, quality: 94, training: 100, status: "On track", tier: "T1" },
-  { id: "p10", daId: "DA-OR-0503", name: "Almaz W.", kebele: "Bako Tibe", visits: 9, quality: 58, training: 55, status: "Needs support", tier: "T4" },
+  { id: "p1", daId: "DA-OR-0412", name: "Almaz W.", kebele: "Kebele 05", visits: 18, quality: 94, training: 100, status: "On track", tier: "T1" },
+  { id: "p2", daId: "DA-OR-0418", name: "Bekele N.", kebele: "Kebele 12", visits: 15, quality: 82, training: 92, status: "On track", tier: "T2" },
+  { id: "p3", daId: "DA-OR-0431", name: "Chaltu D.", kebele: "Kebele 07", visits: 11, quality: 88, training: 84, status: "Check in", tier: "T2" },
+  { id: "p4", daId: "DA-OR-0447", name: "Dawit G.", kebele: "Kebele 09", visits: 9, quality: 71, training: 76, status: "Needs support", tier: "T3" },
+  { id: "p5", daId: "DA-OR-0452", name: "Hana T.", kebele: "Chefe", visits: 20, quality: 96, training: 100, status: "On track", tier: "T1" },
+  { id: "p6", daId: "DA-OR-0463", name: "Kedir A.", kebele: "Kebele 01", visits: 16, quality: 79, training: 88, status: "On track", tier: "T2" },
+  { id: "p7", daId: "DA-OR-0470", name: "Lensa M.", kebele: "Kebele 07", visits: 12, quality: 66, training: 82, status: "Check in", tier: "T3" },
+  { id: "p8", daId: "DA-OR-0488", name: "Mulugeta F.", kebele: "Kebele 09", visits: 17, quality: 85, training: 95, status: "On track", tier: "T2" },
+  { id: "p9", daId: "DA-OR-0491", name: "Selam K.", kebele: "Chefe", visits: 19, quality: 91, training: 100, status: "On track", tier: "T1" },
+  { id: "p10", daId: "DA-OR-0503", name: "Yared B.", kebele: "Kebele 12", visits: 7, quality: 55, training: 52, status: "Needs support", tier: "T4" },
 ];
 
 export const TOTAL_DA_IDENTIFIERS = 8412;
@@ -138,9 +138,9 @@ export const PERFORMANCE_FILTER_FIELDS: FilterFieldConfig[] = [
 ];
 
 // KPI entry / import form options
-export const REPORTING_PERIODS = ["Q2 2024 (Apr - Jun)", "Q1 2024 (Jan - Mar)", "Q4 2023 (Oct - Dec)", "Q3 2023 (Jul - Sep)"];
+export const REPORTING_PERIODS = ["Q3 2026 (Jul - Sep)", "Q2 2026 (Apr - Jun)", "Q1 2026 (Jan - Mar)", "Q4 2025 (Oct - Dec)"];
 export const WOREDA_REGIONS = ["Adama Woreda, Oromia", "Bishoftu Woreda, Oromia", "Dendi Woreda, Oromia"];
-export const DEVELOPMENT_AGENTS = ["Abebe Bikila", "Almaz Worku", "Bekele Negash", "Chaltu Dida"];
-export const ASSIGNED_KEBELES = ["Malka Adama, Kebele 01", "Bako Tibe, Kebele 02", "Koye Feche, Kebele 03", "Dendi, Kebele 04"];
+export const DEVELOPMENT_AGENTS = ["Almaz Wolde", "Bekele Negash", "Chaltu Dida", "Tadesse Alemu"];
+export const ASSIGNED_KEBELES = ["Adama, Kebele 01", "Adama, Kebele 05", "Adama, Kebele 07", "Adama, Kebele 12"];
 
 export const KPI_IMPORT_MAX_BYTES = 5 * 1024 * 1024;

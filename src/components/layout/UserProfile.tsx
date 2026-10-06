@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+import { PersonAvatar } from "@/components/ui/PersonAvatar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -16,7 +16,6 @@ export function UserProfile() {
   const [isConfirmingLogout, setIsConfirmingLogout] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const name = user?.name ?? "Tadesse Alemu";
-  const initials = name.split(" ").map((p) => p[0]).slice(0, 2).join("");
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -43,19 +42,8 @@ export function UserProfile() {
         className={`flex items-center gap-3 py-1.5 pl-1.5 pr-4 border transition-all duration-300 bg-white group active:scale-[0.98] w-full ${isOpen ? 'rounded-t-[20px] rounded-b-none border-zinc-200 border-b-transparent shadow-[0_-4px_10px_-5px_rgba(0,0,0,0.05)] relative z-[61]' : 'rounded-full border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-md'
           }`}
       >
-        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-gold text-[13px] font-bold text-brand-green-deep shadow-inner">
-          {/* The portal ships a photo for the DA only; every other signed-in role falls back to initials. */}
-          {role === "DA" ? (
-            <Image
-              src="/images/tadesse_profile.png"
-              alt="Profile"
-              width={36}
-              height={36}
-              className="w-full h-full object-cover group-hover:scale-[1.3] group-hover:rotate-12 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-            />
-          ) : (
-            initials
-          )}
+        <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full shadow-inner">
+          <PersonAvatar />
         </div>
         <div className="hidden text-left sm:block">
           <p className="text-[14px] font-bold leading-tight text-gray-900">
@@ -102,7 +90,7 @@ export function UserProfile() {
       <Modal
         isOpen={isConfirmingLogout}
         onClose={() => setIsConfirmingLogout(false)}
-        title="Log out?"
+        title="Log Out?"
         icon={
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-danger-tint text-danger">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">

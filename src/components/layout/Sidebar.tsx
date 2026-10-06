@@ -29,7 +29,7 @@ interface NavItemProps {
 // Part 2 items are rendered disabled so the §2.4 nav shape is complete without dead routes.
 function NavItem({ item, active, expanded, onNavigate, onHover }: NavItemProps) {
   const disabled = item.part === 2;
-  const label = disabled ? `${item.title} · Part 2 (coming soon)` : item.title;
+  const label = disabled ? `${item.title} · Part 2 preview` : item.title;
   const className = cn(
     "flex items-center gap-3.5 h-11 rounded-lg text-[14.5px] transition-all duration-200",
     active ? "bg-brand-green-bright text-white font-semibold shadow-sm" : "text-sidebar-text",
@@ -48,7 +48,7 @@ function NavItem({ item, active, expanded, onNavigate, onHover }: NavItemProps) 
         )}
       >
         <span className="truncate">{item.title}</span>
-        {disabled && <span className="shrink-0 rounded bg-white/15 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider">P2</span>}
+        {disabled && <span className="shrink-0 rounded bg-white/15 px-1.5 py-px text-[10px] font-semibold ">Part 2 preview</span>}
       </span>
     </>
   );

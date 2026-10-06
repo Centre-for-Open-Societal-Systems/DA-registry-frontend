@@ -1,7 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
+import { FormField } from "@/components/ui/FormField";
+import { Select } from "@/components/ui/Select";
+import { SEGMENTS, segmentName, useBeneficiariesStore } from "@/features/beneficiaries";
 import { AdvancedFiltersButton } from "@/components/ui/AdvancedFiltersButton";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -49,14 +55,32 @@ const EXPORT_COLUMNS: CsvColumn<Farmer>[] = [
 ];
 
 export function FarmersTable() {
-  // First four rows start selected, matching the design's selected-state example.
-  const [selected, setSelected] = useState<Set<string>>(
-    () => new Set(FARMERS.slice(0, 4).map((f) => f.id)),
-  );
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [filters, setFilters] = useState<FarmerFilters>(EMPTY_FILTERS);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<ReactNode>(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [segmentId, setSegmentId] = useState(SEGMENTS[0].id);
+  const linkBeneficiaries = useBeneficiariesStore((s) => s.link);
+
+  const selectedFarmers = FARMERS.filter((f) => selected.has(f.id));
+
+  const addToBeneficiaries = () => {
+    const { added, skipped } = linkBeneficiaries([...selected], segmentId);
+    const parts = [
+      added.length > 0 && `${added.length} farmer${added.length === 1 ? "" : "s"} added to “${segmentName(segmentId)}” — Pending verification.`,
+      skipped.length > 0 && `Already in this segment: ${skipped.join(", ")}.`,
+    ].filter(Boolean);
+    setNotice(
+      <>
+        {parts.join(" ")}{" "}
+        <Link href="/beneficiaries" className="font-semibold underline">View beneficiaries</Link>
+      </>,
+    );
+    setSelected(new Set());
+    setIsAddOpen(false);
+  };
 
   const rows = applyFilters(FARMERS, filters).filter((farmer) => matchesQuery(query, farmer));
   const activeFilterCount = countActiveFilters(filters);
@@ -92,6 +116,12 @@ export function FarmersTable() {
           <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
 
           <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
+
+          {selected.size > 0 && (
+            <Button variant="brand" size="md" onClick={() => { setSegmentId(SEGMENTS[0].id); setIsAddOpen(true); }}>
+              Add to beneficiaries ({selected.size})
+            </Button>
+          )}
 
           <ExportButton
             disabled={rows.length === 0}
@@ -155,7 +185,7 @@ export function FarmersTable() {
                       <FarmerAvatar name={farmer.name} avatar={farmer.avatar} />
                       <div className="leading-tight">
                         <p className="font-medium text-ink">{farmer.name}</p>
-                        <p className="mt-0.5 text-[13px] text-muted">{farmer.email}</p>
+                        <p className="mt-0.5 text-[13px] text-muted">{farmer.phone}</p>
                       </div>
                     </div>
                   </td>
@@ -196,6 +226,34 @@ export function FarmersTable() {
           })
         }
       />
+
+      <Modal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        title="Add to Beneficiaries"
+        subtitle={`${selectedFarmers.length} farmer${selectedFarmers.length === 1 ? "" : "s"} selected`}
+        footer={<><Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button><Button variant="brand" onClick={addToBeneficiaries}>Add</Button></>}
+      >
+        <div className="flex flex-col gap-4">
+          <FormField label="Segment" htmlFor="bulk-segment" required hint="Membership is verified against the segment rule before enrolment.">
+            <Select id="bulk-segment" value={segmentId} onChange={(e) => setSegmentId(e.target.value)}>
+              {SEGMENTS.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </Select>
+          </FormField>
+          <div>
+            <p className="text-[14px] font-medium text-ink">Farmers</p>
+            <ul className="mt-2 flex max-h-[220px] flex-col gap-2 overflow-y-auto">
+              {selectedFarmers.map((f) => (
+                <li key={f.id} className="flex items-center gap-2.5 text-[14px]">
+                  <FarmerAvatar name={f.name} avatar={f.avatar} />
+                  <span className="text-ink">{f.name}</span>
+                  <span className="text-[13px] text-muted">{f.kebele} · {f.crop}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </Modal>
     </Card>
   );
 }

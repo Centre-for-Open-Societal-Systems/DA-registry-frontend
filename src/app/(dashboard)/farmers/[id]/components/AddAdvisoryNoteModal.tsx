@@ -15,7 +15,7 @@ export function AddAdvisoryNoteModal({ isOpen, onClose }: AddAdvisoryNoteModalPr
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Add advisory note"
+      title="Add Advisory Note"
       footer={
         <>
           <Button type="button" variant="outline" onClick={onClose}>

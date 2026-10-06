@@ -74,7 +74,7 @@ export function ApprovalQueue({
       </div>
 
       {/* Kind tabs */}
-      <div role="tablist" className="flex overflow-x-auto border-y border-line">
+      <div role="tablist" className="flex flex-wrap border-y border-line">
         {APPROVAL_TABS.map((t) => {
           const active = t.key === tab;
           return (

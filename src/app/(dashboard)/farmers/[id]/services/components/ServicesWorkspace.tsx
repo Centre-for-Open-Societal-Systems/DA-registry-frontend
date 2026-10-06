@@ -148,7 +148,7 @@ export function ServicesWorkspace({ farmer }: { farmer: Farmer }) {
       </Card>
 
       {/* FR-05b-v mobile credit-application capture */}
-      <Modal isOpen={newCredit} onClose={() => setNewCredit(false)} title="New credit application" subtitle={`${farmer.name} · ${farmer.id} · Fayda ${farmer.status}`} size="lg"
+      <Modal isOpen={newCredit} onClose={() => setNewCredit(false)} title="New Credit Application" subtitle={`${farmer.name} · ${farmer.id} · Fayda ${farmer.status}`} size="lg"
         footer={<><Button variant="outline" onClick={() => setNewCredit(false)}>Cancel</Button><Button variant="brand" disabled={!credit.amount || credit.purpose.trim().length < 3 || farmer.status !== "Verified"} onClick={submitCredit}>Submit application</Button></>}
       >
         {farmer.status !== "Verified" && <Banner tone="warning" className="mb-4">This farmer is not Fayda-verified. A credit application requires a verified identity.</Banner>}

@@ -9,6 +9,7 @@ import { HoldingsSection } from "./components/HoldingsSection";
 import { CropHistorySection } from "./components/CropHistorySection";
 import { VisitHistorySection } from "./components/VisitHistorySection";
 import { DocumentsSection } from "./components/DocumentsSection";
+import { AdvisorySection } from "./components/AdvisorySection";
 import { BackLink } from "@/components/ui/BackLink";
 
 export async function generateMetadata(props: PageProps<"/farmers/[id]">): Promise<Metadata> {
@@ -37,6 +38,7 @@ export default async function FarmerProfilePage(props: PageProps<"/farmers/[id]"
           "Crop history": <CropHistorySection />,
           "Visit history": <VisitHistorySection />,
           Documents: <DocumentsSection />,
+          Advisory: <AdvisorySection farmerId={farmer.id} />,
         }}
       />
     </div>

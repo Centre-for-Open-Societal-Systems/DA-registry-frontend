@@ -20,10 +20,27 @@ export const VISIT_STATS = {
 };
 
 const FARMERS = {
-  lelise: { id: "lelise-gudeta", name: "Lelise Gudeta", email: "lelise.gudeta@oan.gov.et" },
-  chaltu: { id: "chaltu-dinkesa", name: "Chaltu Dinkesa", email: "chaltu.dinkesa@oan.gov.et" },
-  abebe: { id: "abebe-kebede", name: "Abebe Kebede", email: "abebe.kebede@oan.gov.et" },
-  tadesse: { id: "tadesse-alemu", name: "Tadesse Alemu", email: "tadesse.alemu@oan.gov.et", avatar: "/images/tadesse_profile.png" },
+  lelise: { id: "lelise-gudeta", name: "Lelise Gudeta", email: "lelise.gudeta@gmail.com", kebele: "Bako Tibe", plotRef: "BT-0472" },
+  meseret: { id: "meseret-tolera", name: "Meseret Tolera", email: "meseret.tolera@gmail.com", kebele: "Bako Tibe", plotRef: "BT-0518" },
+  abebe: { id: "abebe-kebede", name: "Abebe Kebede", email: "abebe.kebede@gmail.com", kebele: "Gedo", plotRef: "GD-0318" },
+  hirut: { id: "hirut-fikadu", name: "Hirut Fikadu", email: "hirut.fikadu@gmail.com", kebele: "Gedo", plotRef: "GD-0342" },
+  chaltu: { id: "chaltu-dinkesa", name: "Chaltu Dinkesa", email: "chaltu.dinkesa@gmail.com", kebele: "Lume", plotRef: "LM-1127" },
+  tigist: { id: "tigist-worku", name: "Tigist Worku", email: "tigist.worku@gmail.com", kebele: "Lume", plotRef: "LM-1164" },
+  tadesse: { id: "tadesse-alemu", name: "Tadesse Alemu", email: "tadesse.alemu@gmail.com", kebele: "Dendi", plotRef: "DN-0207", avatar: "/images/tadesse_profile.png" },
+  dawit: { id: "dawit-negash", name: "Dawit Negash", email: "dawit.negash@gmail.com", kebele: "Dendi", plotRef: "DN-0233" },
+  gemechu: { id: "gemechu-bekele", name: "Gemechu Bekele", email: "gemechu.bekele@gmail.com", kebele: "Adea", plotRef: "AD-0611" },
+  kedir: { id: "kedir-mohammed", name: "Kedir Mohammed", email: "kedir.mohammed@gmail.com", kebele: "Adea", plotRef: "AD-0645" },
+};
+
+// Typical on-site time per visit purpose.
+const DURATION_MIN: Record<string, number> = {
+  "Crop inspection": 45,
+  "Input advisory": 30,
+  "Pest follow-up": 40,
+  Registration: 60,
+  "Harvest survey": 50,
+  "Soil sampling": 55,
+  "Follow-up": 25,
 };
 
 const visit = (
@@ -32,7 +49,6 @@ const visit = (
   time: string,
   agent: string,
   farmer: (typeof FARMERS)[keyof typeof FARMERS],
-  kebele: string,
   purpose: string,
   status: VisitRecord["status"],
   assignedBy?: string,
@@ -45,30 +61,30 @@ const visit = (
   farmerName: farmer.name,
   farmerEmail: farmer.email,
   farmerAvatar: "avatar" in farmer ? farmer.avatar : undefined,
-  kebele,
+  kebele: farmer.kebele,
   purpose,
   status,
-  plotRef: "BT-0472",
-  durationMin: 45,
+  plotRef: farmer.plotRef,
+  durationMin: DURATION_MIN[purpose] ?? 45,
   assignedBy,
 });
 
 export const VISITS: VisitRecord[] = [
-  visit("v-1001", "Sep 08, 2026", "14:20", "Almaz W.", FARMERS.lelise, "Bako Tibe", "Crop inspection", "Confirmed"),
-  visit("v-1002", "Sep 08, 2026", "11:30", "Almaz W.", FARMERS.chaltu, "Bako Tibe", "Input advisory", "Planned"),
-  visit("v-1003", "Sep 08, 2026", "09:20", "Bekele N.", FARMERS.abebe, "Koye Feche", "Pest follow-up", "Confirmed"),
-  visit("v-1004", "Sep 09, 2026", "09:20", "Chaltu D.", FARMERS.tadesse, "Dendi", "Registration", "Planned"),
-  visit("v-1005", "Sep 10, 2026", "09:20", "Almaz W.", FARMERS.lelise, "Koye Feche", "Pest follow-up", "Planned"),
-  visit("v-1006", "Sep 12, 2026", "09:20", "Dawit M.", FARMERS.chaltu, "Bako Tibe", "Harvest survey", "Completed"),
-  visit("v-1007", "Sep 12, 2026", "09:20", "Almaz W.", FARMERS.tadesse, "Adea", "Crop inspection", "Missed"),
-  visit("v-1008", "Sep 14, 2026", "09:20", "Bekele N.", FARMERS.abebe, "Bako Tibe", "Input advisory", "Completed"),
-  visit("v-1009", "Sep 15, 2026", "10:00", "Chaltu D.", FARMERS.lelise, "Bako Tibe", "Soil sampling", "Planned"),
-  visit("v-1010", "Sep 16, 2026", "08:45", "Dawit M.", FARMERS.abebe, "Gedo", "Follow-up", "Confirmed"),
+  visit("v-1001", "Sep 08, 2026", "14:20", "Almaz W.", FARMERS.lelise, "Crop inspection", "Confirmed"),
+  visit("v-1002", "Sep 08, 2026", "11:30", "Almaz W.", FARMERS.chaltu, "Input advisory", "Planned"),
+  visit("v-1003", "Sep 08, 2026", "09:20", "Bekele N.", FARMERS.abebe, "Pest follow-up", "Confirmed"),
+  visit("v-1004", "Sep 09, 2026", "10:15", "Genet D.", FARMERS.dawit, "Registration", "Planned"),
+  visit("v-1005", "Sep 10, 2026", "15:00", "Almaz W.", FARMERS.tigist, "Pest follow-up", "Planned"),
+  visit("v-1006", "Sep 12, 2026", "08:40", "Dawit M.", FARMERS.meseret, "Harvest survey", "Completed"),
+  visit("v-1007", "Sep 12, 2026", "13:10", "Almaz W.", FARMERS.gemechu, "Crop inspection", "Missed"),
+  visit("v-1008", "Sep 14, 2026", "11:00", "Bekele N.", FARMERS.hirut, "Input advisory", "Completed"),
+  visit("v-1009", "Sep 15, 2026", "10:00", "Genet D.", FARMERS.kedir, "Soil sampling", "Planned"),
+  visit("v-1010", "Sep 16, 2026", "08:45", "Dawit M.", FARMERS.tadesse, "Follow-up", "Confirmed"),
   // Assigned by the Woreda supervisor to the demo DA (Tadesse Alemu) — the only visits the DA sees.
-  visit("v-1011", "Sep 08, 2026", "08:30", "Tadesse A.", FARMERS.lelise, "Bako Tibe", "Crop inspection", "Completed", "Almaz Tesfaye"),
-  visit("v-1012", "Sep 10, 2026", "10:00", "Tadesse A.", FARMERS.abebe, "Bako Tibe", "Pest follow-up", "Missed", "Almaz Tesfaye"),
-  visit("v-1013", "Sep 15, 2026", "09:00", "Tadesse A.", FARMERS.chaltu, "Bako Tibe", "Input advisory", "Confirmed", "Almaz Tesfaye"),
-  visit("v-1014", "Sep 17, 2026", "14:00", "Tadesse A.", FARMERS.lelise, "Bako Tibe", "Harvest survey", "Planned", "Almaz Tesfaye"),
+  visit("v-1011", "Sep 07, 2026", "08:30", "Tadesse A.", FARMERS.lelise, "Soil sampling", "Completed", "Almaz Tesfaye"),
+  visit("v-1012", "Sep 09, 2026", "14:30", "Tadesse A.", FARMERS.meseret, "Pest follow-up", "Missed", "Almaz Tesfaye"),
+  visit("v-1013", "Sep 15, 2026", "09:00", "Tadesse A.", FARMERS.hirut, "Crop inspection", "Confirmed", "Almaz Tesfaye"),
+  visit("v-1014", "Sep 17, 2026", "14:00", "Tadesse A.", FARMERS.tigist, "Harvest survey", "Planned", "Almaz Tesfaye"),
 ];
 
 /** Short agent label used in the visits table, e.g. "Tadesse Alemu" -> "Tadesse A.". */
@@ -103,14 +119,14 @@ export function getVisit(id: string): VisitRecord | undefined {
 export const VISIT_AGENT_OPTIONS: FilterOption[] = [
   { value: "Almaz W.", label: "Almaz Wolde", count: 1420 },
   { value: "Bekele N.", label: "Bekele Negash", count: 1188 },
-  { value: "Chaltu D.", label: "Chaltu Dinkesa", count: 964 },
+  { value: "Genet D.", label: "Genet Desta", count: 964 },
   { value: "Dawit M.", label: "Dawit Mekonnen", count: 840 },
   { value: "Tadesse A.", label: "Tadesse Alemu", count: 4 },
 ];
 
 export const VISIT_KEBELE_OPTIONS: FilterOption[] = [
   { value: "Bako Tibe", label: "Bako Tibe", count: 2210 },
-  { value: "Koye Feche", label: "Koye Feche", count: 1560 },
+  { value: "Lume", label: "Lume", count: 1560 },
   { value: "Dendi", label: "Dendi", count: 1204 },
   { value: "Adea", label: "Adea", count: 980 },
   { value: "Gedo", label: "Gedo", count: 812 },
@@ -149,7 +165,7 @@ export const RESCHEDULE_REASONS = [
 
 export const PLANNER_WEEK = {
   month: "June 2026",
-  range: "Week of 24-30 June 2024",
+  range: "Week of 24-30 June 2026",
   todayLabel: "Mon 24 June",
 };
 
@@ -214,8 +230,8 @@ export const ACTIVITY_REPORT = {
 };
 
 export const SUBMITTED_OUTCOMES: SubmittedOutcome[] = [
-  { farmerName: "Lelise Gudeta", kebele: "Bako Tibe kebele", purpose: "Advisory — teff rust", summary: "Fungicide advice issued; follow-up 12 Aug", date: "Jun 24, 2016" },
-  { farmerName: "Abebe Kebede", kebele: "Gedo kebele", purpose: "Input check", summary: "Voucher issue logged as grievance", date: "Jun 24, 2016" },
-  { farmerName: "Chaltu Dinkesa", kebele: "Lume kebele", purpose: "Registration", summary: "2 farmers registered; synced", date: "Jun 24, 2016" },
-  { farmerName: "Tadesse Alemu", kebele: "Dendi kebele", purpose: "Advisory — storage", summary: "Advised hermetic bags; farmer to procure", date: "Jun 24, 2016" },
+  { farmerName: "Lelise Gudeta", kebele: "Bako Tibe kebele", purpose: "Advisory — teff rust", summary: "Fungicide advice issued; follow-up 12 Aug", date: "Jun 24, 2026" },
+  { farmerName: "Abebe Kebede", kebele: "Gedo kebele", purpose: "Input check", summary: "Voucher issue logged as grievance", date: "Jun 25, 2026" },
+  { farmerName: "Chaltu Dinkesa", kebele: "Lume kebele", purpose: "Registration", summary: "2 farmers registered; synced", date: "Jun 26, 2026" },
+  { farmerName: "Tadesse Alemu", kebele: "Dendi kebele", purpose: "Advisory — storage", summary: "Advised hermetic bags; farmer to procure", date: "Jun 27, 2026" },
 ];

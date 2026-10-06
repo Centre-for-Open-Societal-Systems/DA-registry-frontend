@@ -30,7 +30,7 @@ export function VisitLocationsButton() {
       <Modal
         isOpen={locationsOpen}
         onClose={() => setLocationsOpen(false)}
-        title="Today's visit locations"
+        title="Today's Visit Locations"
         subtitle={`${TODAYS_VISITS.length} visits · ${PLANNER_WEEK.todayLabel} · in the order you arranged them`}
         size="lg"
         footer={

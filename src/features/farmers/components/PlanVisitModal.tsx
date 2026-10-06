@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/Button";
 import type { Farmer } from "../types";
 import { FarmerPicker } from "./FarmerPicker";
 import { FarmerSearch } from "./FarmerSearch";
-import { FORM_ID, type VisitPreset } from "./planVisit";
+import { ADVISORY_VISIT, FORM_ID, type VisitPreset } from "./planVisit";
+import { AdvisoryQaFields } from "./AdvisoryQaFields";
 import { PlanVisitSuccess } from "./PlanVisitSuccess";
 import { usePlanVisit } from "./usePlanVisit";
 import { VisitDetailsFields } from "./VisitDetailsFields";
@@ -28,7 +29,7 @@ export function PlanVisitModal({ farmer, isOpen, onClose, mode = "plan", preset 
   const v = usePlanVisit(farmer, preset);
 
   const isSchedule = mode === "schedule";
-  const title = isSchedule ? "Schedule visit" : "Plan a visit";
+  const title = isSchedule ? "Schedule Visit" : "Plan a Visit";
   const subtitle = isSchedule ? "Schedule a field visit and notify the farmer" : "Plan a field visit and notify the farmer";
   const primaryLabel = isSchedule ? "Schedule" : "Plan visit";
 
@@ -69,7 +70,7 @@ export function PlanVisitModal({ farmer, isOpen, onClose, mode = "plan", preset 
       }
     >
       {v.result ? (
-        <PlanVisitSuccess result={v.result} visitType={v.visitType} isSchedule={isSchedule} />
+        <PlanVisitSuccess result={v.result} visitType={v.visitType} isSchedule={isSchedule} questionCount={v.visitType === ADVISORY_VISIT ? v.advisoryQa.filter((qa) => qa.question.trim()).length : 0} />
       ) : (
       <form
         id={FORM_ID}
@@ -89,6 +90,7 @@ export function PlanVisitModal({ farmer, isOpen, onClose, mode = "plan", preset 
           onClearSearch={() => v.changeQuery("")}
         />
         <VisitTypePicker value={v.visitType} onChange={v.setVisitType} />
+        {v.visitType === ADVISORY_VISIT && <AdvisoryQaFields items={v.advisoryQa} onChange={v.setAdvisoryQa} />}
         <VisitDetailsFields selected={v.selected} preset={preset} isSchedule={isSchedule} />
       </form>
       )}

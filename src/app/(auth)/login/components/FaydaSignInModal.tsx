@@ -64,7 +64,7 @@ export function FaydaSignInModal({ isOpen, onClose, onSignedIn }: FaydaSignInMod
     <Modal
       isOpen={isOpen}
       onClose={close}
-      title="Sign in with FAYDA ID"
+      title="Sign In with FAYDA ID"
       subtitle={step === "fin" ? "Enter your 12-digit Fayda ID (FIN). We'll send a one-time code to the phone registered with Fayda." : `Code sent to the phone linked to FIN •••• •••• ${digitsOnly(fin).slice(-4)}.`}
     >
       <form className="flex flex-col gap-4" onSubmit={step === "fin" ? sendOtp : verify}>
