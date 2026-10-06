@@ -46,6 +46,8 @@ const SEED: QueueIssue[] = [
   { ref: "ISS-2033", subject: "ODK form rejects a valid Fayda ID", category: "Data / system", severity: "Medium", reporter: "Tadesse Alemu", woreda: "Bako Tibe", assignee: "Kebede Alemu (Supervisor)", slaDue: "17 Sep", slaBreached: false, status: "In Review", history: [{ at: "10 Sep 2026, 15:00", text: "Picked up for review" }] },
   { ref: "ISS-2027", subject: "Field tablet screen cracked", category: "Equipment / supplies", severity: "Medium", reporter: "Tadesse Alemu", woreda: "Bako Tibe", assignee: "IT support desk", slaDue: "15 Sep", slaBreached: false, status: "Assigned", history: [{ at: "09 Sep 2026, 08:30", text: "Assigned to IT support desk" }] },
   { ref: "ISS-2022", subject: "Unsafe footbridge on route to Koye Feche", category: "Safety", severity: "High", reporter: "Selamawit Haile", woreda: "Bako Tibe", assignee: "Logistics — Bako Tibe", slaDue: "11 Sep", slaBreached: true, status: "In Progress", history: [{ at: "08 Sep 2026, 14:10", text: "Assigned to Logistics" }] },
+  { ref: "ISS-2015", subject: "Transfer request to Gedo kebele not actioned", category: "HR", severity: "Low", reporter: "Selamawit Haile", woreda: "Bako Tibe", assignee: "Kebede Alemu (Supervisor)", slaDue: "19 Sep", slaBreached: false, status: "Reopened", history: [{ at: "11 Sep 2026, 10:30", text: "Reopened by reporter: transfer letter still not issued" }, { at: "29 Aug 2026, 14:00", text: "Resolved: forwarded to Woreda HR" }] },
+  { ref: "ISS-2009", subject: "Second power bank for field tablet", category: "Equipment / supplies", severity: "Low", reporter: "Hana Girma", woreda: "Bako Tibe", assignee: "Logistics — Bako Tibe", slaDue: "—", slaBreached: false, status: "Rejected", history: [{ at: "04 Sep 2026, 11:20", text: "Rejected: one power bank per DA under current supply plan" }] },
   { ref: "ISS-2004", subject: "Duplicate farmer records in Koye Feche", category: "Data / system", severity: "Low", reporter: "Tadesse Alemu", woreda: "Bako Tibe", assignee: "IT support desk", slaDue: "—", slaBreached: false, status: "Resolved", history: [{ at: "02 Sep 2026, 16:45", text: "Resolved: records merged by data team" }] },
   { ref: "ISS-1987", subject: "Fuel allowance form unavailable", category: "Operational", severity: "Low", reporter: "Hana Girma", woreda: "Bako Tibe", assignee: "Kebede Alemu (Supervisor)", slaDue: "—", slaBreached: false, status: "Closed", history: [{ at: "20 Aug 2026, 09:00", text: "Closed: form restored" }] },
 ];
@@ -227,7 +229,7 @@ export function IssueQueue() {
         <Modal
           isOpen
           onClose={() => setAction(null)}
-          title={{ assign: "Assign issue", info: "Request more information", resolve: "Resolve issue", reopen: "Reopen issue" }[action.type]}
+          title={{ assign: "Assign Issue", info: "Request More Information", resolve: "Resolve Issue", reopen: "Reopen Issue" }[action.type]}
           subtitle={`${action.issue.ref} · ${action.issue.subject}`}
           footer={<><Button variant="outline" onClick={() => setAction(null)}>Cancel</Button><Button variant="brand" disabled={action.type !== "assign" && note.trim().length < 3} onClick={commit}>{{ assign: "Assign", info: "Send request", resolve: "Mark resolved", reopen: "Reopen" }[action.type]}</Button></>}
         >

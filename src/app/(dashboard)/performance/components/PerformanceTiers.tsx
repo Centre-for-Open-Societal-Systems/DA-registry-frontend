@@ -122,7 +122,7 @@ export function PerformanceTiers() {
       <Modal
         isOpen={configOpen}
         onClose={() => setConfigOpen(false)}
-        title="Configure tiers"
+        title="Configure Tiers"
         subtitle="Threshold changes apply when the KPI engine next recomputes tiers (next period)."
         size="xl"
         footer={

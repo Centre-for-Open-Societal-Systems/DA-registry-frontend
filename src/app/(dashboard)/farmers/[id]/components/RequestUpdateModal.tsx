@@ -11,15 +11,16 @@ import { Textarea } from "@/components/ui/Textarea";
 import { CURRENT_AGENT } from "@/features/farmers";
 import { AttributionCard } from "@/features/farmers";
 import type { Farmer } from "@/features/farmers";
+import { FileDropInput } from "@/components/ui/FileDropInput";
 
-interface SuggestCorrectionModalProps {
+interface RequestUpdateModalProps {
   farmer: Farmer;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function SuggestCorrectionModal({ farmer, isOpen, onClose }: SuggestCorrectionModalProps) {
-  // Fields of the read-only registry record that an agent can propose a change to.
+export function RequestUpdateModal({ farmer, isOpen, onClose }: RequestUpdateModalProps) {
+  // Fields of the read-only registry record that an agent can request a change to.
   const fields = [
     { key: "phone", label: "Mobile phone", value: farmer.phone },
     { key: "email", label: "Email address", value: farmer.email },
@@ -29,25 +30,26 @@ export function SuggestCorrectionModal({ farmer, isOpen, onClose }: SuggestCorre
   ];
   const [fieldKey, setFieldKey] = useState(fields[0].key);
   const current = fields.find((f) => f.key === fieldKey) ?? fields[0];
+  const [files, setFiles] = useState<File[]>([]);
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Suggest a correction"
+      title="Request an Update"
       footer={
         <>
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" form="suggest-correction-form" variant="brand">
-            Submit correction
+          <Button type="submit" form="request-update-form" variant="brand">
+            Submit request
           </Button>
         </>
       }
     >
       <form
-        id="suggest-correction-form"
+        id="request-update-form"
         className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
@@ -56,13 +58,8 @@ export function SuggestCorrectionModal({ farmer, isOpen, onClose }: SuggestCorre
       >
         <AttributionCard name={CURRENT_AGENT.name} avatar={CURRENT_AGENT.avatar} subtitle="Today · will be attributed to you" />
 
-        <FormField label="Field to correct" htmlFor="correction-field">
-          <Select
-            id="correction-field"
-            className="h-10"
-            value={fieldKey}
-            onChange={(e) => setFieldKey(e.target.value)}
-          >
+        <FormField label="Field to update" htmlFor="update-field">
+          <Select id="update-field" className="h-10" value={fieldKey} onChange={(e) => setFieldKey(e.target.value)}>
             {fields.map((f) => (
               <option key={f.key} value={f.key}>{f.label}</option>
             ))}
@@ -70,21 +67,23 @@ export function SuggestCorrectionModal({ farmer, isOpen, onClose }: SuggestCorre
         </FormField>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Current value" htmlFor="correction-current">
-            <Input id="correction-current" value={current.value} readOnly className="h-10 border-transparent bg-slate-100 text-slate-600" />
+          <FormField label="Current value" htmlFor="update-current">
+            <Input id="update-current" value={current.value} readOnly className="h-10 border-transparent bg-slate-100 text-slate-600" />
           </FormField>
-          <FormField label="Suggested value" htmlFor="correction-suggested">
-            <Input id="correction-suggested" placeholder="Enter corrected value" className="h-10" required />
+          <FormField label="New value" htmlFor="update-new">
+            <Input id="update-new" placeholder="Enter the updated value" className="h-10" required />
           </FormField>
         </div>
 
-        <FormField label="Reason for correction" htmlFor="correction-reason">
-          <Textarea id="correction-reason" rows={2} placeholder="e.g. Farmer provided a new phone number during last visit." required />
+        <FormField label="Reason for update" htmlFor="update-reason">
+          <Textarea id="update-reason" rows={2} placeholder="e.g. The farmer shared a new phone number during the last visit." required />
         </FormField>
 
+        <FileDropInput label="Supporting documents" actionLabel="Upload documents" name="supporting" files={files} onChange={setFiles} />
+
         <Banner tone="info">
-          This record is sourced from the Farmer Registry and is read-only here. Your suggestion will be routed to the
-          Registry team for review.
+          This record comes from the Farmer Registry and is read-only here. Your request, with any supporting documents, will
+          be sent to the Registry team for review.
         </Banner>
       </form>
     </Modal>

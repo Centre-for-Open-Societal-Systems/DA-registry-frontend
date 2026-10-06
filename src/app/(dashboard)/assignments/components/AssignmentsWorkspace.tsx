@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { FARMER_PAGE_TABS } from "@/features/farmers";
 import { AdvancedFiltersButton } from "@/components/ui/AdvancedFiltersButton";
 import { RowAction } from "@/components/ui/RowAction";
 import { DataTable, type Column } from "@/components/ui/DataTable";
@@ -76,7 +78,9 @@ interface Draft {
   kebele: string;
   effectiveDate: string;
   reason: string;
-  mode: AssociationMode;
+  mode: AssociationMode | "";
+  /** Opened from the header "Assign agent" button — the officer picks the agent in the modal. */
+  pickAgent?: boolean;
 }
 
 // Geofence validation (§4.2): deterministic stand-in for the boundary check — flagged when the DA's registered
@@ -146,8 +150,15 @@ export function AssignmentsWorkspace() {
   const openAssign = (r: AgentAssignment) =>
     setDraft({ daId: r.daId, woreda: r.woreda, kebele: r.kebele ?? "", effectiveDate: "2026-09-21", reason: "", mode: r.mode ?? "Automatic" });
 
+  // Header "Assign agent": every field starts empty and the officer fills it in, agent included.
+  const openNewAssign = () =>
+    setDraft({ daId: "", woreda: "", kebele: "", effectiveDate: "", reason: "", mode: "", pickAgent: true });
+
+  const draftAgent = draft ? rows.find((r) => r.daId === draft.daId) : undefined;
+
   const commit = () => {
-    if (!draft) return;
+    if (!draft || !draft.mode) return;
+    const mode = draft.mode;
     const check = runGeofence(draft.kebele);
     const prior = rows.find((r) => r.daId === draft.daId)!;
     const isReassign = Boolean(prior.kebele);
@@ -155,7 +166,7 @@ export function AssignmentsWorkspace() {
     setRows((prev) =>
       prev.map((r) =>
         r.daId === draft.daId
-          ? { ...r, woreda: draft.woreda, kebele: draft.kebele, farmers: check.result === "In-boundary" ? farmers : r.farmers, status: r.status === "Unassigned" ? "Active" : r.status, assignmentStatus: check.result === "In-boundary" ? "Effective" : "Flagged", effectiveDate: draft.effectiveDate, geofence: check.result, geofenceReason: check.reason, mode: draft.mode, assignedBy: user?.name }
+          ? { ...r, woreda: draft.woreda, kebele: draft.kebele, farmers: check.result === "In-boundary" ? farmers : r.farmers, status: r.status === "Unassigned" ? "Active" : r.status, assignmentStatus: check.result === "In-boundary" ? "Effective" : "Flagged", effectiveDate: draft.effectiveDate, geofence: check.result, geofenceReason: check.reason, mode, assignedBy: user?.name }
           : r,
       ),
     );
@@ -171,9 +182,15 @@ export function AssignmentsWorkspace() {
     setDraft(null);
   };
 
+  const assignedByColumn: Column<AgentAssignment> = { key: "assignedBy", header: "Assigned by", cell: (r) => r.assignedBy ?? <span className="text-subtle">—</span> };
+
+  const daIdColumn: Column<AgentAssignment> = { key: "daId", header: "DA-ID", cell: (r) => <span className="font-mono text-[13px] text-ink-soft">{r.daId}</span> };
+
+  // A DA sees DA-ID then who assigned them, with no Agent column (the agent is always themselves).
   const columns: Column<AgentAssignment>[] = [
-    { key: "agent", header: "Agent", cell: (r) => <Link href={`/agents/${r.daId}`} className="font-medium text-ink hover:text-brand-green">{r.agent}</Link> },
-    { key: "daId", header: "DA-ID", cell: (r) => <span className="font-mono text-[13px] text-ink-soft">{r.daId}</span> },
+    ...(isDA
+      ? [daIdColumn, assignedByColumn]
+      : [{ key: "agent", header: "Agent", cell: (r: AgentAssignment) => <Link href={`/agents/${r.daId}`} className="font-medium text-ink hover:text-brand-green">{r.agent}</Link> }, daIdColumn]),
     { key: "woreda", header: <FilterDropdown label="Woreda" allLabel="All woredas" options={woredaOptions} selected={filters.woreda} onApply={setFilter("woreda")} />, cell: (r) => r.woreda },
     { key: "kebele", header: <FilterDropdown label="Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setFilter("kebele")} />, cell: (r) => (r.kebele ? <span>{r.kebele}<span className="block text-[12px] text-muted">since {r.effectiveDate}</span></span> : <span className="text-subtle">—</span>) },
     { key: "farmers", header: "Farmers", align: "right", cell: (r) => r.farmers.toLocaleString() },
@@ -187,7 +204,7 @@ export function AssignmentsWorkspace() {
         </span>
       ),
       cell: (r) => <div className="flex flex-col items-start gap-1"><Pill tone={AGENT_STATUS_TONE[r.status]} dot>{r.status}</Pill><Pill tone={ASSIGNMENT_TONE[r.assignmentStatus]}>{r.assignmentStatus}{r.geofence === "Out-of-bounds" ? " · out-of-bounds" : ""}</Pill></div> },
-    { key: "assignedBy", header: "Assigned by", cell: (r) => r.assignedBy ?? <span className="text-subtle">—</span> },
+    ...(isDA ? [] : [assignedByColumn]),
     {
       key: "actions", header: "Actions", align: "center",
       cell: (r) => (
@@ -201,6 +218,27 @@ export function AssignmentsWorkspace() {
 
   return (
     <>
+      <PageHeader
+        tabs={FARMER_PAGE_TABS}
+        activeHref="/assignments"
+        title="Agent Assignment"
+        description="Links a DA to their Kebele of operation and, through it, to the farmers they serve. Assign or reassign with an effective date; geofence validation runs on commit."
+        actions={
+          canAssign && (
+            <button
+              type="button"
+              onClick={openNewAssign}
+              className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md bg-brand-green px-4 text-[14px] font-semibold text-white transition-colors hover:bg-brand-green-dark"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Assign agent
+            </button>
+          )
+        }
+      />
+
       {isDA ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="My kebele" value={mine?.kebele ?? "—"} hint={mine ? `${mine.woreda} woreda` : "Not assigned yet"} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0zM12 13a3 3 0 100-6 3 3 0 000 6z")} />
@@ -292,12 +330,20 @@ export function AssignmentsWorkspace() {
       )}
 
       {draft && (
-        <Modal isOpen onClose={() => setDraft(null)} title={rows.find((r) => r.daId === draft.daId)?.kebele ? "Reassign agent" : "Assign agent"} subtitle={`${rows.find((r) => r.daId === draft.daId)?.agent} · ${draft.daId}`} size="lg"
-          footer={<><Button variant="outline" onClick={() => setDraft(null)}>Cancel</Button><Button variant="brand" disabled={!draft.kebele || !draft.effectiveDate || draft.reason.trim().length < 3} onClick={commit}>Validate &amp; commit</Button></>}
+        <Modal isOpen onClose={() => setDraft(null)} title={draftAgent?.kebele ? "Reassign Agent" : "Assign Agent"} subtitle={draftAgent ? `${draftAgent.agent} · ${draft.daId}` : "Select an agent"} size="lg"
+          footer={<><Button variant="outline" onClick={() => setDraft(null)}>Cancel</Button><Button variant="brand" disabled={!draftAgent || !draft.woreda || !draft.kebele || !draft.mode || !draft.effectiveDate || draft.reason.trim().length < 3} onClick={commit}>Validate &amp; commit</Button></>}
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {draft.pickAgent && (
+              <FormField label="Agent" htmlFor="as-agent" required className="sm:col-span-2" hint={draftAgent?.kebele ? `Currently in ${draftAgent.kebele} — committing supersedes that assignment.` : undefined}>
+                <Select id="as-agent" value={draft.daId} onChange={(e) => setDraft({ ...draft, daId: e.target.value })}>
+                  <option value="">Select agent</option>
+                  {rows.map((r) => <option key={r.daId} value={r.daId}>{r.agent} · {r.daId}{r.kebele ? ` (${r.kebele})` : " (unassigned)"}</option>)}
+                </Select>
+              </FormField>
+            )}
             <FormField label="Woreda" htmlFor="as-woreda" required>
-              <Select id="as-woreda" value={draft.woreda} onChange={(e) => setDraft({ ...draft, woreda: e.target.value, kebele: "" })}>{WOREDAS.map((w) => <option key={w}>{w}</option>)}</Select>
+              <Select id="as-woreda" value={draft.woreda} onChange={(e) => setDraft({ ...draft, woreda: e.target.value, kebele: "" })}><option value="">Select woreda</option>{WOREDAS.map((w) => <option key={w}>{w}</option>)}</Select>
             </FormField>
             <FormField label="Kebele" htmlFor="as-kebele" required>
               <Select id="as-kebele" value={draft.kebele} onChange={(e) => setDraft({ ...draft, kebele: e.target.value })}><option value="">Select kebele</option>{(KEBELES[draft.woreda] ?? []).map((k) => <option key={k}>{k}</option>)}</Select>
@@ -305,11 +351,11 @@ export function AssignmentsWorkspace() {
             <FormField label="Effective date" htmlFor="as-date" required>
               <Input id="as-date" type="date" value={draft.effectiveDate} onChange={(e) => setDraft({ ...draft, effectiveDate: e.target.value })} />
             </FormField>
-            <FormField label="Farmer association" htmlFor="as-mode" required hint={draft.mode === "Automatic" ? "Farmers in the kebele task list are linked automatically." : "You select the farmers after commit."}>
-              <Select id="as-mode" value={draft.mode} onChange={(e) => setDraft({ ...draft, mode: e.target.value as AssociationMode })}><option>Automatic</option><option>Manual</option></Select>
+            <FormField label="Farmer association" htmlFor="as-mode" required hint={draft.mode === "Automatic" ? "Farmers in the kebele task list are linked automatically." : draft.mode === "Manual" ? "You select the farmers after commit." : undefined}>
+              <Select id="as-mode" value={draft.mode} onChange={(e) => setDraft({ ...draft, mode: e.target.value as AssociationMode | "" })}><option value="">Select farmer association</option><option>Automatic</option><option>Manual</option></Select>
             </FormField>
             <FormField label="Reason" htmlFor="as-reason" required className="sm:col-span-2" hint="Recorded with the assignment; reassignment supersedes the prior assignment (effective-dated).">
-              <Input id="as-reason" value={draft.reason} onChange={(e) => setDraft({ ...draft, reason: e.target.value })} placeholder="e.g. Coverage gap in Bako 02" />
+              <Input id="as-reason" value={draft.reason} onChange={(e) => setDraft({ ...draft, reason: e.target.value })} placeholder="Enter reason" />
             </FormField>
           </div>
           {draft.kebele && (

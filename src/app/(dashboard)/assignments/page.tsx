@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { FARMER_PAGE_TABS } from "@/features/farmers";
 import { AssignmentsWorkspace } from "./components/AssignmentsWorkspace";
 
 export const metadata: Metadata = {
@@ -8,15 +6,10 @@ export const metadata: Metadata = {
   description: "Assign and reassign Development Agents to kebeles with geofence validation.",
 };
 
+// The page header lives in AssignmentsWorkspace so its "Assign agent" action can open the workspace's modal.
 export default function AssignmentsPage() {
   return (
     <div className="flex w-full flex-col gap-4">
-      <PageHeader
-        tabs={FARMER_PAGE_TABS}
-        activeHref="/assignments"
-        title="Agent Assignment"
-        description="Links a DA to their Kebele of operation and, through it, to the farmers they serve. Assign or reassign with an effective date; geofence validation runs on commit."
-      />
       <AssignmentsWorkspace />
     </div>
   );

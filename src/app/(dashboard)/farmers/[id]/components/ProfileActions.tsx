@@ -7,7 +7,7 @@ import { PlanVisitModal } from "@/features/farmers";
 import { ConsentWithdrawalModal } from "@/features/farmers";
 import { RaiseGrievanceModal } from "@/features/grievances";
 import { cn } from "@/lib/utils";
-import { SuggestCorrectionModal } from "./SuggestCorrectionModal";
+import { RequestUpdateModal } from "./RequestUpdateModal";
 
 type Secondary = "correction" | "consent" | "grievance";
 
@@ -31,7 +31,7 @@ const ICONS = {
 const SECONDARY: { key: Secondary | "services"; label: string; hint: string; icon: string }[] = [
   { key: "services", label: "Services", hint: "Credit & marketplace", icon: ICONS.services },
   { key: "grievance", label: "Raise grievance", hint: "Via Grievance Service", icon: ICONS.grievance },
-  { key: "correction", label: "Suggest correction", hint: "Routed to Woreda", icon: ICONS.correction },
+  { key: "correction", label: "Request update", hint: "Routed to Woreda", icon: ICONS.correction },
   { key: "consent", label: "Consent", hint: "View or withdraw", icon: ICONS.consent },
 ];
 
@@ -91,7 +91,7 @@ export function ProfileActionStrip({ farmer }: { farmer: Farmer }) {
       </div>
 
       {openModal === "visit" && <PlanVisitModal farmer={farmer} isOpen onClose={close} />}
-      <SuggestCorrectionModal farmer={farmer} isOpen={openModal === "correction"} onClose={close} />
+      {openModal === "correction" && <RequestUpdateModal farmer={farmer} isOpen onClose={close} />}
       {openModal === "consent" && <ConsentWithdrawalModal farmer={farmer} isOpen onClose={close} />}
       {openModal === "grievance" && <RaiseGrievanceModal isOpen onClose={close} farmerId={farmer.id} />}
     </>

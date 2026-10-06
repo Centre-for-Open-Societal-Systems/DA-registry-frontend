@@ -108,7 +108,7 @@ export function UserFormModal({ mode, initial, subtitle, onClose, onSave }: User
     <Modal
       isOpen
       onClose={onClose}
-      title={isEdit ? "Edit user" : "Add user"}
+      title={isEdit ? "Edit User" : "Add User"}
       subtitle={subtitle ?? "Create the account and assign the role and scope it acts within"}
       className="max-w-[544px]"
       bodyClassName="p-0"

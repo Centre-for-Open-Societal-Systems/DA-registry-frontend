@@ -18,6 +18,7 @@ import { SmsPreview } from "@/features/communication";
 import { DISPATCHES, SIGNAL_TONE, SIGNALS, type Audience, type Channel, type Dispatch, type SignalSource } from "@/features/communication";
 import { useAuthStore } from "@/store/useAuthStore";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
+import { FileDropInput } from "@/components/ui/FileDropInput";
 
 const AUDIENCES: { value: Audience; size: number }[] = [
   { value: "All DAs — Bako Tibe", size: 38 },
@@ -45,19 +46,22 @@ const EMPTY: HistoryFilters = { source: new Set(), audience: new Set(), channel:
 // FR-10 / §4.4: Communications Officer crafts a message with a live SMS preview, picks audience + channels, dispatches; logged to history.
 export function BroadcastWorkspace() {
   const role = useAuthStore((s) => s.role);
-  const canDispatch = role === "CommsOfficer" || role === "Admin";
+  const userName = useAuthStore((s) => s.user?.name);
+  const canDispatch = role === "CommsOfficer" || role === "Admin" || role === "DA";
   const params = useSearchParams();
   const signal = SIGNALS.find((s) => s.id === params.get("signal"));
 
   const [source, setSource] = useState<SignalSource>(signal?.source ?? "Informational");
   const [message, setMessage] = useState(signal ? `${signal.title}. ${signal.detail} — Bako Tibe Woreda` : "");
-  const [audience, setAudience] = useState<Audience>(signal?.source === "Weather" || signal?.source === "Emergency" ? "Drought-response kebeles" : "All DAs — Bako Tibe");
+  // A DA usually writes to their own linked farmers; officers default to the DA network.
+  const [audience, setAudience] = useState<Audience>(signal?.source === "Weather" || signal?.source === "Emergency" ? "Drought-response kebeles" : role === "DA" ? "My linked farmers" : "All DAs — Bako Tibe");
   const [channels, setChannels] = useState<Set<Channel>>(new Set<Channel>(["SMS"]));
   const [history, setHistory] = useState<Dispatch[]>(DISPATCHES);
   const [notice, setNotice] = useState<string | null>(null);
   const [filters, setFilters] = useState<HistoryFilters>(EMPTY);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [evidence, setEvidence] = useState<File[]>([]);
 
   const activeFilterCount = Object.values(filters).filter((set) => set.size > 0).length;
   const setFilter = (key: keyof HistoryFilters) => (next: Set<string>) => setFilters((prev) => ({ ...prev, [key]: next }));
@@ -83,15 +87,26 @@ export function BroadcastWorkspace() {
   const toggle = (c: Channel) => setChannels((prev) => { const n = new Set(prev); if (n.has(c)) n.delete(c); else n.add(c); return n; });
 
   const dispatch = () => {
-    const d: Dispatch = { id: `bc-${2211 + history.length - DISPATCHES.length}`, message, source, channels: [...channels], audience, recipients: size, dispatchedBy: "Almaz Tesfaye", dispatchedAt: "Just now", delivery: { delivered: 0, failed: 0, pending: size } };
+    const d: Dispatch = { id: `bc-${2211 + history.length - DISPATCHES.length}`, message, source, channels: [...channels], audience, recipients: size, dispatchedBy: `${userName ?? "You"}${role === "DA" ? " (DA)" : ""}`, dispatchedAt: "Just now", delivery: { delivered: 0, failed: 0, pending: size }, evidence: evidence.map((f) => f.name) };
     setHistory((prev) => [d, ...prev]);
     setNotice(`Dispatched ${d.id} to ${size} recipients via ${d.channels.join(" + ")}. Delivery outcomes update in history as the gateway reports; ${signal ? `signal ${signal.id} is marked Dispatched.` : "the dispatch is logged."}`);
     setMessage("");
+    setEvidence([]);
   };
 
   const columns: Column<Dispatch>[] = [
     { key: "id", header: "Dispatch", cell: (d) => <span className="font-mono text-[13px] font-medium text-ink">{d.id}</span> },
-    { key: "msg", header: "Message", cell: (d) => <span className="line-clamp-2 max-w-[360px] text-[13px] text-ink">{d.message}</span> },
+    { key: "msg", header: "Message", cell: (d) => (
+      <div className="max-w-[360px]">
+        <span className="line-clamp-2 text-[13px] text-ink">{d.message}</span>
+        {d.evidence && d.evidence.length > 0 && (
+          <span className="mt-1 inline-flex items-center gap-1 text-[12px] text-muted" title={d.evidence.join(", ")}>
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21.4 11.1l-9.2 9.2a6 6 0 01-8.5-8.5l9.2-9.2a4 4 0 015.7 5.7l-9.2 9.2a2 2 0 01-2.8-2.8l8.5-8.5" /></svg>
+            {d.evidence.length} evidence file{d.evidence.length === 1 ? "" : "s"}
+          </span>
+        )}
+      </div>
+    ) },
     { key: "src", header: <FilterDropdown label="Source" allLabel="All sources" options={sourceOptions} selected={filters.source} onApply={setFilter("source")} />, cell: (d) => <Pill tone={SIGNAL_TONE[d.source]}>{d.source}</Pill> },
     { key: "aud", header: <FilterDropdown label="Audience" allLabel="All audiences" options={audienceOptions} selected={filters.audience} onApply={setFilter("audience")} />, cell: (d) => <span>{d.audience}<span className="block text-[12px] text-muted">{d.recipients} recipients</span></span> },
     { key: "ch", header: <FilterDropdown label="Channels" allLabel="All channels" options={channelOptions} selected={filters.channel} onApply={setFilter("channel")} />, cell: (d) => <div className="flex gap-1">{d.channels.map((c) => <Pill key={c} tone="slate">{c}</Pill>)}</div> },
@@ -106,7 +121,7 @@ export function BroadcastWorkspace() {
 
       <Card className="shadow-card">
         <h2 className="text-[15px] font-semibold text-ink">Compose</h2>
-        {!canDispatch && <p className="mt-1 text-[12.5px] text-muted">Only a Communications Officer or Administrator can dispatch. You can preview.</p>}
+        {!canDispatch && <p className="mt-1 text-[12.5px] text-muted">Only a Development Agent, Communications Officer or Administrator can dispatch. You can preview.</p>}
         <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -128,8 +143,9 @@ export function BroadcastWorkspace() {
                 ))}
               </div>
             </fieldset>
+            <FileDropInput label="Evidence" actionLabel="Upload evidence" hint="Field photos or documents · PDF, JPG or PNG up to 5 MB each" files={evidence} onChange={setEvidence} />
             <div className="flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setMessage("")} className="inline-flex shrink-0 whitespace-nowrap h-10 items-center rounded-md border border-zinc-200 bg-white px-4 text-[14px] font-medium text-ink-soft hover:bg-zinc-50">Clear</button>
+              <button type="button" onClick={() => { setMessage(""); setEvidence([]); }} className="inline-flex shrink-0 whitespace-nowrap h-10 items-center rounded-md border border-zinc-200 bg-white px-4 text-[14px] font-medium text-ink-soft hover:bg-zinc-50">Clear</button>
               <button type="button" disabled={!canDispatch || channels.size === 0 || message.trim().length < 5} onClick={dispatch} className="inline-flex shrink-0 whitespace-nowrap h-10 items-center gap-2 rounded-md bg-brand-green px-4 text-[14px] font-semibold text-white hover:bg-brand-green-dark disabled:opacity-50">
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                 Send to {size}

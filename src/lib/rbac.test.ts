@@ -29,7 +29,11 @@ describe("navForRole", () => {
 
   it("gives the DA no officer-only areas", () => {
     const da = hrefsFor("DA");
-    for (const href of ["/agents", "/assignments", "/visits", "/broadcast", "/admin/reports"]) expect(da).not.toContain(href);
+    for (const href of ["/agents", "/assignments", "/visits", "/admin/reports"]) expect(da).not.toContain(href);
+  });
+
+  it("lets the DA broadcast to their farmers", () => {
+    expect(navForRole("DA").find((g) => g.title === "Communication")?.items.map((i) => i.href)).toContain("/broadcast");
   });
 
   it("shows My Teams to the DA only, under Agent Registry", () => {

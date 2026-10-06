@@ -80,9 +80,12 @@ export function VisitsTable() {
           <thead>
             <tr className="border-y border-line bg-surface text-[14px] font-semibold text-slate-500">
               <th className="whitespace-nowrap px-4 py-3 font-semibold">Date &amp; time</th>
-              <th className="px-4 py-3 font-semibold">
-                {isDA ? "Assigned by" : <FilterDropdown label="Agent" allLabel="All agents" options={VISIT_AGENT_OPTIONS} selected={filters.agent} onApply={setFilter("agent")} />}
-              </th>
+              {/* A DA's own visits: no Agent column (it is always them); who assigned them lives on the Assignments page. */}
+              {!isDA && (
+                <th className="px-4 py-3 font-semibold">
+                  <FilterDropdown label="Agent" allLabel="All agents" options={VISIT_AGENT_OPTIONS} selected={filters.agent} onApply={setFilter("agent")} />
+                </th>
+              )}
               <th className="px-4 py-3 font-semibold">Farmer</th>
               <th className="px-4 py-3 font-semibold">
                 <FilterDropdown label="Kebele" allLabel="All kebeles" options={VISIT_KEBELE_OPTIONS} selected={filters.kebele} onApply={setFilter("kebele")} />
@@ -97,7 +100,7 @@ export function VisitsTable() {
           <tbody className="text-[14px] text-slate-700">
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-6"><EmptyState title="No visits match the selected filters" hint="Clear a filter or try a different search." /></td>
+                <td colSpan={isDA ? 6 : 7}className="px-4 py-6"><EmptyState title="No visits match the selected filters" hint="Clear a filter or try a different search." /></td>
               </tr>
             )}
             {pageRows.map((v) => (
@@ -107,7 +110,7 @@ export function VisitsTable() {
                   <br />
                   <span className="text-slate-600">- {v.time}</span>
                 </td>
-                <td className="px-4 py-3.5">{isDA ? v.assignedBy : v.agent}</td>
+                {!isDA && <td className="px-4 py-3.5">{v.agent}</td>}
                 <td className="px-4 py-3.5">
                   <div className="flex items-center gap-2.5">
                     <FarmerAvatar name={v.farmerName} avatar={v.farmerAvatar} />

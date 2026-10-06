@@ -12,7 +12,7 @@ export type GrievanceStatus =
 
 export type GrievancePriority = "Low" | "Medium" | "High" | "Critical";
 
-export type GrievanceCategory = "Input" | "Inputs" | "Schemes" | "Payments" | "Markets" | "Extension" | "Land";
+export type GrievanceCategory = "Inputs" | "Schemes" | "Payments" | "Markets" | "Extension" | "Land";
 
 export interface Grievance {
   ticketId: string;

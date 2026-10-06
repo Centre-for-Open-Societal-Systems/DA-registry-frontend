@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Banner } from "@/components/ui/Banner";
 import { Card } from "@/components/ui/Card";
@@ -34,12 +33,6 @@ export default async function VisitOutcomePage(props: PageProps<"/visits/[id]/ou
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            href={`/visits/${visit.id}`}
-            className="inline-flex h-9 items-center whitespace-nowrap rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green transition-colors hover:bg-brand-wash"
-          >
-            Today&apos;s visits &rarr;
-          </Link>
           <PlanVisitButton farmer={farmer} />
         </div>
       </Card>

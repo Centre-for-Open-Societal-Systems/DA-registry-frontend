@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { AGENT_PROFILE } from "@/features/farmers";
-import { getInitials } from "@/features/farmers";
+import { PersonAvatar } from "@/components/ui/PersonAvatar";
 
 interface AgentHeaderProps {
   /** A submitted change is waiting for supervisor approval. */
@@ -13,11 +13,8 @@ export function AgentHeader({ pending }: AgentHeaderProps) {
 
   return (
     <Card className="flex flex-col gap-4 px-6 py-5 shadow-card sm:flex-row sm:items-center sm:gap-5">
-      <div
-        className="flex h-[64px] w-[64px] shrink-0 items-center justify-center rounded-full bg-brand-tint text-[22px] font-semibold text-brand-green"
-        aria-hidden="true"
-      >
-        {getInitials(p.name)}
+      <div className="h-[64px] w-[64px] shrink-0">
+        <PersonAvatar />
       </div>
 
       <div className="flex flex-col gap-1">

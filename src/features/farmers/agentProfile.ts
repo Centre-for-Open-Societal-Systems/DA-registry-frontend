@@ -4,22 +4,20 @@ export const AGENT_PROFILE = {
   name: "Tadesse Alemu",
   role: "Development Agent",
   agentId: "DA-00012351",
-  location: "Bako Tibe kebele, Adama woreda, Oromia",
-  email: "tadesse.alemu@moa.gov.et",
+  location: "Bako Tibe kebele, Bako Tibe woreda, Oromia",
+  email: "tadesse.alemu@gmail.com",
   phone: "+251 91 234 5678",
   joinedOn: "12 Jul 2022",
   status: "Active",
 };
 
 export const AGENT_STATS = {
-  yearsOfService: "3.2",
+  yearsOfService: "4.2",
   serviceSince: "Since Jul 2022",
   kebelesAssigned: 2,
   kebeles: "Bako Tibe, Gedo",
   certifications: 3,
   certificationsPending: 1,
-  performanceTier: "T1",
-  performanceNote: "Star performer · Q2 2024",
 };
 
 // Read-only summary mirrored from Agrilearn.
@@ -64,5 +62,5 @@ export const LEAVE_HISTORY: LeaveRecord[] = [
   { id: "1", type: "Annual leave", period: "15 – 19 Sep 2026", days: 5, status: "Pending", message: "Family vacation planned" },
   { id: "2", type: "Sick leave", period: "04 – 06 Aug 2026", days: 3, status: "Approved", message: "Doctor advised rest" },
   { id: "3", type: "Annual leave", period: "02 – 08 Jun 2026", days: 7, status: "Taken", message: "Personal time off" },
-  { id: "4", type: "Maternity (statutory)", period: "02 Jan – 01 Apr 2024", days: 90, status: "Taken", message: "Maternity leave period" },
+  { id: "4", type: "Annual leave", period: "22 – 31 Dec 2025", days: 8, status: "Taken", message: "Year-end family visit" },
 ];

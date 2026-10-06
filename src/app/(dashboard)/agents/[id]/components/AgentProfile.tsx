@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { Modal } from "@/components/ui/Modal";
+import { FileDropInput } from "@/components/ui/FileDropInput";
 import { Button } from "@/components/ui/Button";
 import { Banner } from "@/components/ui/Banner";
 import { FormField } from "@/components/ui/FormField";
@@ -53,10 +54,11 @@ function Field({ label, value, mono }: { label: string; value: string; mono?: bo
   );
 }
 
-// Appendix C.2 "DA profile 360": tabs Overview / Activity / Documents / History; Suggest correction.
+// Appendix C.2 "DA profile 360": tabs Overview / Activity / Documents / History; Request update.
 export function AgentProfile({ agent }: { agent: Agent }) {
   const [tab, setTab] = useState<Tab>("overview");
-  const [correctionOpen, setCorrectionOpen] = useState(false);
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [updateFiles, setUpdateFiles] = useState<File[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [viewDoc, setViewDoc] = useState<AgentDocument | null>(null);
   const initials = agent.fullName.split(" ").map((p) => p[0]).slice(0, 2).join("");
@@ -84,7 +86,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <button type="button" onClick={() => setCorrectionOpen(true)} className="inline-flex h-9 items-center whitespace-nowrap rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green transition-colors hover:bg-brand-wash">Suggest correction</button>
+            <button type="button" onClick={() => { setUpdateFiles([]); setUpdateOpen(true); }} className="inline-flex h-9 items-center whitespace-nowrap rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green transition-colors hover:bg-brand-wash">Request update</button>
           </div>
         </div>
       </Card>
@@ -189,7 +191,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
         <Modal
           isOpen
           onClose={() => setViewDoc(null)}
-          title={viewDoc.state === "Agrilearn-auto" ? "Agrilearn certificate" : "Document details"}
+          title={viewDoc.state === "Agrilearn-auto" ? "Agrilearn Certificate" : "Document Details"}
           subtitle={`${agent.fullName} · ${agent.daId}`}
           titleAddon={<Pill tone={DOC_TONE[viewDoc.state]}>{viewDoc.state}</Pill>}
           footer={
@@ -233,24 +235,25 @@ export function AgentProfile({ agent }: { agent: Agent }) {
         </Modal>
       )}
 
-      <Modal isOpen={correctionOpen} onClose={() => setCorrectionOpen(false)} title="Suggest a correction" subtitle={`${agent.fullName} · ${agent.daId}`}
-        footer={<><Button variant="outline" onClick={() => setCorrectionOpen(false)}>Cancel</Button><Button variant="brand" onClick={() => { setCorrectionOpen(false); setNotice("Correction submitted to the Woreda supervisor for review. Verified identity fields (name, Fayda ID) can only change via Fayda re-verification."); }}>Submit for review</Button></>}
+      <Modal isOpen={updateOpen} onClose={() => setUpdateOpen(false)} title="Request an Update" subtitle={`${agent.fullName} · ${agent.daId}`}
+        footer={<><Button variant="outline" onClick={() => setUpdateOpen(false)}>Cancel</Button><Button variant="brand" onClick={() => { setUpdateOpen(false); setNotice(`Update request${updateFiles.length ? ` with ${updateFiles.length} supporting document${updateFiles.length === 1 ? "" : "s"}` : ""} sent to the Woreda supervisor for review. Verified identity fields (name, Fayda ID) can only change via Fayda re-verification.`); }}>Submit request</Button></>}
       >
         <div className="flex flex-col gap-4">
-          <FormField label="Field" htmlFor="corr-field" required>
-            <Select id="corr-field" defaultValue="phone">
+          <FormField label="Field to update" htmlFor="update-field" required>
+            <Select id="update-field" defaultValue="phone">
               <option value="phone">Phone</option>
               <option value="tier">Education tier</option>
               <option value="spec">Specialisation</option>
               <option value="kebele">Assigned kebele (routes to Assignment)</option>
             </Select>
           </FormField>
-          <FormField label="Proposed value" htmlFor="corr-value" required>
-            <input id="corr-value" className="h-11 w-full rounded-lg border border-zinc-300 px-3 text-sm focus:border-emerald-600 focus:outline-none" placeholder="New value" />
+          <FormField label="New value" htmlFor="update-value" required>
+            <input id="update-value" className="h-11 w-full rounded-lg border border-zinc-300 px-3 text-sm focus:border-emerald-600 focus:outline-none" placeholder="Enter the updated value" />
           </FormField>
-          <FormField label="Reason" htmlFor="corr-reason" required hint="Recorded in the audit trail with your identity and timestamp.">
-            <Textarea id="corr-reason" rows={3} placeholder="Why this record needs correcting" />
+          <FormField label="Reason for update" htmlFor="update-reason" required hint="Recorded in the audit trail with your identity and timestamp.">
+            <Textarea id="update-reason" rows={3} placeholder="Why this record needs updating" />
           </FormField>
+          <FileDropInput label="Supporting documents" actionLabel="Upload documents" files={updateFiles} onChange={setUpdateFiles} />
         </div>
       </Modal>
     </div>

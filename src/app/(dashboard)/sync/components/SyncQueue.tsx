@@ -188,7 +188,7 @@ export function SyncQueue() {
       </Card>
 
       {selected && (
-        <Modal isOpen onClose={() => setSelected(null)} title="Resolve sync conflict" subtitle={`${selected.entity} · ${selected.ref} · based on v${selected.version?.base}, server now v${selected.version?.server}`} size="xl"
+        <Modal isOpen onClose={() => setSelected(null)} title="Resolve Sync Conflict" subtitle={`${selected.entity} · ${selected.ref} · based on v${selected.version?.base}, server now v${selected.version?.server}`} size="xl"
           footer={<>
             <Button variant="outline" onClick={() => setSelected(null)}>Decide later</Button>
             <Button variant="outline" onClick={() => resolve("server")}>Keep server</Button>

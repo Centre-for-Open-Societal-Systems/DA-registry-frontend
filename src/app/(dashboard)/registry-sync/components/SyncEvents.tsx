@@ -149,7 +149,7 @@ export function SyncEvents() {
         />
       </Card>
 
-      <Modal isOpen={reconcileOpen} onClose={() => setReconcileOpen(false)} title="Bulk reconciliation" subtitle="Compare OAN DA Registry against the MoA master and queue corrections"
+      <Modal isOpen={reconcileOpen} onClose={() => setReconcileOpen(false)} title="Bulk Reconciliation" subtitle="Compare OAN DA Registry against the MoA master and queue corrections"
         footer={<><Button variant="outline" onClick={() => setReconcileOpen(false)}>Cancel</Button><Button variant="brand" onClick={() => { setReconcileOpen(false); setNotice("Reconciliation run #31 started for Oromia (1,284 records). Differences will appear as Reconciled / Failed events and a downloadable report."); }}>Run reconciliation</Button></>}
       >
         <ul className="list-disc space-y-1.5 pl-5 text-[13.5px] text-ink-soft">

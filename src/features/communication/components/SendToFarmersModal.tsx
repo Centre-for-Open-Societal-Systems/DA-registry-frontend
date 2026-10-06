@@ -36,7 +36,7 @@ export function SendToFarmersModal({ article, isOpen, onClose }: { article: Arti
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={close} title="Send to farmers" subtitle={article.title} size="xl"
+    <Modal isOpen={isOpen} onClose={close} title="Send to Farmers" subtitle={article.title} size="xl"
       footer={sent ? <Button variant="brand" onClick={close}>Done</Button> : (
         <>
           <Button variant="outline" onClick={close}>Cancel</Button>

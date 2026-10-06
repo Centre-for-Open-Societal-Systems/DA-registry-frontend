@@ -25,12 +25,12 @@ export interface TrendPoint {
 }
 
 export const REGISTRATIONS_TREND: TrendPoint[] = [
-  { label: "Jan 2024", value: 460 },
-  { label: "Feb 2024", value: 540 },
-  { label: "Mar 2024", value: 420 },
-  { label: "Apr 2024", value: 630 },
-  { label: "May 2024", value: 510 },
-  { label: "Jun 2024", value: 740 },
+  { label: "Apr 2026", value: 460 },
+  { label: "May 2026", value: 540 },
+  { label: "Jun 2026", value: 420 },
+  { label: "Jul 2026", value: 630 },
+  { label: "Aug 2026", value: 510 },
+  { label: "Sep 2026", value: 740 },
 ];
 
 export type ActivityTone = "green" | "blue" | "purple" | "amber";
@@ -45,11 +45,11 @@ export interface ActivityItem {
 }
 
 export const RECENT_ACTIVITY: ActivityItem[] = [
-  { id: "a1", initials: "LG", tone: "green", title: "Lelise Gudeta registered as new farmer", place: "Bako Tibe", at: "10 min ago" },
-  { id: "a2", initials: "AK", tone: "blue", title: "Profile updated: Abebe Kebede", place: "Adama Sector", at: "25 min ago" },
-  { id: "a3", initials: "LG", tone: "purple", title: "Visit completed: Lelise Gudeta · Bako Tibe", place: "Gedo", at: "1 hr ago" },
-  { id: "a4", initials: "CD", tone: "amber", title: "Kebele reassigned: Chaltu Dinkesa → Dendi", place: "Adama Sector", at: "2 hr ago" },
-  { id: "a5", initials: "LG", tone: "green", title: "Lelise Gudeta registered as new farmer", place: "Bako Tibe", at: "10 min ago" },
+  { id: "a1", initials: "DN", tone: "green", title: "Dawit Negash registered as new farmer", place: "Dendi", at: "10 min ago" },
+  { id: "a2", initials: "AK", tone: "blue", title: "Profile updated: Abebe Kebede", place: "Gedo", at: "25 min ago" },
+  { id: "a3", initials: "LG", tone: "purple", title: "Visit completed: Lelise Gudeta", place: "Bako Tibe", at: "1 hr ago" },
+  { id: "a4", initials: "CD", tone: "amber", title: "Kebele reassigned: Chaltu Dinkesa → Lume", place: "Lume", at: "2 hr ago" },
+  { id: "a5", initials: "HF", tone: "green", title: "Hirut Fikadu registered as new farmer", place: "Gedo", at: "3 hr ago" },
 ];
 
 export type RegistrationStatus = "Pending" | "Requires review";
@@ -69,10 +69,10 @@ export interface PendingRegistration {
 }
 
 export const PENDING_REGISTRATIONS: PendingRegistration[] = [
-  { id: "r1", agent: "Almaz W.", type: "Farmer", kebele: "Lume", updatedAt: "May 12, 2026", status: "Pending" },
-  { id: "r2", agent: "Almaz W.", type: "Transporter", kebele: "Dendi", updatedAt: "May 12, 2026", status: "Requires review" },
-  { id: "r3", agent: "Bekele N.", type: "Vendor", kebele: "Bako Tibe", updatedAt: "May 12, 2026", status: "Pending" },
-  { id: "r4", agent: "Chaltu D.", type: "Transporter", kebele: "Abele", updatedAt: "May 12, 2026", status: "Pending" },
+  { id: "r1", agent: "Almaz W.", type: "Farmer", kebele: "Lume", updatedAt: "14 Sep 2026", status: "Pending" },
+  { id: "r2", agent: "Almaz W.", type: "Transporter", kebele: "Dendi", updatedAt: "13 Sep 2026", status: "Requires review" },
+  { id: "r3", agent: "Bekele N.", type: "Vendor", kebele: "Bako Tibe", updatedAt: "11 Sep 2026", status: "Pending" },
+  { id: "r4", agent: "Hailu G.", type: "Farmer", kebele: "Adea", updatedAt: "09 Sep 2026", status: "Requires review" },
 ];
 
 const optionsFor = (pick: (row: PendingRegistration) => string): FilterOption[] => {

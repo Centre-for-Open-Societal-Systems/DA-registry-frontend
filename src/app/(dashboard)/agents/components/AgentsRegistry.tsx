@@ -232,7 +232,7 @@ export function AgentsRegistry() {
       </Card>
 
       {/* §4.1 Intake — bulk import is one of only two entry paths (no manual Add DA). */}
-      <Modal isOpen={importOpen} onClose={() => setImportOpen(false)} title="Import agents (bulk)" subtitle="CSV/XLSX per the MoA extension-staff template. Records enter as proposals routed to their Woreda for review." size="lg"
+      <Modal isOpen={importOpen} onClose={() => setImportOpen(false)} title="Import Agents (Bulk)" subtitle="CSV/XLSX per the MoA extension-staff template. Records enter as proposals routed to their Woreda for review." size="lg"
         footer={<><Button variant="outline" onClick={() => setImportOpen(false)}>Cancel</Button><Button variant="brand" onClick={() => { setImportOpen(false); setNotice("Import job #205 queued — 0 records parsed yet. Proposals will appear in Approvals as they pass identity checks."); }}>Upload &amp; validate</Button></>}
       >
         <div className="flex flex-col gap-4">

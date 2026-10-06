@@ -23,7 +23,7 @@ export function ReviewDecisionModal({ reviewIds, reason, reasonError, onReasonCh
     <Modal
       isOpen={reviewIds !== null}
       onClose={onClose}
-      title="Record review decision"
+      title="Record Review Decision"
       bodyClassName="px-4 py-4 sm:px-6"
       footer={
         <>

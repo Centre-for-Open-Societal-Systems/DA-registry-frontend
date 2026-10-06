@@ -31,7 +31,7 @@ export function ConsentWithdrawalModal({ farmer, isOpen, onClose }: { farmer: Fa
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={close} title="Withdraw consent" subtitle={`${farmer.name} · ${farmer.id}`} size="lg"
+    <Modal isOpen={isOpen} onClose={close} title="Withdraw Consent" subtitle={`${farmer.name} · ${farmer.id}`} size="lg"
       footer={done ? <Button variant="brand" onClick={close}>Done</Button> : (
         <>
           <Button variant="outline" onClick={close}>Keep consent</Button>
