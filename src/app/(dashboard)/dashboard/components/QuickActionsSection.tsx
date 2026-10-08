@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/Card";
 
 export function QuickActionsSection() {
   const actions = [
-    { title: "Register Farmer", desc: "Add new household profile", icon: "user-add", href: "/farmers/new" },
     { title: "Submit Crop Report", desc: "Log yield and pest surveys", icon: "clipboard-list", href: "/visits/v-1001/outcome" },
     { title: "Start Farm Visit", desc: "Activate GPS route and inspection logs", icon: "location", href: "/visits/v-1001" },
     { title: "Sync Queue", desc: "Offline captures and conflicts", icon: "sync", href: "/sync" },
@@ -14,23 +13,10 @@ export function QuickActionsSection() {
       <div className="border-b border-line px-5 py-3.5">
         <h3 className="text-[15px] font-semibold text-ink">Quick actions</h3>
       </div>
-      <div className="grid grid-cols-1 gap-4 px-4 py-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 px-4 py-4 md:grid-cols-3">
         {actions.map((act) => (
           <Link key={act.href} href={act.href} className="group flex items-center gap-3 rounded-lg border border-line bg-white px-4 py-5 transition-all hover:border-brand-green/30 hover:shadow-sm">
             <div className="w-[48px] h-[48px] flex shrink-0 items-center justify-center rounded-lg bg-brand-tint text-brand-green group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
-              {act.icon === "user-add" && (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <g clipPath="url(#clip0_707_7138)">
-                    <path d="M16.0011 21V19C16.0011 17.9391 15.5797 16.9217 14.8295 16.1716C14.0792 15.4214 13.0618 15 12.0008 15H6.00032C4.93937 15 3.92187 15.4214 3.17167 16.1716C2.42146 16.9217 2 17.9391 2 19V21M19.0014 8V14M22.0016 11H16.0011M13.0009 7C13.0009 9.20914 11.2099 11 9.00056 11C6.79124 11 5.00024 9.20914 5.00024 7C5.00024 4.79086 6.79124 3 9.00056 3C11.2099 3 13.0009 4.79086 13.0009 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_707_7138">
-                      <rect width="24" height="24" fill="white" />
-                    </clipPath>
-                  </defs>
-                </svg>
-
-              )}
               {act.icon === "clipboard-list" && (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <g clipPath="url(#clip0_707_7149)">
