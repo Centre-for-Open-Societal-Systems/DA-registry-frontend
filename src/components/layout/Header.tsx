@@ -84,13 +84,17 @@ export function Header() {
           type="button"
           onClick={() => setIsNotificationsOpen(true)}
           aria-label={unreadCount > 0 ? `Notifications — ${unreadCount} unread` : "Notifications"}
-          className="relative text-slate-500 transition-colors hover:text-slate-700 focus:outline-none lg:ml-2"
+          className="relative flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40 lg:ml-2"
         >
-          <svg className="h-[22px] w-[22px]" fill="currentColor" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
             <path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9" />
-            <path fill="none" d="M10.3 21a1.94 1.94 0 003.4 0" />
+            <path d="M10.3 21a1.94 1.94 0 003.4 0" />
           </svg>
-          {unreadCount > 0 && <span className="absolute -right-0.5 -top-0.5 block h-2.5 w-2.5 rounded-full border-2 border-white bg-red-600" />}
+          {unreadCount > 0 && (
+            <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-red-600 px-1 text-[10px] font-bold leading-none text-white">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </button>
 
         <NotificationsPanel

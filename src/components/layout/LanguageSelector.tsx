@@ -3,14 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-// Portal languages — same list and look as the Grievance Management portal header.
+// Portal languages: English and Amharic (same look as the Grievance Management portal header).
 const LANGUAGES = [
   { code: "en", label: "English", flag: "🇺🇸" },
   { code: "am", label: "Amharic", flag: "🇪🇹" },
-  { code: "om", label: "Afaan Oromo", flag: "🇪🇹" },
-  { code: "ar", label: "Arabic", flag: "🇸🇦" },
-  { code: "ti", label: "Tigrinya", flag: "🇪🇹" },
-  { code: "so", label: "Somali", flag: "🇸🇴" },
 ];
 
 export function LanguageSelector({ className }: { className?: string }) {
