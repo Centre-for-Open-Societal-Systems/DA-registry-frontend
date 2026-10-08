@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "bottom-right",
   },
+  // Knowledge Base video covers are YouTube thumbnails.
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "i.ytimg.com", pathname: "/vi/**" }],
+  },
 };
 
 export default nextConfig;

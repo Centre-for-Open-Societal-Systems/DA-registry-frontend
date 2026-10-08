@@ -31,26 +31,40 @@ export const ARTICLE_CATEGORIES = Array.from(new Set(ARTICLES.map((a) => a.categ
 
 export interface KnowledgeVideo {
   id: string;
+  /** Title as published by the Ministry of Agriculture (Amharic). */
   title: string;
   category: Article["category"];
+  /** English summary of the video. */
   summary: string;
-  /** Opens on YouTube in a new tab. Topic searches until curated video links are supplied. */
+  /** Opens on YouTube in a new tab. */
   url: string;
-  /** Cover photo in /public/images/knowledge (from Wikimedia Commons). */
+  /** YouTube thumbnail of the video. */
   image: string;
-  /** Photographer and licence, shown on the card as the licences require. */
-  imageCredit: string;
+  publishedAt: string;
 }
 
-const youtubeSearch = (terms: string) => `https://www.youtube.com/results?search_query=${encodeURIComponent(terms)}`;
+// Videos listed on the Ministry of Agriculture's video page (https://www.moa.gov.et/videos/), from its YouTube channel.
+const moaVideo = (videoId: string, title: string, category: Article["category"], summary: string, publishedAt: string): KnowledgeVideo => ({
+  id: `yt-${videoId}`,
+  title,
+  category,
+  summary,
+  url: `https://www.youtube.com/watch?v=${videoId}`,
+  image: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+  publishedAt,
+});
 
-// YouTube tab of the Knowledge Base: one video topic per article category.
+// YouTube tab of the Knowledge Base.
 export const KNOWLEDGE_VIDEOS: KnowledgeVideo[] = [
-  { id: "yt-101", title: "Teff row planting in Ethiopia", category: "Crop production", summary: "Field demonstrations of row spacing, seed rate and shallow covering for teff.", url: youtubeSearch("teff row planting Ethiopia"), image: "/images/knowledge/teff-field.jpg", imageCredit: "Timothy A. Gonsalves · CC BY-SA 4.0" },
-  { id: "yt-102", title: "Fall armyworm scouting and control on maize", category: "Pest & disease", summary: "How to spot window-pane feeding and frass in the whorl, and when to act.", url: youtubeSearch("fall armyworm scouting maize Ethiopia"), image: "/images/knowledge/armyworm-spraying.jpg", imageCredit: "Tigana Chileshe · CC BY-SA 4.0" },
-  { id: "yt-103", title: "Livestock vaccination for cattle, sheep and goats", category: "Livestock", summary: "Anthrax, blackleg and PPR vaccination explained for smallholder herds.", url: youtubeSearch("cattle sheep goat vaccination anthrax blackleg PPR Ethiopia"), image: "/images/knowledge/cattle-herd.jpg", imageCredit: "Sonjamariavienna · CC BY-SA 4.0" },
-  { id: "yt-104", title: "Building and repairing soil bunds", category: "Soil & water", summary: "Soil and water conservation: laying out, compacting and repairing bunds.", url: youtubeSearch("soil bund construction soil water conservation Ethiopia"), image: "/images/knowledge/hillside-terraces.jpg", imageCredit: "USAID / Nena Terrell · Public domain" },
-  { id: "yt-105", title: "Farm credit and input loans for smallholders", category: "Markets & credit", summary: "How seasonal input loans work and how to plan repayment after harvest.", url: youtubeSearch("smallholder farmer input loan credit Ethiopia"), image: "/images/knowledge/grain-market.jpg", imageCredit: "David Stanley · CC BY 2.0" },
+  moaVideo("nIp7ZqrEHyk", "ከስደት መልስ አዋጭ የዶሮ እርባታ", "Livestock", "Profitable poultry farming started by a returnee after migration.", "07 Oct 2026"),
+  moaVideo("LJkLRoSJ_tU", "ተንቀሳቃሽ የእንስሳት ክሊኒክ", "Livestock", "Mobile veterinary clinics bringing animal health services to farmers.", "07 Oct 2026"),
+  moaVideo("o0hJ3gwyJAk", "አስደናቂው የሩዝ ምርት", "Crop production", "A remarkable rice harvest and the practices behind it.", "07 Oct 2026"),
+  moaVideo("U1Uvqg85MUs", "ተፈጥሮ ካደለው ደን መሃል የተገኘ ማር", "Livestock", "Beekeeping and honey production in the heart of a natural forest.", "07 Oct 2026"),
+  moaVideo("EBUsrARcQl4", "የተሻሻሉ የመኖ ሳሮች- ለእንስሳት ምርትና ምርታማነት እድገት", "Livestock", "Improved forage grasses to raise livestock production and productivity.", "07 Oct 2026"),
+  moaVideo("1H8QTnCe2RA", "የሥጋ ዶሮ እርባታ ከወላጅ ዶሮ እስከ ገበያ", "Livestock", "Broiler farming from parent stock all the way to market.", "07 Oct 2026"),
+  moaVideo("kvwk_qvnh9M", "ለምግብ ሉዓላዊነት መረጋገጥ በስንዴ ምርት ራስን መቻል", "Crop production", "Wheat self-sufficiency as the path to food sovereignty.", "05 Oct 2026"),
+  moaVideo("9DVjlnlLna0", "የግብርና ኢንቨስትመንት አዲስ የለውጥ ጉዞ", "Markets & credit", "Agricultural investment and the new journey of transformation.", "05 Oct 2026"),
+  moaVideo("AaFVT8Oh2Ck", "በራስ ፀንቶ መሻገር…", "Advisory", "Standing on our own: self-reliance in Ethiopian agriculture.", "05 Oct 2026"),
 ];
 export const getArticle = (id: string) => ARTICLES.find((a) => a.id === id);
 

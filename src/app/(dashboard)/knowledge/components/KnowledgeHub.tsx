@@ -125,7 +125,7 @@ export function KnowledgeHub() {
                         <path d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z" />
                       </svg>
                     </span>
-                    <span className="absolute bottom-2 right-2.5 text-[10.5px] text-white/80">Photo: {v.imageCredit}</span>
+                    <span className="absolute bottom-2 right-2.5 text-[10.5px] text-white/80">Ministry of Agriculture · {v.publishedAt}</span>
                   </a>
 
                   <div className="flex flex-1 flex-col p-4">
