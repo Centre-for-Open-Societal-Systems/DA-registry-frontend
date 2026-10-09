@@ -77,7 +77,8 @@ export function KnowledgeHub() {
               type="button"
               variant={isYoutube ? "brand" : "brandOutline"}
               size="md"
-              className="gap-2"
+              // YouTube brand red instead of the portal green
+              className={isYoutube ? "gap-2 bg-[#FF0000] hover:bg-[#CC0000]" : "gap-2 border-[#FF0000] text-[#FF0000] hover:bg-red-50"}
               aria-pressed={isYoutube}
               onClick={() => setIsYoutube((v) => !v)}
             >
