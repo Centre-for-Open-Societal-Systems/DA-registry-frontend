@@ -23,7 +23,7 @@ export default async function VisitOutcomePage(props: PageProps<"/visits/[id]/ou
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <BackLink href={`/visits/${visit.id}`} />
+      <BackLink href="/dashboard" />
 
       <Card className="flex flex-col gap-4 px-4 py-5 shadow-card md:flex-row md:items-center md:justify-between">
         <div>
