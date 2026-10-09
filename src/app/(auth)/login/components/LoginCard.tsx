@@ -8,13 +8,11 @@ import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { findAccount, type DemoAccount } from "@/features/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
-import { FaydaSignInModal } from "./FaydaSignInModal";
 import { ContactAdminModal } from "./ContactAdminModal";
 
 export function LoginCard() {
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const [isFaydaOpen, setIsFaydaOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -164,19 +162,6 @@ export function LoginCard() {
             <span className='font-semibold'>Sign in</span>
           </Button>
 
-          <div className="flex items-center gap-3 text-sm text-zinc-400">
-            <span className="h-px flex-1 bg-zinc-200" />
-            or
-            <span className="h-px flex-1 bg-zinc-200" />
-          </div>
-
-          <Button type="button" onClick={() => setIsFaydaOpen(true)} variant="brandOutline" size="lg" className="h-11 w-full gap-2 rounded-md transition-all duration-300 hover:bg-emerald-50 hover:scale-[1.02] active:scale-[0.98]">
-            <svg className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 10h16v11H4V10zM8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4" />
-            </svg>
-            <span className='font-semibold'>Sign in with FAYDA ID</span>
-          </Button>
-
           <p className="mt-1 text-center text-sm text-zinc-500">
             Don&apos;t have an account?{" "}
             <button type="button" onClick={() => setIsContactOpen(true)} className="font-semibold text-brand-green transition-colors hover:text-brand-green-dark hover:underline">
@@ -193,7 +178,6 @@ export function LoginCard() {
         isOpen={isForgotPasswordOpen}
         onClose={() => setIsForgotPasswordOpen(false)}
       />
-      <FaydaSignInModal isOpen={isFaydaOpen} onClose={() => setIsFaydaOpen(false)} onSignedIn={completeSignIn} />
       <ContactAdminModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </div>
   );
