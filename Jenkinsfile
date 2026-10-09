@@ -1,0 +1,152 @@
+pipeline {
+    agent any
+
+    options {
+        disableConcurrentBuilds()
+        timeout(time: 45, unit: 'MINUTES')
+    }
+
+    environment {
+        AWS_REGION      = 'ap-south-1'
+        AWS_ACCOUNT_ID  = '379220350808'
+        IMAGE_REGISTRY  = '379220350808.dkr.ecr.ap-south-1.amazonaws.com'
+        IMAGE_NAME      = 'da-registry-frontend'   // must exist as an ECR repository first
+        IMAGE_REPO      = "${IMAGE_REGISTRY}/${IMAGE_NAME}"
+        // The DA cluster node (different from the grievance node). Jenkins SSHes in and runs helm there.
+        DA_NODE         = '65.0.132.192'
+        HELM_RELEASE    = 'registry-frontend'
+        CHART_DIR       = '/home/ubuntu/da/helm/charts/da-app'
+        // Per-branch target (namespace, public URL) is chosen in the Checkout stage:
+        //   develop -> namespace develop, image tag develop-<build>-<sha>
+        //   staging -> namespace staging, image tag staging-<build>-<sha>
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    def targets = [
+                        develop: [
+                            namespace: 'develop',
+                            verifyUrl: 'https://da-registry-development.oanstaging.com/login'
+                        ],
+                        staging: [
+                            namespace: 'staging',
+                            verifyUrl: 'https://da-registry-staging.oanstaging.com/login'
+                        ]
+                    ]
+                    def target = targets[env.BRANCH_NAME]
+                    env.TARGET_ENV    = target ? env.BRANCH_NAME : 'develop'
+                    def t = target ?: targets.develop
+                    env.K8S_NAMESPACE = t.namespace
+                    env.VERIFY_URL    = t.verifyUrl
+
+                    def sha = sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()
+                    env.IMAGE_TAG_BUILD = "${env.TARGET_ENV}-${env.BUILD_NUMBER}-${sha}"
+                    env.FULL_IMAGE      = "${env.IMAGE_REPO}:${env.IMAGE_TAG_BUILD}"
+                    echo "Branch ${env.BRANCH_NAME} -> namespace ${env.K8S_NAMESPACE}, image ${env.FULL_IMAGE}"
+                }
+            }
+        }
+
+        stage('Install & test') {
+            steps {
+                // npm project (package-lock.json); `npm run check` = lint + typecheck + vitest
+                sh '''
+                    docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e CI=true \
+                        -v "$PWD":/app -w /app node:24-alpine \
+                        sh -c "npm ci && npm run check"
+                '''
+            }
+        }
+
+        stage('Build image') {
+            when { anyOf { branch 'develop'; branch 'staging' } }
+            steps {
+                sh '''
+                    docker build --pull \
+                        -t "$FULL_IMAGE" \
+                        -t "$IMAGE_REPO:$TARGET_ENV" \
+                        .
+                '''
+            }
+        }
+
+        stage('Push image') {
+            when { anyOf { branch 'develop'; branch 'staging' } }
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-ecr-creds'
+                ]]) {
+                    sh '''
+                        aws ecr get-login-password --region "$AWS_REGION" \
+                            | docker login --username AWS --password-stdin "$IMAGE_REGISTRY"
+                        docker push "$FULL_IMAGE"
+                        docker push "$IMAGE_REPO:$TARGET_ENV"
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy (helm)') {
+            when { anyOf { branch 'develop'; branch 'staging' } }
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'da-node-ssh-key',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+                    // Same chart and values Ansible uses; --reuse-values keeps env, ingress host and probes
+                    // of the live release and changes only the image and pull secret.
+                    // --rollback-on-failure + --wait: Helm rolls back itself if the pods do not become ready.
+                    sh '''
+ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$DA_NODE" \
+    bash -s -- "$HELM_RELEASE" "$CHART_DIR" "$K8S_NAMESPACE" "$IMAGE_REPO" "$IMAGE_TAG_BUILD" <<'ENDSSH'
+set -euo pipefail
+RELEASE="$1"; CHART="$2"; NS="$3"; REPO="$4"; TAG="$5"
+export PATH="$PATH:/usr/local/bin:/snap/bin"
+export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/config}"
+
+# Fail fast on a wrong release/namespace instead of creating a second release
+helm status "$RELEASE" -n "$NS" > /dev/null
+kubectl get secret ecr-regcred -n "$NS" > /dev/null || { echo "secret ecr-regcred missing in $NS (pull-secret CronJob not set up?)"; exit 1; }
+
+echo "Deploying $REPO:$TAG to release $RELEASE ($NS)"
+helm upgrade "$RELEASE" "$CHART" -n "$NS" --reuse-values \
+    --set-string "image.repository=$REPO" \
+    --set-string "image.tag=$TAG" \
+    --set-string "image.pullPolicy=IfNotPresent" \
+    --set "imagePullSecrets[0].name=ecr-regcred" \
+    --rollback-on-failure --wait --timeout 5m
+ENDSSH
+                    '''
+                }
+            }
+        }
+
+        stage('Verify') {
+            when { anyOf { branch 'develop'; branch 'staging' } }
+            steps {
+                sh '''
+                    for i in $(seq 1 10); do
+                        code=$(curl -skL -o /dev/null -w "%{http_code}" "$VERIFY_URL" || true)
+                        echo "attempt $i: $VERIFY_URL -> $code"
+                        [ "$code" = "200" ] && exit 0
+                        sleep 6
+                    done
+                    echo "da-registry-frontend did not return 200 at $VERIFY_URL"
+                    exit 1
+                '''
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "da-registry-frontend ${env.BRANCH_NAME} deploy failed (namespace ${env.K8S_NAMESPACE}). Check the stage logs above; 'helm history ${env.HELM_RELEASE} -n ${env.K8S_NAMESPACE}' shows whether Helm rolled back."
+        }
+    }
+}
