@@ -32,7 +32,7 @@ export const useBeneficiariesStore = create<BeneficiariesState>()((set, get) => 
         continue;
       }
       result.added.push(f.name);
-      fresh.push({ id: f.id, name: f.name, avatar: f.avatar, kebele: f.kebele, crop: f.crop, segmentId, status: "Pending verification", linkedAt: "Just now" });
+      fresh.push({ id: f.id, name: f.name, avatar: f.avatar, kebele: f.kebele, crop: f.crop, livestock: f.livestock, segmentId, status: "Pending verification", linkedAt: "Just now" });
     }
     const freshIds = new Set(fresh.map((b) => b.id));
     set({ rows: [...fresh, ...current.filter((b) => !freshIds.has(b.id))] });

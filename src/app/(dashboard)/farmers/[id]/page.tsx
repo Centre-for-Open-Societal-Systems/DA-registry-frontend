@@ -7,6 +7,8 @@ import { ProfileTabs } from "./components/ProfileTabs";
 import { ProfileOverview } from "./components/ProfileOverview";
 import { HoldingsSection } from "./components/HoldingsSection";
 import { CropHistorySection } from "./components/CropHistorySection";
+import { LivestockSection } from "./components/LivestockSection";
+import { LivestockHistorySection } from "./components/LivestockHistorySection";
 import { VisitHistorySection } from "./components/VisitHistorySection";
 import { DocumentsSection } from "./components/DocumentsSection";
 import { AdvisorySection } from "./components/AdvisorySection";
@@ -36,6 +38,8 @@ export default async function FarmerProfilePage(props: PageProps<"/farmers/[id]"
           Overview: <ProfileOverview />,
           Holdings: <HoldingsSection />,
           "Crop history": <CropHistorySection />,
+          Livestock: <LivestockSection />,
+          "Livestock history": <LivestockHistorySection />,
           "Visit history": <VisitHistorySection />,
           Documents: <DocumentsSection />,
           Advisory: <AdvisorySection farmerId={farmer.id} />,

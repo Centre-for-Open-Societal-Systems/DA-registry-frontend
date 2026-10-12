@@ -41,6 +41,7 @@ const DURATION_MIN: Record<string, number> = {
   "Harvest survey": 50,
   "Soil sampling": 55,
   "Follow-up": 25,
+  "Livestock survey": 40,
 };
 
 const visit = (
@@ -85,6 +86,7 @@ export const VISITS: VisitRecord[] = [
   visit("v-1012", "Sep 09, 2026", "14:30", "Tadesse A.", FARMERS.meseret, "Pest follow-up", "Missed", "Almaz Tesfaye"),
   visit("v-1013", "Sep 15, 2026", "09:00", "Tadesse A.", FARMERS.hirut, "Crop inspection", "Confirmed", "Almaz Tesfaye"),
   visit("v-1014", "Sep 17, 2026", "14:00", "Tadesse A.", FARMERS.tigist, "Harvest survey", "Planned", "Almaz Tesfaye"),
+  visit("v-1015", "Sep 18, 2026", "10:30", "Tadesse A.", FARMERS.chaltu, "Livestock survey", "Confirmed", "Almaz Tesfaye"),
 ];
 
 /** Short agent label used in the visits table, e.g. "Tadesse Alemu" -> "Tadesse A.". */

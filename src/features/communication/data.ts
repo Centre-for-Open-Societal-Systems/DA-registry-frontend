@@ -3,7 +3,22 @@ import type { PillTone } from "@/components/ui/Pill";
 // FR-10 Broadcast/Alert engine, FR-11 knowledge dissemination, FR-10b notifications.
 
 export type Channel = "SMS" | "Telegram";
-export type Audience = "All DAs — Bako Tibe" | "My linked farmers" | "Farmers — Bako 01" | "Farmers — Koye Feche" | "Cooperative members — Bako" | "Drought-response kebeles";
+// Broadcasts are limited to Woredas: a message goes to every farmer or every DA in one Woreda, never a kebele or segment.
+export type RecipientGroup = "Farmers" | "Development Agents";
+export const RECIPIENT_GROUPS: RecipientGroup[] = ["Farmers", "Development Agents"];
+export type Audience = `${RecipientGroup} — ${string} Woreda`;
+
+/** Reachable recipients per Woreda (registered farmers with a phone, active DAs). */
+export const WOREDA_AUDIENCES: Record<string, Record<RecipientGroup, number>> = {
+  "Bako Tibe": { Farmers: 1240, "Development Agents": 38 },
+  Ambo: { Farmers: 980, "Development Agents": 31 },
+  Dendi: { Farmers: 860, "Development Agents": 27 },
+  Cheliya: { Farmers: 710, "Development Agents": 22 },
+};
+export const BROADCAST_WOREDAS = Object.keys(WOREDA_AUDIENCES);
+
+export const audienceOf = (group: RecipientGroup, woreda: string): Audience => `${group} — ${woreda} Woreda`;
+export const audienceSize = (group: RecipientGroup, woreda: string) => WOREDA_AUDIENCES[woreda]?.[group] ?? 0;
 export type SignalSource = "Knowledge" | "Emergency" | "Weather" | "Informational" | "Grievance";
 
 export interface Article {
@@ -103,10 +118,10 @@ export interface Dispatch {
 }
 
 export const DISPATCHES: Dispatch[] = [
-  { id: "bc-2210", message: "Woreda DA coordination meeting moved to Mon 22 Sep, 09:00, same venue. — Bako Tibe Extension Office", source: "Informational", channels: ["SMS", "Telegram"], audience: "All DAs — Bako Tibe", recipients: 38, dispatchedBy: "Almaz Tesfaye", dispatchedAt: "12 Sep 2026, 15:20", delivery: { delivered: 37, failed: 1, pending: 0 } },
-  { id: "bc-2207", message: "Teff: plant in rows 20 cm apart, seed 5–8 kg/ha, cover no deeper than 1 cm. First weeding at 3 weeks. — OpenAgriNet", source: "Knowledge", channels: ["SMS"], audience: "Farmers — Bako 01", recipients: 248, dispatchedBy: "Tadesse Alemu (DA)", dispatchedAt: "12 Sep 2026, 11:02", delivery: { delivered: 231, failed: 9, pending: 8 } },
-  { id: "bc-2201", message: "Livestock: anthrax + blackleg vaccination before the rains; PPR yearly for all shoats over 3 months. — OpenAgriNet", source: "Knowledge", channels: ["SMS", "Telegram"], audience: "Farmers — Koye Feche", recipients: 211, dispatchedBy: "Kebede Alemu (DA)", dispatchedAt: "05 Sep 2026, 08:45", delivery: { delivered: 205, failed: 6, pending: 0 } },
-  { id: "bc-2196", message: "Flood warning: heavy rain expected 3–4 Sep. Move stored grain and animals away from riverbanks. — Bako Tibe Woreda", source: "Weather", channels: ["SMS"], audience: "Drought-response kebeles", recipients: 387, dispatchedBy: "Almaz Tesfaye", dispatchedAt: "02 Sep 2026, 17:30", delivery: { delivered: 380, failed: 7, pending: 0 } },
+  { id: "bc-2210", message: "Woreda DA coordination meeting moved to Mon 22 Sep, 09:00, same venue. — Bako Tibe Extension Office", source: "Informational", channels: ["SMS", "Telegram"], audience: "Development Agents — Bako Tibe Woreda", recipients: 38, dispatchedBy: "Almaz Tesfaye", dispatchedAt: "12 Sep 2026, 15:20", delivery: { delivered: 37, failed: 1, pending: 0 } },
+  { id: "bc-2207", message: "Teff: plant in rows 20 cm apart, seed 5–8 kg/ha, cover no deeper than 1 cm. First weeding at 3 weeks. — OpenAgriNet", source: "Knowledge", channels: ["SMS"], audience: "Farmers — Bako Tibe Woreda", recipients: 1240, dispatchedBy: "Tadesse Alemu (DA)", dispatchedAt: "12 Sep 2026, 11:02", delivery: { delivered: 1198, failed: 26, pending: 16 } },
+  { id: "bc-2201", message: "Livestock: anthrax + blackleg vaccination before the rains; PPR yearly for all shoats over 3 months. — OpenAgriNet", source: "Knowledge", channels: ["SMS", "Telegram"], audience: "Farmers — Bako Tibe Woreda", recipients: 1240, dispatchedBy: "Kebede Alemu (DA)", dispatchedAt: "05 Sep 2026, 08:45", delivery: { delivered: 1211, failed: 29, pending: 0 } },
+  { id: "bc-2196", message: "Flood warning: heavy rain expected 3–4 Sep. Move stored grain and animals away from riverbanks. — Bako Tibe Woreda", source: "Weather", channels: ["SMS"], audience: "Farmers — Bako Tibe Woreda", recipients: 1240, dispatchedBy: "Almaz Tesfaye", dispatchedAt: "02 Sep 2026, 17:30", delivery: { delivered: 1219, failed: 21, pending: 0 } },
 ];
 
 export interface Notification {

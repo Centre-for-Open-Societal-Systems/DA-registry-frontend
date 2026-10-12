@@ -15,19 +15,11 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { SmsPreview } from "@/features/communication";
-import { DISPATCHES, SIGNAL_TONE, SIGNALS, type Audience, type Channel, type Dispatch, type SignalSource } from "@/features/communication";
+import { BROADCAST_WOREDAS, DISPATCHES, RECIPIENT_GROUPS, SIGNAL_TONE, SIGNALS, audienceOf, audienceSize, type Channel, type Dispatch, type RecipientGroup, type SignalSource } from "@/features/communication";
 import { useAuthStore } from "@/store/useAuthStore";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { FileDropInput } from "@/components/ui/FileDropInput";
 
-const AUDIENCES: { value: Audience; size: number }[] = [
-  { value: "All DAs — Bako Tibe", size: 38 },
-  { value: "My linked farmers", size: 248 },
-  { value: "Farmers — Bako 01", size: 248 },
-  { value: "Farmers — Koye Feche", size: 211 },
-  { value: "Cooperative members — Bako", size: 96 },
-  { value: "Drought-response kebeles", size: 387 },
-];
 const SOURCES: SignalSource[] = ["Knowledge", "Emergency", "Weather", "Informational"];
 const CHANNELS: Channel[] = ["SMS", "Telegram"];
 
@@ -53,8 +45,10 @@ export function BroadcastWorkspace() {
 
   const [source, setSource] = useState<SignalSource>(signal?.source ?? "Informational");
   const [message, setMessage] = useState(signal ? `${signal.title}. ${signal.detail} — Bako Tibe Woreda` : "");
-  // A DA usually writes to their own linked farmers; officers default to the DA network.
-  const [audience, setAudience] = useState<Audience>(signal?.source === "Weather" || signal?.source === "Emergency" ? "Drought-response kebeles" : role === "DA" ? "My linked farmers" : "All DAs — Bako Tibe");
+  // Audience is always a whole Woreda. A DA (and any weather/emergency signal) defaults to farmers; officers default to the DA network.
+  const [woreda, setWoreda] = useState(BROADCAST_WOREDAS[0]);
+  const [group, setGroup] = useState<RecipientGroup>(signal?.source === "Weather" || signal?.source === "Emergency" || role === "DA" ? "Farmers" : "Development Agents");
+  const audience = audienceOf(group, woreda);
   const [channels, setChannels] = useState<Set<Channel>>(new Set<Channel>(["SMS"]));
   const [history, setHistory] = useState<Dispatch[]>(DISPATCHES);
   const [notice, setNotice] = useState<string | null>(null);
@@ -67,7 +61,7 @@ export function BroadcastWorkspace() {
   const setFilter = (key: keyof HistoryFilters) => (next: Set<string>) => setFilters((prev) => ({ ...prev, [key]: next }));
 
   const sourceOptions = optionsOf(history.map((d) => d.source), Object.keys(SIGNAL_TONE));
-  const audienceOptions = optionsOf(history.map((d) => d.audience), AUDIENCES.map((a) => a.value));
+  const audienceOptions = optionsOf(history.map((d) => d.audience), [...new Set(history.map((d) => d.audience))].sort());
   const channelOptions = optionsOf(history.flatMap((d) => d.channels), CHANNELS);
   const filterFields: FilterFieldConfig[] = [
     { key: "source", label: "Source", allLabel: "All sources", placeholder: "All Sources", options: sourceOptions },
@@ -83,7 +77,7 @@ export function BroadcastWorkspace() {
       matchesQuery(query, d),
   );
 
-  const size = AUDIENCES.find((a) => a.value === audience)?.size ?? 0;
+  const size = audienceSize(group, woreda);
   const toggle = (c: Channel) => setChannels((prev) => { const n = new Set(prev); if (n.has(c)) n.delete(c); else n.add(c); return n; });
 
   const dispatch = () => {
@@ -124,12 +118,15 @@ export function BroadcastWorkspace() {
         {!canDispatch && <p className="mt-1 text-[12.5px] text-muted">Only a Development Agent, Communications Officer or Administrator can dispatch. You can preview.</p>}
         <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
           <div className="flex flex-col gap-4">
+            <FormField label="Signal source" htmlFor="bc-source" required hint="Weather appears only as a source feeding this engine.">
+              <Select id="bc-source" value={source} onChange={(e) => setSource(e.target.value as SignalSource)}>{SOURCES.map((s) => <option key={s}>{s}</option>)}</Select>
+            </FormField>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormField label="Signal source" htmlFor="bc-source" required hint="Weather appears only as a source feeding this engine.">
-                <Select id="bc-source" value={source} onChange={(e) => setSource(e.target.value as SignalSource)}>{SOURCES.map((s) => <option key={s}>{s}</option>)}</Select>
+              <FormField label="Woreda" htmlFor="bc-woreda" required hint="Broadcasts reach a whole Woreda.">
+                <Select id="bc-woreda" value={woreda} onChange={(e) => setWoreda(e.target.value)}>{BROADCAST_WOREDAS.map((w) => <option key={w} value={w}>{w}</option>)}</Select>
               </FormField>
-              <FormField label="Audience" htmlFor="bc-audience" required hint={`${size} recipients`}>
-                <Select id="bc-audience" value={audience} onChange={(e) => setAudience(e.target.value as Audience)}>{AUDIENCES.map((a) => <option key={a.value} value={a.value}>{a.value}</option>)}</Select>
+              <FormField label="Recipients" htmlFor="bc-group" required hint={`${size.toLocaleString()} recipients in ${woreda} Woreda`}>
+                <Select id="bc-group" value={group} onChange={(e) => setGroup(e.target.value as RecipientGroup)}>{RECIPIENT_GROUPS.map((g) => <option key={g} value={g}>{g === "Farmers" ? "All farmers" : "All Development Agents"}</option>)}</Select>
               </FormField>
             </div>
             <FormField label="Message" htmlFor="bc-message" required hint={`${message.length} characters · ${Math.max(1, Math.ceil(message.length / 160))} SMS segment${message.length > 160 ? "s" : ""} · Amharic + English supported`}>
@@ -148,11 +145,11 @@ export function BroadcastWorkspace() {
               <button type="button" onClick={() => { setMessage(""); setEvidence([]); }} className="inline-flex shrink-0 whitespace-nowrap h-10 items-center rounded-md border border-zinc-200 bg-white px-4 text-[14px] font-medium text-ink-soft hover:bg-zinc-50">Clear</button>
               <button type="button" disabled={!canDispatch || channels.size === 0 || message.trim().length < 5} onClick={dispatch} className="inline-flex shrink-0 whitespace-nowrap h-10 items-center gap-2 rounded-md bg-brand-green px-4 text-[14px] font-semibold text-white hover:bg-brand-green-dark disabled:opacity-50">
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
-                Send to {size}
+                Send to {size.toLocaleString()}
               </button>
             </div>
           </div>
-          <SmsPreview text={message} sender={source === "Knowledge" ? "OpenAgriNet" : "Bako Tibe Woreda"} />
+          <SmsPreview text={message} sender={source === "Knowledge" ? "OpenAgriNet" : `${woreda} Woreda`} />
         </div>
       </Card>
 

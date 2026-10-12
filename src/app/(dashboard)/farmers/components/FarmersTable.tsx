@@ -20,6 +20,7 @@ import {
   applyFilters,
   countActiveFilters,
   CROP_OPTIONS,
+  LIVESTOCK_OPTIONS,
   EMPTY_FILTERS,
   FARMER_FILTER_FIELDS,
   KEBELE_OPTIONS,
@@ -37,7 +38,7 @@ import { fileDate, type CsvColumn } from "@/lib/download";
 import { downloadTable, formatLabel } from "@/lib/export";
 import type { Farmer } from "@/features/farmers";
 
-const SEARCH_PLACEHOLDER = searchPlaceholder(["Farmer Details", "Kebele", "Crop", "Registered date", "Status"]);
+const SEARCH_PLACEHOLDER = searchPlaceholder(["Farmer Details", "Kebele", "Crop", "Livestock", "Registered date", "Status"]);
 
 // The visible table columns (Farmer Details split into name / email / phone).
 const EXPORT_COLUMNS: CsvColumn<Farmer>[] = [
@@ -49,6 +50,8 @@ const EXPORT_COLUMNS: CsvColumn<Farmer>[] = [
   { header: "Woreda", value: (f) => f.woreda },
   { header: "Crop", value: (f) => f.crop },
   { header: "Land (ha)", value: (f) => f.landHa },
+  { header: "Livestock", value: (f) => f.livestock },
+  { header: "Livestock (heads)", value: (f) => f.livestockHeads },
   { header: "Registered date", value: (f) => `${f.registeredAt} ${f.registeredTime}` },
   { header: "Status", value: (f) => f.status },
   { header: "Status reason", value: (f) => f.statusReason ?? "" },
@@ -137,7 +140,7 @@ export function FarmersTable() {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] border-collapse text-left">
+        <table className="w-full min-w-[1020px] border-collapse text-left">
           <thead>
             <tr className="border-y border-line bg-surface text-[14px] font-semibold text-slate-500">
               <th className="w-14 px-4 py-3 align-middle">
@@ -150,6 +153,9 @@ export function FarmersTable() {
               <th className="px-4 py-3 font-semibold">
                 <FilterDropdown label="Crop" allLabel="All crops" options={CROP_OPTIONS} selected={filters.crop} onApply={setColumnFilter("crop")} />
               </th>
+              <th className="px-4 py-3 font-semibold">
+                <FilterDropdown label="Livestock" allLabel="All livestock" options={LIVESTOCK_OPTIONS} selected={filters.livestock} onApply={setColumnFilter("livestock")} />
+              </th>
               <th className="px-4 py-3 text-center font-semibold">Registered date</th>
               <th className="px-4 py-3 text-center font-semibold">
                 <FilterDropdown label="Status" allLabel="All Status" options={STATUS_OPTIONS} selected={filters.status} onApply={setColumnFilter("status")} />
@@ -160,7 +166,7 @@ export function FarmersTable() {
           <tbody className="text-[14px] text-slate-700">
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-6"><EmptyState title="No farmers match the selected filters" hint="Clear a filter or try a different search." /></td>
+                <td colSpan={8} className="px-4 py-6"><EmptyState title="No farmers match the selected filters" hint="Clear a filter or try a different search." /></td>
               </tr>
             )}
             {pageRows.map((farmer) => {
@@ -193,6 +199,9 @@ export function FarmersTable() {
                   <td className="px-4 py-3.5">
                     {farmer.crop} {farmer.landHa} ha
                   </td>
+                  <td className="px-4 py-3.5">
+                    {farmer.livestock} {farmer.livestockHeads} heads
+                  </td>
                   <td className="px-4 py-3.5 text-center leading-tight">
                     {farmer.registeredAt}
                     <br />
@@ -222,6 +231,7 @@ export function FarmersTable() {
           setFilters({
             kebele: next.kebele ?? new Set(),
             crop: next.crop ?? new Set(),
+            livestock: next.livestock ?? new Set(),
             status: next.status ?? new Set(),
           })
         }
@@ -247,7 +257,7 @@ export function FarmersTable() {
                 <li key={f.id} className="flex items-center gap-2.5 text-[14px]">
                   <FarmerAvatar name={f.name} avatar={f.avatar} />
                   <span className="text-ink">{f.name}</span>
-                  <span className="text-[13px] text-muted">{f.kebele} · {f.crop}</span>
+                  <span className="text-[13px] text-muted">{f.kebele} · {f.crop} · {f.livestock}</span>
                 </li>
               ))}
             </ul>

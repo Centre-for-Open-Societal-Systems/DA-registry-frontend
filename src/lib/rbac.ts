@@ -66,7 +66,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Assignments", href: "/assignments", roles: ["Supervisor"], part: 1 },
       { title: "Approvals", href: "/approvals", roles: ["Admin"], part: 1 },
       { title: "Registry Sync", href: "/registry-sync", roles: ["Admin"], part: 1 },
-      { title: "Internal Feedback", href: "/feedback", roles: ["DA", "Supervisor", "Admin"], part: 1 },
+      // Internal Feedback (/feedback) is hidden from the sidebar; the page still opens by URL.
     ],
   },
   {
@@ -75,6 +75,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Knowledge Base", href: "/knowledge", roles: ALL, part: 1 },
       { title: "Broadcast", href: "/broadcast", roles: ["DA", "CommsOfficer", "Admin"], part: 1 },
       { title: "Alerts", href: "/alerts", roles: ["CommsOfficer", "Admin", "Supervisor"], part: 1 },
+      // Admin maintains the directory; DAs open it from My Teams.
+      { title: "Advisors", href: "/advisors", roles: ["Admin"], part: 1 },
     ],
   },
   {
@@ -82,6 +84,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "My Performance", href: "/performance", roles: ["DA", "Supervisor"], part: 1 },
       { title: "Surveys", href: "/surveys", roles: ["DA", "Supervisor"], part: 1 },
+      { title: "Training", href: "/training", roles: ["DA"], part: 1 },
     ],
   },
   {
@@ -130,10 +133,12 @@ export const PAGE_TITLES: { prefix: string; title: string }[] = [
   { prefix: "/knowledge", title: "Knowledge Base" },
   { prefix: "/broadcast", title: "Broadcast" },
   { prefix: "/alerts", title: "Alerts" },
+  { prefix: "/advisors", title: "Advisors" },
   { prefix: "/performance/kpi-entry", title: "KPI Entry" },
   { prefix: "/performance", title: "My Performance" },
   { prefix: "/surveys/", title: "Survey Capture" },
   { prefix: "/surveys", title: "Surveys" },
+  { prefix: "/training", title: "Training" },
   { prefix: "/sync", title: "Sync Queue" },
   { prefix: "/admin/users", title: "Users & Roles" },
   { prefix: "/admin/reports", title: "Reports" },

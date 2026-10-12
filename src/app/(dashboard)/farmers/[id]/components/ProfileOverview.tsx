@@ -1,6 +1,8 @@
 import { OVERVIEW_DOCUMENT_COUNT } from "@/features/farmers";
 import { HoldingsSection } from "./HoldingsSection";
 import { CropHistorySection } from "./CropHistorySection";
+import { LivestockSection } from "./LivestockSection";
+import { LivestockHistorySection } from "./LivestockHistorySection";
 import { VisitHistorySection } from "./VisitHistorySection";
 import { DocumentsSection } from "./DocumentsSection";
 
@@ -11,6 +13,10 @@ export function ProfileOverview() {
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <HoldingsSection />
         <CropHistorySection />
+      </div>
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <LivestockSection />
+        <LivestockHistorySection />
       </div>
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <VisitHistorySection showViewAll />
