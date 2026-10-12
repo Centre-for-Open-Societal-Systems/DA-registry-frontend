@@ -19,8 +19,8 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
   { email: "communications@gmail.com", password: "communications@123", role: "CommsOfficer", name: "Hana Girma" },
 ];
 
-/** Case-insensitive on the email, exact on the password. Returns undefined when nothing matches. */
-export function findAccount(email: string, password: string): DemoAccount | undefined {
+/** Case-insensitive on the email, exact on the password. `registered` adds accounts created via Register. */
+export function findAccount(email: string, password: string, registered: DemoAccount[] = []): DemoAccount | undefined {
   const wanted = email.trim().toLowerCase();
-  return DEMO_ACCOUNTS.find((a) => a.email === wanted && a.password === password);
+  return [...DEMO_ACCOUNTS, ...registered].find((a) => a.email === wanted && a.password === password);
 }

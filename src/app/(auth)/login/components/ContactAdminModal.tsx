@@ -8,7 +8,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Textarea } from "@/components/ui/Textarea";
 import { Banner } from "@/components/ui/Banner";
 
-// Portal accounts are provisioned by an administrator (no self-registration); this sends them an access request.
+// For anyone who cannot register themselves (e.g. an Admin account or a locked-out user): sends the administrator an access request.
 export function ContactAdminModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [sentTo, setSentTo] = useState<string | null>(null);
 
@@ -24,7 +24,7 @@ export function ContactAdminModal({ isOpen, onClose }: { isOpen: boolean; onClos
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={close} title="Request Portal Access" subtitle="Accounts are created by your Woreda or regional administrator — there is no self-registration.">
+    <Modal isOpen={isOpen} onClose={close} title="Request Portal Access" subtitle="Your Woreda or regional administrator will create or restore your account.">
       {sentTo ? (
         <div className="flex flex-col gap-4">
           <Banner tone="success" title="Access request sent">
