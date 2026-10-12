@@ -66,7 +66,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Assignments", href: "/assignments", roles: ["Supervisor"], part: 1 },
       { title: "Approvals", href: "/approvals", roles: ["Admin"], part: 1 },
       { title: "Registry Sync", href: "/registry-sync", roles: ["Admin"], part: 1 },
-      { title: "Internal Feedback", href: "/feedback", roles: ["DA", "Supervisor", "Admin"], part: 1 },
+      // Internal Feedback (/feedback) is hidden from the sidebar; the page still opens by URL.
     ],
   },
   {
