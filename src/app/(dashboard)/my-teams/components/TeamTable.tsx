@@ -11,23 +11,16 @@ import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } f
 import { ACTIVE_TONE, type Agent } from "@/features/agents";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 
-const UNASSIGNED = "—";
-const UNASSIGNED_LABEL = "Unassigned";
-
 const SEARCH_PLACEHOLDER = searchPlaceholder(["Name", "DA-ID", "Kebele", "Specialisation", "Phone"]);
 
 const optionsOf = (values: string[]): FilterOption[] =>
   [...new Set(values)].sort().map((value) => ({ value, label: value, count: values.filter((v) => v === value).length }));
 
-const kebeleOf = (a: Agent) => (a.kebele === UNASSIGNED ? UNASSIGNED_LABEL : a.kebele);
-
 interface TeamFilters extends FilterSelection {
-  kebele: Set<string>;
   specialisation: Set<string>;
-  tier: Set<string>;
   status: Set<string>;
 }
-const EMPTY: TeamFilters = { kebele: new Set(), specialisation: new Set(), tier: new Set(), status: new Set() };
+const EMPTY: TeamFilters = { specialisation: new Set(), status: new Set() };
 
 // The DA's Woreda team. Read-only: DAs see their colleagues' work contacts, not registry records (no row links).
 export function TeamTable({ team, myDaId }: { team: Agent[]; myDaId: string }) {
@@ -35,14 +28,10 @@ export function TeamTable({ team, myDaId }: { team: Agent[]; myDaId: string }) {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  const kebeleOptions = optionsOf(team.map(kebeleOf));
   const specialisationOptions = optionsOf(team.map((a) => a.specialisation));
-  const tierOptions = optionsOf(team.map((a) => a.educationTier));
   const statusOptions = optionsOf(team.map((a) => a.activeStatus));
   const filterFields: FilterFieldConfig[] = [
-    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All Kebeles", options: kebeleOptions },
     { key: "specialisation", label: "Specialisation", allLabel: "All specialisations", placeholder: "All Specialisations", options: specialisationOptions },
-    { key: "tier", label: "Education", allLabel: "All education tiers", placeholder: "All Education Tiers", options: tierOptions },
     { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: statusOptions },
   ];
 
@@ -52,11 +41,9 @@ export function TeamTable({ team, myDaId }: { team: Agent[]; myDaId: string }) {
 
   const rows = team.filter(
     (a) =>
-      has(filters.kebele, kebeleOf(a)) &&
       has(filters.specialisation, a.specialisation) &&
-      has(filters.tier, a.educationTier) &&
       has(filters.status, a.activeStatus) &&
-      matchesQuery(query, a.fullName, a.daId, kebeleOf(a), a.specialisation, a.educationTier, a.activeStatus, a.phone, a.joinedAt),
+      matchesQuery(query, a.fullName, a.daId, a.kebele, a.specialisation, a.activeStatus, a.phone, a.joinedAt),
   );
 
   const columns: Column<Agent>[] = [
@@ -75,18 +62,13 @@ export function TeamTable({ team, myDaId }: { team: Agent[]; myDaId: string }) {
     },
     {
       key: "kebele",
-      header: <FilterDropdown label="Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setFilter("kebele")} />,
-      cell: (a) => (a.kebele === UNASSIGNED ? <span className="text-subtle">{UNASSIGNED_LABEL}</span> : a.kebele),
+      header: "Kebele",
+      cell: (a) => a.kebele,
     },
     {
       key: "specialisation",
       header: <FilterDropdown label="Specialisation" allLabel="All specialisations" options={specialisationOptions} selected={filters.specialisation} onApply={setFilter("specialisation")} />,
       cell: (a) => a.specialisation,
-    },
-    {
-      key: "tier",
-      header: <FilterDropdown label="Education" allLabel="All education tiers" options={tierOptions} selected={filters.tier} onApply={setFilter("tier")} />,
-      cell: (a) => a.educationTier,
     },
     { key: "farmers", header: "Farmers", align: "right", cell: (a) => a.farmerCount.toLocaleString() },
     {
@@ -129,9 +111,7 @@ export function TeamTable({ team, myDaId }: { team: Agent[]; myDaId: string }) {
         filters={filters}
         onApply={(next) =>
           setFilters({
-            kebele: next.kebele ?? new Set(),
             specialisation: next.specialisation ?? new Set(),
-            tier: next.tier ?? new Set(),
             status: next.status ?? new Set(),
           })
         }

@@ -19,6 +19,11 @@ export const WOREDA_SUPERVISORS: Record<string, TeamSupervisor> = {
   "Bako Tibe": { name: "Almaz Tesfaye", title: "Woreda Extension Supervisor", woreda: "Bako Tibe", phone: "+251 91 300 4412", email: "supervisor@gmail.com" },
 };
 
+/** The Woreda agronomist the team turns to for crop and soil advice. */
+export const WOREDA_AGRONOMISTS: Record<string, TeamSupervisor> = {
+  "Bako Tibe": { name: "Dawit Gemechu", title: "Woreda Agronomist", woreda: "Bako Tibe", phone: "+251 91 300 5527", email: "agronomist@gmail.com" },
+};
+
 /** Current members of the DA's Woreda team (separated agents are no longer on it), the DA first. */
 export function getTeam(daId: string): Agent[] {
   const me = AGENTS.find((a) => a.daId === daId);

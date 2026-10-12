@@ -11,6 +11,10 @@ export interface Farmer {
   region: string;
   crop: string;
   landHa: number;
+  /** Main animal kept, recorded the same way as the primary crop. */
+  livestock: string;
+  /** Head count of the primary livestock. */
+  livestockHeads: number;
   registeredAt: string;
   registeredTime: string;
   status: FarmerStatus;
@@ -39,6 +43,28 @@ export interface CropRecord {
   season: string;
   crop: string;
   yield: string;
+  status: CropOutcome;
+}
+
+export type VaccinationStatus = "Up to date" | "Due" | "Overdue";
+
+/** A herd or flock — the livestock counterpart of a Plot. */
+export interface Herd {
+  code: string;
+  animal: string;
+  breed: string;
+  heads: number;
+  purpose: string;
+  housing: string;
+  vaccination: VaccinationStatus;
+  lastVaccinated: string;
+}
+
+/** Season-by-season livestock output — the counterpart of a CropRecord. */
+export interface LivestockRecord {
+  season: string;
+  animal: string;
+  production: string;
   status: CropOutcome;
 }
 

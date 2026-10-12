@@ -27,6 +27,7 @@ export function RequestUpdateModal({ farmer, isOpen, onClose }: RequestUpdateMod
     { key: "kebele", label: "Kebele", value: farmer.kebele },
     { key: "woreda", label: "Woreda", value: farmer.woreda },
     { key: "crop", label: "Primary crop", value: farmer.crop },
+    { key: "livestock", label: "Primary livestock", value: `${farmer.livestock} (${farmer.livestockHeads} heads)` },
   ];
   const [fieldKey, setFieldKey] = useState(fields[0].key);
   const current = fields.find((f) => f.key === fieldKey) ?? fields[0];

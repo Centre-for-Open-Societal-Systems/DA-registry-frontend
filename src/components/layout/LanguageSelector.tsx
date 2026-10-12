@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-// Portal languages: English and Amharic (same look as the Grievance Management portal header).
+// Portal languages: English, Amharic and Afaan Oromo (same look as the Grievance Management portal header).
 const LANGUAGES = [
   { code: "en", label: "English", flag: "🇺🇸" },
   { code: "am", label: "Amharic", flag: "🇪🇹" },
+  { code: "om", label: "Afaan Oromo", flag: "🇦🇴" },
 ];
 
 export function LanguageSelector({ className }: { className?: string }) {
@@ -61,10 +62,10 @@ export function LanguageSelector({ className }: { className?: string }) {
                 setSelected(lang.code);
                 setIsOpen(false);
               }}
-              className="flex w-full items-center px-6 py-4 text-left transition-colors hover:bg-slate-50"
+              className={cn("flex w-full items-center px-6 py-4 text-left transition-colors", selected === lang.code ? "bg-emerald-50" : "hover:bg-slate-50")}
             >
               <span className="mr-4 text-[22px] leading-none">{lang.flag}</span>
-              <span className={cn("flex-1 text-[16px] tracking-wide", selected === lang.code ? "font-bold text-ink" : "font-medium text-slate-700")}>{lang.label}</span>
+              <span className={cn("flex-1 text-[16px] tracking-wide", selected === lang.code ? "font-semibold text-emerald-700" : "font-medium text-slate-700")}>{lang.label}</span>
               {selected === lang.code && (
                 <svg className="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" />

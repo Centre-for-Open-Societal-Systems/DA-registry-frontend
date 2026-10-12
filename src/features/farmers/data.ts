@@ -1,4 +1,4 @@
-import type { AdvisoryNote, CropRecord, Farmer, FarmerDocument, Plot, Visit } from "./types";
+import type { AdvisoryNote, CropRecord, Farmer, FarmerDocument, Herd, LivestockRecord, Plot, Visit } from "./types";
 
 export const TOTAL_FARMERS = 1284;
 
@@ -13,16 +13,16 @@ export const FARMER_PAGE_TABS = [
 export const CURRENT_AGENT = { name: "Tadesse Alemu", avatar: "/images/tadesse_profile.png" };
 
 const FARMER_RECORDS: Omit<Farmer, "id">[] = [
-  { name: "Lelise Gudeta", email: "lelise.gudeta@gmail.com", phone: "+251 91 246 3157", kebele: "Bako Tibe", woreda: "Bako Tibe woreda", region: "Oromia", crop: "Teff", landHa: 1.2, registeredAt: "12 May 2026", registeredTime: "08:20", status: "Verified", totalPlots: 2, visits: 9, lastVisit: "12 Jun 2026" },
-  { name: "Abebe Kebede", email: "abebe.kebede@gmail.com", phone: "+251 91 555 0192", kebele: "Gedo", woreda: "Chelia woreda", region: "Oromia", crop: "Maize", landHa: 0.8, registeredAt: "03 Apr 2026", registeredTime: "09:45", status: "Pending", statusReason: "Fayda verification pending — OTP not yet confirmed by the farmer. Record is on the Farmer Registry review queue.", totalPlots: 1, visits: 4, lastVisit: "02 May 2026" },
-  { name: "Chaltu Dinkesa", email: "chaltu.dinkesa@gmail.com", phone: "+251 92 118 7734", kebele: "Lume", woreda: "Lume woreda", region: "Oromia", crop: "Wheat", landHa: 1.5, registeredAt: "21 Jan 2026", registeredTime: "10:15", status: "Verified", totalPlots: 3, visits: 11, lastVisit: "20 Jun 2026" },
-  { name: "Tadesse Alemu", email: "tadesse.alemu@gmail.com", phone: "+251 91 800 2210", avatar: "/images/tadesse_profile.png", kebele: "Dendi", woreda: "Dendi woreda", region: "Oromia", crop: "Teff", landHa: 2.1, registeredAt: "15 Feb 2026", registeredTime: "11:30", status: "Flagged", statusReason: "Possible duplicate — Fayda ID matches an existing record in Dendi woreda. Needs merge/keep decision in the Farmer Registry.", totalPlots: 2, visits: 6, lastVisit: "30 May 2026" },
-  { name: "Meseret Tolera", email: "meseret.tolera@gmail.com", phone: "+251 93 412 6650", kebele: "Bako Tibe", woreda: "Bako Tibe woreda", region: "Oromia", crop: "Maize", landHa: 1.0, registeredAt: "08 Mar 2026", registeredTime: "14:05", status: "Verified", totalPlots: 2, visits: 7, lastVisit: "18 Jun 2026" },
-  { name: "Gemechu Bekele", email: "gemechu.bekele@gmail.com", phone: "+251 91 677 3021", kebele: "Adea", woreda: "Adea woreda", region: "Oromia", crop: "Haricot bean", landHa: 0.6, registeredAt: "27 Feb 2026", registeredTime: "09:10", status: "Verified", totalPlots: 1, visits: 5, lastVisit: "09 Jun 2026" },
-  { name: "Hirut Fikadu", email: "hirut.fikadu@gmail.com", phone: "+251 92 305 8847", kebele: "Gedo", woreda: "Chelia woreda", region: "Oromia", crop: "Barley", landHa: 0.9, registeredAt: "14 Apr 2026", registeredTime: "15:40", status: "Pending", statusReason: "Land certificate upload pending — awaiting scan of the Level 2 holding certificate.", totalPlots: 1, visits: 2, lastVisit: "28 May 2026" },
-  { name: "Kedir Mohammed", email: "kedir.mohammed@gmail.com", phone: "+251 94 220 1593", kebele: "Adea", woreda: "Adea woreda", region: "Oromia", crop: "Chili pepper", landHa: 0.5, registeredAt: "02 Feb 2026", registeredTime: "10:50", status: "Verified", totalPlots: 1, visits: 8, lastVisit: "15 Jun 2026" },
-  { name: "Tigist Worku", email: "tigist.worku@gmail.com", phone: "+251 91 948 7206", kebele: "Lume", woreda: "Lume woreda", region: "Oromia", crop: "Teff", landHa: 1.7, registeredAt: "19 Mar 2026", registeredTime: "13:25", status: "Verified", totalPlots: 2, visits: 6, lastVisit: "11 Jun 2026" },
-  { name: "Dawit Negash", email: "dawit.negash@gmail.com", phone: "+251 93 761 4418", kebele: "Dendi", woreda: "Dendi woreda", region: "Oromia", crop: "Wheat", landHa: 1.3, registeredAt: "05 May 2026", registeredTime: "16:00", status: "Flagged", statusReason: "Phone number already linked to another farmer record — confirm the correct owner before approval.", totalPlots: 2, visits: 3, lastVisit: "04 Jun 2026" },
+  { name: "Lelise Gudeta", email: "lelise.gudeta@gmail.com", phone: "+251 91 246 3157", kebele: "Bako Tibe", woreda: "Bako Tibe woreda", region: "Oromia", crop: "Teff", landHa: 1.2, livestock: "Cattle", livestockHeads: 4, registeredAt: "12 May 2026", registeredTime: "08:20", status: "Verified", totalPlots: 2, visits: 9, lastVisit: "12 Jun 2026" },
+  { name: "Abebe Kebede", email: "abebe.kebede@gmail.com", phone: "+251 91 555 0192", kebele: "Gedo", woreda: "Chelia woreda", region: "Oromia", crop: "Maize", landHa: 0.8, livestock: "Goats", livestockHeads: 7, registeredAt: "03 Apr 2026", registeredTime: "09:45", status: "Pending", statusReason: "Fayda verification pending — OTP not yet confirmed by the farmer. Record is on the Farmer Registry review queue.", totalPlots: 1, visits: 4, lastVisit: "02 May 2026" },
+  { name: "Chaltu Dinkesa", email: "chaltu.dinkesa@gmail.com", phone: "+251 92 118 7734", kebele: "Lume", woreda: "Lume woreda", region: "Oromia", crop: "Wheat", landHa: 1.5, livestock: "Cattle", livestockHeads: 6, registeredAt: "21 Jan 2026", registeredTime: "10:15", status: "Verified", totalPlots: 3, visits: 11, lastVisit: "20 Jun 2026" },
+  { name: "Tadesse Alemu", email: "tadesse.alemu@gmail.com", phone: "+251 91 800 2210", avatar: "/images/tadesse_profile.png", kebele: "Dendi", woreda: "Dendi woreda", region: "Oromia", crop: "Teff", landHa: 2.1, livestock: "Sheep", livestockHeads: 10, registeredAt: "15 Feb 2026", registeredTime: "11:30", status: "Flagged", statusReason: "Possible duplicate — Fayda ID matches an existing record in Dendi woreda. Needs merge/keep decision in the Farmer Registry.", totalPlots: 2, visits: 6, lastVisit: "30 May 2026" },
+  { name: "Meseret Tolera", email: "meseret.tolera@gmail.com", phone: "+251 93 412 6650", kebele: "Bako Tibe", woreda: "Bako Tibe woreda", region: "Oromia", crop: "Maize", landHa: 1.0, livestock: "Poultry", livestockHeads: 25, registeredAt: "08 Mar 2026", registeredTime: "14:05", status: "Verified", totalPlots: 2, visits: 7, lastVisit: "18 Jun 2026" },
+  { name: "Gemechu Bekele", email: "gemechu.bekele@gmail.com", phone: "+251 91 677 3021", kebele: "Adea", woreda: "Adea woreda", region: "Oromia", crop: "Haricot bean", landHa: 0.6, livestock: "Goats", livestockHeads: 5, registeredAt: "27 Feb 2026", registeredTime: "09:10", status: "Verified", totalPlots: 1, visits: 5, lastVisit: "09 Jun 2026" },
+  { name: "Hirut Fikadu", email: "hirut.fikadu@gmail.com", phone: "+251 92 305 8847", kebele: "Gedo", woreda: "Chelia woreda", region: "Oromia", crop: "Barley", landHa: 0.9, livestock: "Sheep", livestockHeads: 8, registeredAt: "14 Apr 2026", registeredTime: "15:40", status: "Pending", statusReason: "Land certificate upload pending — awaiting scan of the Level 2 holding certificate.", totalPlots: 1, visits: 2, lastVisit: "28 May 2026" },
+  { name: "Kedir Mohammed", email: "kedir.mohammed@gmail.com", phone: "+251 94 220 1593", kebele: "Adea", woreda: "Adea woreda", region: "Oromia", crop: "Chili pepper", landHa: 0.5, livestock: "Poultry", livestockHeads: 40, registeredAt: "02 Feb 2026", registeredTime: "10:50", status: "Verified", totalPlots: 1, visits: 8, lastVisit: "15 Jun 2026" },
+  { name: "Tigist Worku", email: "tigist.worku@gmail.com", phone: "+251 91 948 7206", kebele: "Lume", woreda: "Lume woreda", region: "Oromia", crop: "Teff", landHa: 1.7, livestock: "Cattle", livestockHeads: 3, registeredAt: "19 Mar 2026", registeredTime: "13:25", status: "Verified", totalPlots: 2, visits: 6, lastVisit: "11 Jun 2026" },
+  { name: "Dawit Negash", email: "dawit.negash@gmail.com", phone: "+251 93 761 4418", kebele: "Dendi", woreda: "Dendi woreda", region: "Oromia", crop: "Wheat", landHa: 1.3, livestock: "Cattle", livestockHeads: 5, registeredAt: "05 May 2026", registeredTime: "16:00", status: "Flagged", statusReason: "Phone number already linked to another farmer record — confirm the correct owner before approval.", totalPlots: 2, visits: 3, lastVisit: "04 Jun 2026" },
 ];
 
 // Each farmer appears once; ids are derived from the name.
@@ -44,6 +44,21 @@ export const CROP_HISTORY: CropRecord[] = [
   { season: "2023 Meher", crop: "Teff", yield: "14 Quintal/ha", status: "Successful" },
   { season: "2023 Belg", crop: "Chickpea", yield: "8 Quintal/ha", status: "Average" },
   { season: "2022 Meher", crop: "Maize", yield: "6 Quintal/ha", status: "Below average" },
+];
+
+export const HERDS: Herd[] = [
+  { code: "Herd 01", animal: "Cattle", breed: "Boran (local)", heads: 4, purpose: "Dairy & draught", housing: "Zero-grazing shed", vaccination: "Up to date", lastVaccinated: "12 Jun 2026" },
+  { code: "Herd 02", animal: "Sheep", breed: "Horro", heads: 8, purpose: "Meat", housing: "Communal grazing", vaccination: "Due", lastVaccinated: "15 Jan 2026" },
+  { code: "Herd 03", animal: "Goats", breed: "Arsi-Bale", heads: 5, purpose: "Meat & milk", housing: "Communal grazing", vaccination: "Up to date", lastVaccinated: "03 May 2026" },
+  { code: "Flock 01", animal: "Poultry", breed: "Sasso (improved)", heads: 25, purpose: "Eggs", housing: "Backyard coop", vaccination: "Overdue", lastVaccinated: "10 Nov 2025" },
+];
+
+export const LIVESTOCK_HISTORY: LivestockRecord[] = [
+  { season: "2024 Meher", animal: "Cattle", production: "4 L milk/cow/day", status: "Successful" },
+  { season: "2024 Belg", animal: "Sheep", production: "3 lambs sold", status: "Average" },
+  { season: "2023 Meher", animal: "Poultry", production: "180 eggs/month", status: "Successful" },
+  { season: "2023 Belg", animal: "Goats", production: "2 kids born, 1 lost", status: "Below average" },
+  { season: "2022 Meher", animal: "Cattle", production: "3 L milk/cow/day", status: "Average" },
 ];
 
 export const VISITS: Visit[] = [

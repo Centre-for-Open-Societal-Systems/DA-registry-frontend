@@ -29,6 +29,7 @@ export interface Beneficiary {
   name: string;
   kebele: string;
   crop: string;
+  livestock: string;
   segmentId: string;
   status: BeneficiaryStatus;
   linkedAt: string;
@@ -54,5 +55,6 @@ export const SEED_BENEFICIARIES: Beneficiary[] = FARMERS.filter((f) => LINKS[f.i
   avatar: f.avatar,
   kebele: f.kebele,
   crop: f.crop,
+  livestock: f.livestock,
   ...LINKS[f.id],
 }));

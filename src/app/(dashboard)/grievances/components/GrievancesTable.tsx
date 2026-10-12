@@ -30,13 +30,21 @@ import { TablePagination } from "@/components/ui/TablePagination";
 
 const SEARCH_PLACEHOLDER = searchPlaceholder(["Ticket ID", "Details", "Category", "Status", "Priority", "Submitted"]);
 
-type RaisedBy = "All" | "DA" | "Farmer";
+type RaisedBy = "All" | Grievance["raisedBy"];
+
+const RAISED_BY_TABS: { key: RaisedBy; label: string }[] = [
+  { key: "All", label: "All" },
+  { key: "OnBehalf", label: "On behalf of Farmers" },
+  { key: "Farmer", label: "Raised by Farmers" },
+  { key: "DA", label: "Raised for DAs" },
+];
 
 // Table heading follows the active "Raised by" tab.
 const RAISED_BY_HEADINGS: Record<RaisedBy, { title: string; description: string }> = {
   All: { title: "All Grievances", description: "Track and manage all reported grievances." },
-  DA: { title: "Raised by DA", description: "Grievances you raised for yourself or on behalf of a farmer." },
-  Farmer: { title: "Raised by Farmer", description: "Grievances farmers raised directly." },
+  OnBehalf: { title: "On behalf of Farmers", description: "Grievances you raised on behalf of a farmer." },
+  Farmer: { title: "Raised by Farmers", description: "Grievances farmers raised directly." },
+  DA: { title: "Raised for DAs", description: "Grievances you raised for yourself as a DA." },
 };
 
 interface Filters extends FilterSelection {
@@ -51,7 +59,7 @@ const EMPTY: Filters = { category: new Set(), status: new Set(), priority: new S
 export function GrievancesTable() {
   const [filters, setFilters] = useState<Filters>(EMPTY);
   const [query, setQuery] = useState("");
-  // FR-12 raised-by filter: DA-originated vs farmer-originated (external service records both)
+  // FR-12 raised-by filter: on behalf of a farmer, farmer-originated, or for the DA (external service records all three)
   const [raisedBy, setRaisedBy] = useState<RaisedBy>("All");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selected, setSelected] = useState<Grievance | null>(null);
@@ -90,7 +98,7 @@ export function GrievancesTable() {
         tabBar={
           <SegmentTabs<RaisedBy>
             label="Raised by"
-            tabs={[{ key: "All", label: "All" }, { key: "DA", label: "Raised by DA" }, { key: "Farmer", label: "Raised by farmer" }]}
+            tabs={RAISED_BY_TABS}
             active={raisedBy}
             onChange={(k) => { setRaisedBy(k); setPage(1); }}
           />

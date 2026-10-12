@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card";
 export function QuickActionsSection() {
   const actions = [
     { title: "Submit Crop Report", desc: "Log yield and pest surveys", icon: "clipboard-list", href: "/visits/v-1001/outcome" },
+    { title: "Submit Livestock Report", desc: "Log herd counts and vaccinations", icon: "livestock", href: "/visits/v-1015/outcome" },
     { title: "Start Farm Visit", desc: "Activate GPS route and inspection logs", icon: "location", href: "/visits/v-1001" },
     { title: "Sync Queue", desc: "Offline captures and conflicts", icon: "sync", href: "/sync" },
   ];
@@ -13,7 +14,7 @@ export function QuickActionsSection() {
       <div className="border-b border-line px-5 py-3.5">
         <h3 className="text-[15px] font-semibold text-ink">Quick actions</h3>
       </div>
-      <div className="grid grid-cols-1 gap-4 px-4 py-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 px-4 py-4 md:grid-cols-2 xl:grid-cols-4">
         {actions.map((act) => (
           <Link key={act.href} href={act.href} className="group flex items-center gap-3 rounded-lg border border-line bg-white px-4 py-5 transition-all hover:border-brand-green/30 hover:shadow-sm">
             <div className="w-[48px] h-[48px] flex shrink-0 items-center justify-center rounded-lg bg-brand-tint text-brand-green group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
@@ -29,6 +30,12 @@ export function QuickActionsSection() {
                   </defs>
                 </svg>
 
+              )}
+              {act.icon === "livestock" && (
+                <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 4l2 3M19 4l-2 3M7 7h10a2 2 0 012 2v3a7 7 0 01-14 0V9a2 2 0 012-2z" />
+                  <path d="M9 17h6M10 12h.01M14 12h.01" />
+                </svg>
               )}
               {act.icon === "sync" && (
                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">

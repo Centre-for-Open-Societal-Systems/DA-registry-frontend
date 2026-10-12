@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function BroadcastPage() {
   return (
     <div className="flex w-full flex-col gap-4">
-      <PageHeader title="Broadcast" description="One engine receives, assimilates, crafts and broadcasts messages across SMS and Telegram. Audiences include DAs, farmer segments and cooperative members." />
+      <PageHeader title="Broadcast" description="One engine receives, assimilates, crafts and broadcasts messages across SMS and Telegram. Broadcasts are limited to Woredas: all farmers or all DAs in a Woreda." />
       {/* useSearchParams (signal prefill) needs a Suspense boundary for static rendering */}
       <Suspense fallback={null}>
         <BroadcastWorkspace />
