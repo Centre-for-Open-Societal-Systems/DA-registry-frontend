@@ -8,7 +8,7 @@ const ROUTE_DOTS = [
 
 export function BrandPanel() {
   return (
-    <div className="relative flex min-h-[50vh] min-w-0 flex-col px-6 pt-24 pb-6 md:px-10 md:pt-28 md:pb-10 lg:min-h-auto lg:px-16 lg:pt-12 lg:pb-14">
+    <div className="relative flex min-w-0 flex-col px-5 pt-22 pb-2 sm:px-6 md:px-10 md:pt-23 md:pb-2 lg:px-12 lg:pt-8 lg:pb-8 xl:px-16 lg:short:pt-6 lg:short:pb-5">
       {/* Agency Header */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center gap-4 border-b border-white/10 bg-emerald-950/80 px-6 py-4 backdrop-blur-md lg:static lg:border-none lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-brand-gold text-brand-gold md:h-12 md:w-12">
@@ -23,8 +23,8 @@ export function BrandPanel() {
       </div>
 
       {/* Hero copy */}
-      <div className="relative z-10 flex flex-1 flex-col lg:pt-20">
-        <h1 className="max-w-md text-4xl font-bold leading-[1.05] tracking-tight text-white md:text-5xl lg:text-[52px]">
+      <div className="relative z-10 flex flex-1 flex-col lg:pt-14 lg:short:pt-8 lg:tiny:pt-4">
+        <h1 className="max-w-md text-3xl font-bold leading-[1.05] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[44px] xl:text-[52px] lg:short:text-[40px] lg:tiny:text-[34px]">
           Every plot,
           <br />
           every farmer,
@@ -33,7 +33,7 @@ export function BrandPanel() {
         </h1>
 
         {/* Dashed route line — spans the full viewport width and runs behind the sign-in card */}
-        <div className="pointer-events-none relative z-0 my-8 -ml-6 h-14 w-screen md:-ml-10 lg:mt-10 lg:mb-5 lg:-ml-16" aria-hidden={true}>
+        <div className="pointer-events-none relative z-0 my-4 -ml-5 h-12 w-screen sm:-ml-6 md:my-5 lg:h-14 md:-ml-10 lg:mt-10 lg:mb-5 lg:-ml-12 xl:-ml-16 lg:short:mt-6 lg:short:mb-3" aria-hidden={true}>
           <svg className="h-full w-full text-brand-gold/80" viewBox="0 0 1440 56" fill="none" preserveAspectRatio="none">
             <path
               d="M0 40 C60 40 60 46 120 46 C230 46 230 34 340 34 C465 34 465 18 590 18 C965 18 965 6 1340 6 C1390 6 1390 20 1440 20"
@@ -53,7 +53,7 @@ export function BrandPanel() {
           ))}
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 md:gap-4">
           <p className="text-base font-medium text-brand-gold md:text-[17px]">OpenAgriNet — Development Agent Portal</p>
           <p className="max-w-[440px] text-sm leading-relaxed text-white/70 md:text-base">
             Supporting 12,450 registered farmers across six regions of Ethiopia, one recorded plot at a time.
@@ -62,7 +62,7 @@ export function BrandPanel() {
       </div>
 
       {/* Secure Badge */}
-      <div className="relative z-10 mt-10 flex items-center gap-2.5 text-white/60">
+      <div className="relative z-10 mt-8 hidden items-center gap-2.5 text-white/60 lg:flex lg:short:mt-5">
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
