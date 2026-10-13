@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 
 // Advisory shows the Q&A captured on Advisory visits; AdvisoryNotesSection (Part 2 notes) stays unused for now.
-const TABS = ["Overview", "Holdings", "Crop history", "Livestock", "Livestock history", "Visit history", "Documents", "Advisory"] as const;
+const TABS = ["Overview", "Holdings", "Crop Sown Details", "Livestock Details", "Livestock history", "Visit history", "Documents", "Advisory"] as const;
 export type ProfileTab = (typeof TABS)[number];
 
 // Only the tab switch runs on the client; each panel is rendered by the page and passed in.

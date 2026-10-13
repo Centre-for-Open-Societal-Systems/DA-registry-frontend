@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getFarmer } from "@/features/farmers";
+import { getCropSownDetails, getFarmer } from "@/features/farmers";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { ProfileStats } from "./components/ProfileStats";
 import { ProfileTabs } from "./components/ProfileTabs";
 import { ProfileOverview } from "./components/ProfileOverview";
 import { HoldingsSection } from "./components/HoldingsSection";
-import { CropHistorySection } from "./components/CropHistorySection";
+import { CropSownSection } from "./components/CropSownSection";
 import { LivestockSection } from "./components/LivestockSection";
 import { LivestockHistorySection } from "./components/LivestockHistorySection";
 import { VisitHistorySection } from "./components/VisitHistorySection";
@@ -37,8 +37,8 @@ export default async function FarmerProfilePage(props: PageProps<"/farmers/[id]"
         panels={{
           Overview: <ProfileOverview />,
           Holdings: <HoldingsSection />,
-          "Crop history": <CropHistorySection />,
-          Livestock: <LivestockSection />,
+          "Crop Sown Details": <CropSownSection tabs={getCropSownDetails(farmer)} />,
+          "Livestock Details": <LivestockSection />,
           "Livestock history": <LivestockHistorySection />,
           "Visit history": <VisitHistorySection />,
           Documents: <DocumentsSection />,

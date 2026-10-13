@@ -122,6 +122,7 @@ export const PAGE_TITLES: { prefix: string; title: string }[] = [
   { prefix: "/registry-sync", title: "Agents" },
   { prefix: "/feedback", title: "Internal Feedback" },
   { prefix: "/farmers/new", title: "Register Farmer" },
+  { prefix: "/farmers/crop-report", title: "Crop Report" },
   { prefix: "/farmers/", title: "Farmer Profile" },
   { prefix: "/farmers", title: "My Farmers" },
   { prefix: "/visits/", title: "Visit Planner" },
