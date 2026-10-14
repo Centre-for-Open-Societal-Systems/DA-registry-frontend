@@ -73,7 +73,7 @@ export function LocationStep({ initial = {} }: { initial?: Record<string, string
   };
 
   return (
-    <Card className="min-h-[480px] p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="min-h-[480px] p-0 shadow-card">
       <div className="border-b border-line px-5 py-3.5">
         <h2 className="text-[15px] font-semibold text-ink">Location and kebele</h2>
       </div>

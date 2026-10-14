@@ -11,59 +11,48 @@ import type {
 } from "./types";
 
 // Sample records until the Grievance Service API is wired through src/proxy.ts.
-// The base set mirrors the design; the rest is generated so paging/filters have data to work on.
-type Template = Omit<Grievance, "ticketId" | "submittedAt" | "attachments" | "responses" | "raisedBy">;
+type GrievanceRecord = Omit<Grievance, "ticketId">;
 
-const TEMPLATES: Template[] = [
-  { title: "Fertiliser allocation delivered 6 weeks late, crop season missed", submitter: "Jijiga Woreda Agriculture Office", region: "Somali", woreda: "Jijiga", type: "Fertilizer non-delivery or shortage", category: "Input", status: "Assigned", priority: "High" },
-  { title: "PSNP safety net scheme payment not disbursed for Q1 2026", submitter: "Almaz Worku", region: "Oromia", woreda: "Sebeta", type: "Government scheme benefit not received", category: "Schemes", status: "Submitted", priority: "High" },
-  { title: "Teff produce payment overdue by 45 days", submitter: "Debrezion Farmers Cooperative", region: "Amhara", woreda: "Bahir Dar Zuria", type: "Payment delay (>SLA)", category: "Payments", status: "Pending Submit", priority: "Critical" },
-  { title: "Certified maize seed supplied with poor germination rate", submitter: "Abebe Bekele", region: "Oromia", woreda: "Bishoftu", type: "Seed quality / germination failure", category: "Inputs", status: "In Progress", priority: "High" },
-  { title: "PSNP safety net scheme payment not disbursed for Q1 2026", submitter: "Almaz Worku", region: "Oromia", woreda: "Sebeta", type: "Government scheme benefit not received", category: "Markets", status: "More Info Needed", priority: "Medium" },
-  { title: "Weighing scale irregularity at Nekemte grain market", submitter: "Nekemte Traders Association", region: "Oromia", woreda: "Nekemte", type: "Market malpractice", category: "Markets", status: "Under Review", priority: "Medium" },
-  { title: "Extension agent visit not conducted for two consecutive months", submitter: "Hana Alemu", region: "SNNPR", woreda: "Dale", type: "Extension service gap", category: "Extension", status: "Resolved", priority: "Low" },
-  { title: "Boundary dispute over irrigated plot near Koka reservoir", submitter: "Kebele 02 Farmers Group", region: "Oromia", woreda: "Lume", type: "Land / plot dispute", category: "Land", status: "Rejected", priority: "Medium" },
-  { title: "Pesticide batch expired before distribution", submitter: "Adama Input Dealer", region: "Oromia", woreda: "Adama", type: "Input quality complaint", category: "Inputs", status: "Resolved", priority: "High" },
-  { title: "Cooperative dividend payment miscalculated", submitter: "Fogera Rice Cooperative", region: "Amhara", woreda: "Fogera", type: "Payment discrepancy", category: "Payments", status: "In Progress", priority: "Medium" },
+const RECORDS: GrievanceRecord[] = [
+  { title: "Fertiliser allocation delivered 6 weeks late, crop season missed", submitter: "Jijiga Woreda Agriculture Office", region: "Somali", woreda: "Jijiga", type: "Fertilizer non-delivery or shortage", category: "Inputs", status: "Assigned", priority: "High", submittedAt: "May 28, 2026, 10:42 AM", attachments: 2, responses: 1, raisedBy: "OnBehalf" },
+  { title: "PSNP safety net scheme payment not disbursed for Q1 2026", submitter: "Almaz Worku", region: "Oromia", woreda: "Sebeta", type: "Government scheme benefit not received", category: "Schemes", status: "Submitted", priority: "High", submittedAt: "May 27, 2026, 4:15 PM", attachments: 1, responses: 0, raisedBy: "Farmer" },
+  { title: "Teff produce payment overdue by 45 days", submitter: "Debrezion Farmers Cooperative", region: "Amhara", woreda: "Bahir Dar Zuria", type: "Payment delay (>SLA)", category: "Payments", status: "Pending Submit", priority: "Critical", submittedAt: "May 26, 2026, 9:03 AM", attachments: 3, responses: 0, raisedBy: "Farmer" },
+  { title: "Certified maize seed supplied with poor germination rate", submitter: "Abebe Bekele", region: "Oromia", woreda: "Bishoftu", type: "Seed quality / germination failure", category: "Inputs", status: "In Progress", priority: "High", submittedAt: "May 25, 2026, 2:20 PM", attachments: 3, responses: 1, raisedBy: "OnBehalf" },
+  { title: "Livestock market levy charged twice at Ambo cattle market", submitter: "Gemechu Tafa", region: "Oromia", woreda: "Ambo", type: "Market malpractice", category: "Markets", status: "More Info Needed", priority: "Medium", submittedAt: "May 24, 2026, 1:30 PM", attachments: 1, responses: 1, raisedBy: "Farmer" },
+  { title: "Weighing scale irregularity at Nekemte grain market", submitter: "Nekemte Traders Association", region: "Oromia", woreda: "Nekemte", type: "Market malpractice", category: "Markets", status: "Under Review", priority: "Medium", submittedAt: "May 23, 2026, 11:05 AM", attachments: 2, responses: 1, raisedBy: "Farmer" },
+  { title: "Extension agent visit not conducted for two consecutive months", submitter: "Hana Alemu", region: "SNNPR", woreda: "Dale", type: "Extension service gap", category: "Extension", status: "Resolved", priority: "Low", submittedAt: "May 22, 2026, 3:48 PM", attachments: 1, responses: 1, raisedBy: "OnBehalf" },
+  { title: "Boundary dispute over irrigated plot near Koka reservoir", submitter: "Koka Kebele Farmers Group", region: "Oromia", woreda: "Lume", type: "Land / plot dispute", category: "Land", status: "Rejected", priority: "Medium", submittedAt: "May 21, 2026, 11:20 AM", attachments: 4, responses: 1, raisedBy: "Farmer" },
+  { title: "Pesticide batch expired before distribution", submitter: "Adama Input Dealer", region: "Oromia", woreda: "Adama", type: "Input quality complaint", category: "Inputs", status: "Resolved", priority: "High", submittedAt: "May 20, 2026, 8:55 AM", attachments: 2, responses: 1, raisedBy: "Farmer" },
+  { title: "Cooperative dividend payment miscalculated", submitter: "Fogera Rice Cooperative", region: "Amhara", woreda: "Fogera", type: "Payment discrepancy", category: "Payments", status: "In Progress", priority: "Medium", submittedAt: "May 19, 2026, 10:10 AM", attachments: 1, responses: 1, raisedBy: "OnBehalf" },
+  { title: "Improved wheat seed not delivered to Lemu Bilbilo kebeles", submitter: "Tesfaye Gudina", region: "Oromia", woreda: "Lemu Bilbilo", type: "Seed non-delivery", category: "Inputs", status: "Submitted", priority: "Critical", submittedAt: "May 18, 2026, 4:35 PM", attachments: 2, responses: 0, raisedBy: "OnBehalf" },
+  { title: "Coffee seedlings from woreda nursery arrived diseased", submitter: "Mulugeta Dukale", region: "Sidama", woreda: "Aleta Wondo", type: "Input quality complaint", category: "Inputs", status: "Under Review", priority: "High", submittedAt: "May 16, 2026, 9:40 AM", attachments: 3, responses: 1, raisedBy: "Farmer" },
+  { title: "Irrigation water rotation skipped our kebele for three weeks", submitter: "Ziway Irrigation Users Association", region: "Oromia", woreda: "Adami Tulu", type: "Irrigation access", category: "Land", status: "Assigned", priority: "High", submittedAt: "May 15, 2026, 12:15 PM", attachments: 1, responses: 1, raisedBy: "Farmer" },
+  { title: "Sesame sale proceeds withheld by union for 60 days", submitter: "Humera Sesame Producers Union", region: "Tigray", woreda: "Kafta Humera", type: "Payment delay (>SLA)", category: "Payments", status: "Pending Submit", priority: "Critical", submittedAt: "May 14, 2026, 3:05 PM", attachments: 2, responses: 0, raisedBy: "OnBehalf" },
+  { title: "Livestock vaccination campaign missed remote kebeles", submitter: "Fatuma Abdi", region: "Somali", woreda: "Kebri Dahar", type: "Extension service gap", category: "Extension", status: "In Progress", priority: "Medium", submittedAt: "May 12, 2026, 10:25 AM", attachments: 1, responses: 1, raisedBy: "OnBehalf" },
+  { title: "Crop insurance claim for hail damage not processed", submitter: "Yohannes Asfaw", region: "Amhara", woreda: "Debre Tabor", type: "Government scheme benefit not received", category: "Schemes", status: "Resolved", priority: "Medium", submittedAt: "May 10, 2026, 2:50 PM", attachments: 4, responses: 1, raisedBy: "Farmer" },
+  { title: "Enset processing equipment grant promised but not received", submitter: "Tsehay Wolde", region: "SNNPR", woreda: "Wolkite", type: "Government scheme benefit not received", category: "Schemes", status: "More Info Needed", priority: "Low", submittedAt: "May 8, 2026, 11:45 AM", attachments: 1, responses: 1, raisedBy: "Farmer" },
+  { title: "Broker underpaid potato harvest at Shashemene market", submitter: "Kedir Hussein", region: "Oromia", woreda: "Shashemene", type: "Market malpractice", category: "Markets", status: "Rejected", priority: "Low", submittedAt: "May 6, 2026, 9:15 AM", attachments: 1, responses: 1, raisedBy: "OnBehalf" },
+  { title: "Land certificate issued with wrong plot area", submitter: "Birtukan Mekonnen", region: "Amhara", woreda: "Gondar Zuria", type: "Land / plot dispute", category: "Land", status: "Resolved", priority: "Medium", submittedAt: "May 4, 2026, 4:05 PM", attachments: 2, responses: 1, raisedBy: "Farmer" },
+  { title: "Soil testing results not shared after sample collection", submitter: "Desta Gebremedhin", region: "Tigray", woreda: "Raya Azebo", type: "Extension service gap", category: "Extension", status: "Under Review", priority: "Low", submittedAt: "May 2, 2026, 1:10 PM", attachments: 1, responses: 1, raisedBy: "OnBehalf" },
+  { title: "Field allowance for August not paid to DA", submitter: "Tadesse Alemu", region: "Oromia", woreda: "Bako Tibe", type: "Payment delay (>SLA)", category: "Payments", status: "In Progress", priority: "High", submittedAt: "May 29, 2026, 9:30 AM", attachments: 1, responses: 1, raisedBy: "DA" },
+  { title: "Demonstration plot inputs not supplied to FTC", submitter: "Tadesse Alemu", region: "Oromia", woreda: "Bako Tibe", type: "Fertilizer non-delivery or shortage", category: "Inputs", status: "Submitted", priority: "Medium", submittedAt: "May 17, 2026, 11:15 AM", attachments: 2, responses: 0, raisedBy: "DA" },
+  { title: "Mandatory refresher training venue changed without notice", submitter: "Tadesse Alemu", region: "Oromia", woreda: "Bako Tibe", type: "Extension service gap", category: "Extension", status: "Resolved", priority: "Low", submittedAt: "May 5, 2026, 2:40 PM", attachments: 0, responses: 1, raisedBy: "DA" },
 ];
 
-// Distribution across the 42 records: Pending 12 · In Progress 8 · Under Review 6 · Resolved 12 · Rejected 4
-const STATUS_SEQUENCE: GrievanceStatus[] = [
-  ...Array<GrievanceStatus>(4).fill("Submitted"),
-  ...Array<GrievanceStatus>(4).fill("Pending Submit"),
-  ...Array<GrievanceStatus>(4).fill("More Info Needed"),
-  ...Array<GrievanceStatus>(4).fill("Assigned"),
-  ...Array<GrievanceStatus>(4).fill("In Progress"),
-  ...Array<GrievanceStatus>(6).fill("Under Review"),
-  ...Array<GrievanceStatus>(12).fill("Resolved"),
-  ...Array<GrievanceStatus>(4).fill("Rejected"),
-];
-
-const REGION_CODES: Record<string, string> = { Somali: "SOMA", Oromia: "OROM", Amhara: "AMHA", SNNPR: "SNNP" };
+const REGION_CODES: Record<string, string> = { Somali: "SOMA", Oromia: "OROM", Amhara: "AMHA", SNNPR: "SNNP", Sidama: "SIDA", Tigray: "TIGR" };
 const CATEGORY_CODES: Record<GrievanceCategory, string> = {
-  Input: "INP", Inputs: "INP", Schemes: "SCH", Payments: "PAY", Markets: "MKT", Extension: "EXT", Land: "LND",
+  Inputs: "INP", Schemes: "SCH", Payments: "PAY", Markets: "MKT", Extension: "EXT", Land: "LND",
 };
 
-const SUBMITTED_DATES = ["May 28, 2026, 10:42 AM", "May 27, 2026, 4:15 PM", "May 26, 2026, 9:03 AM", "May 24, 2026, 1:30 PM", "May 21, 2026, 11:20 AM"];
-
-export const TOTAL_GRIEVANCES = 42;
-
-export const GRIEVANCES: Grievance[] = Array.from({ length: TOTAL_GRIEVANCES }, (_, i) => {
-  const t = TEMPLATES[i % TEMPLATES.length];
-  // First five rows keep the design's statuses; the rest follow the fixed distribution
-  const status = i < 5 ? t.status : STATUS_SEQUENCE[i];
-  const woredaCode = t.woreda.replace(/[^A-Za-z]/g, "").slice(0, 4).toUpperCase();
+export const GRIEVANCES: Grievance[] = RECORDS.map((r, i) => {
+  const woredaCode = r.woreda.replace(/[^A-Za-z]/g, "").slice(0, 4).toUpperCase();
   return {
-    ...t,
-    status,
-    // Every third record was raised by the DA (own or on behalf of a farmer)
-    raisedBy: i % 3 === 0 ? "DA" : "Farmer",
-    ticketId: `${REGION_CODES[t.region]}-${woredaCode}-${CATEGORY_CODES[t.category]}-${String(9900 + i).padStart(5, "0")}`,
-    submittedAt: SUBMITTED_DATES[Math.floor(i / 5) % SUBMITTED_DATES.length],
-    attachments: (i % 4) + 1,
-    responses: i % 3 === 0 ? 0 : 1,
+    ...r,
+    ticketId: `${REGION_CODES[r.region]}-${woredaCode}-${CATEGORY_CODES[r.category]}-${String(9900 + i).padStart(5, "0")}`,
   };
 });
+
+export const TOTAL_GRIEVANCES = GRIEVANCES.length;
 
 export function bucketOf(status: GrievanceStatus): GrievanceBucket {
   switch (status) {
@@ -82,14 +71,22 @@ export function bucketOf(status: GrievanceStatus): GrievanceBucket {
   }
 }
 
-export const GRIEVANCE_STATS: Record<"All" | GrievanceBucket, number> = GRIEVANCES.reduce(
-  (acc, g) => {
-    acc.All += 1;
-    acc[bucketOf(g.status)] += 1;
-    return acc;
-  },
-  { All: 0, Pending: 0, "In Progress": 0, "Under Review": 0, Resolved: 0, Rejected: 0 },
-);
+/** Stat-card order; the table's Status column and filter use the same buckets so the two always agree. */
+export const GRIEVANCE_BUCKETS: GrievanceBucket[] = ["Pending", "In Progress", "Under Review", "Resolved", "Rejected"];
+
+/** Stat-card counts for a set of records (pass the table's filtered rows so the cards match the table). */
+export function grievanceStatsFor(list: Grievance[]): Record<"All" | GrievanceBucket, number> {
+  return list.reduce(
+    (acc, g) => {
+      acc.All += 1;
+      acc[bucketOf(g.status)] += 1;
+      return acc;
+    },
+    { All: 0, Pending: 0, "In Progress": 0, "Under Review": 0, Resolved: 0, Rejected: 0 },
+  );
+}
+
+export const GRIEVANCE_STATS = grievanceStatsFor(GRIEVANCES);
 
 function toOptions<T extends string>(values: T[]): FilterOption[] {
   const counts = new Map<T, number>();
@@ -98,7 +95,7 @@ function toOptions<T extends string>(values: T[]): FilterOption[] {
 }
 
 export const GRIEVANCE_CATEGORY_OPTIONS = toOptions(GRIEVANCES.map((g) => g.category));
-export const GRIEVANCE_STATUS_OPTIONS = toOptions(GRIEVANCES.map((g) => g.status));
+export const GRIEVANCE_STATUS_OPTIONS: FilterOption[] = GRIEVANCE_BUCKETS.map((b) => ({ value: b, label: b, count: GRIEVANCE_STATS[b] }));
 export const GRIEVANCE_PRIORITY_OPTIONS: FilterOption[] = (["Critical", "High", "Medium", "Low"] as GrievancePriority[]).map((p) => ({
   value: p,
   label: p,
@@ -108,10 +105,10 @@ export const GRIEVANCE_PRIORITY_OPTIONS: FilterOption[] = (["Critical", "High", 
 export const GRIEVANCE_REGION_OPTIONS = toOptions(GRIEVANCES.map((g) => g.region));
 
 export const GRIEVANCE_FILTER_FIELDS: FilterFieldConfig[] = [
-  { key: "category", label: "Category", allLabel: "All categories", placeholder: "All categories", options: GRIEVANCE_CATEGORY_OPTIONS },
-  { key: "status", label: "Status", allLabel: "All statuses", placeholder: "All statuses", options: GRIEVANCE_STATUS_OPTIONS },
-  { key: "priority", label: "Priority", allLabel: "All priorities", placeholder: "All priorities", options: GRIEVANCE_PRIORITY_OPTIONS },
-  { key: "region", label: "Region", allLabel: "All regions", placeholder: "All regions", options: GRIEVANCE_REGION_OPTIONS },
+  { key: "category", label: "Category", allLabel: "All categories", placeholder: "All Categories", options: GRIEVANCE_CATEGORY_OPTIONS },
+  { key: "status", label: "Status", allLabel: "All statuses", placeholder: "All Statuses", options: GRIEVANCE_STATUS_OPTIONS },
+  { key: "priority", label: "Priority", allLabel: "All priorities", placeholder: "All Priorities", options: GRIEVANCE_PRIORITY_OPTIONS },
+  { key: "region", label: "Region", allLabel: "All regions", placeholder: "All Regions", options: GRIEVANCE_REGION_OPTIONS },
 ];
 
 // ---------------------------------------------------------------------------
@@ -143,10 +140,10 @@ export interface NodalOfficer {
 }
 
 export const NODAL_OFFICERS: NodalOfficer[] = [
-  { name: "Fikadu Negash", organisation: "Ministry of Agriculture (MoA)", email: "fikadu.negash@moa.gov.et" },
-  { name: "Meseret Tadesse", organisation: "Agricultural Transformation Institute (ATI)", email: "meseret.tadesse@ati.gov.et" },
-  { name: "Yonas Bekele", organisation: "Regional Bureau of Agriculture", email: "yonas.bekele@oromia.gov.et" },
-  { name: "Almaz Girma", organisation: "Woreda Agriculture & Natural Resource Office", email: "almaz.girma@moa.gov.et" },
+  { name: "Fikadu Negash", organisation: "Ministry of Agriculture (MoA)", email: "fikadu.negash@gmail.com" },
+  { name: "Meseret Tadesse", organisation: "Agricultural Transformation Institute (ATI)", email: "meseret.tadesse@gmail.com" },
+  { name: "Yonas Bekele", organisation: "Regional Bureau of Agriculture", email: "yonas.bekele@gmail.com" },
+  { name: "Almaz Girma", organisation: "Woreda Agriculture & Natural Resource Office", email: "almaz.girma@gmail.com" },
 ];
 
 export const MAX_DEFERRAL_DAYS = 30;

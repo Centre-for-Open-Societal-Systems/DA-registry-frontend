@@ -55,7 +55,7 @@ export function LeaveSection() {
   };
 
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-hidden p-0 shadow-card">
       <div className="flex flex-col gap-3 border-b border-line px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink">Leave &amp; absence <Pill tone="slate">Part 2 preview</Pill></h2>

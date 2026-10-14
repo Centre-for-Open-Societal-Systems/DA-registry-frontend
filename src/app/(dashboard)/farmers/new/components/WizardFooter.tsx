@@ -25,7 +25,7 @@ export function WizardFooter({
   const isFirst = currentStep === 1;
 
   return (
-    <Card className="flex flex-col gap-4 px-4 py-4 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
+    <Card className="flex flex-col gap-4 px-4 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
       <div className="flex items-center justify-between gap-4 sm:justify-start sm:gap-6">
         <Button variant="outline" size="md" onClick={onSaveDraft} className="whitespace-nowrap">
           Save Draft

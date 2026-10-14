@@ -22,7 +22,7 @@ interface ApprovalDetailProps {
 export function ApprovalDetail({ request: selected, note, onNoteChange, onReview, onApprove }: ApprovalDetailProps) {
   const open = isOpen(selected);
   return (
-    <Card className="flex animate-fade-in flex-col p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="flex animate-fade-in flex-col p-0 shadow-card">
       <div className="border-b border-line px-5 py-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">

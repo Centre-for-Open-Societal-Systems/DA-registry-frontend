@@ -33,12 +33,12 @@ interface RbacAssignment {
 }
 
 const USERS: RbacAssignment[] = [
-  { userId: "U-1001", name: "Tadesse Alemu", faydaId: "3512 4498 7712", phone: "+251 91 234 5678", email: "tadesse.alemu@moa.gov.et", role: "DA", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "12 Mar 2019", effectiveTo: "—", assignedBy: "System (onboarding)" },
-  { userId: "U-1002", name: "Kebede Alemu", faydaId: "3512 7733 1188", phone: "+251 91 776 3321", email: "kebede.alemu@moa.gov.et", role: "Supervisor", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "01 Jan 2024", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
-  { userId: "U-1003", name: "Almaz Tesfaye", faydaId: "3512 2201 8843", phone: "+251 92 118 4402", email: "almaz.tesfaye@moa.gov.et", role: "CommsOfficer", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "15 May 2025", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
-  { userId: "U-1004", name: "Getachew Bekele", faydaId: "3512 9910 3321", phone: "+251 91 900 1234", email: "getachew.bekele@moa.gov.et", role: "Executive", active: true, regionScope: "Oromia", woredaScope: "All (read)", effectiveFrom: "01 Jul 2023", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
-  { userId: "U-1005", name: "Yonas Haile", faydaId: "3512 1188 5544", phone: "+251 91 555 0101", email: "yonas.haile@ati.gov.et", role: "Admin", active: true, regionScope: "All regions", woredaScope: "All", effectiveFrom: "01 Jan 2023", effectiveTo: "—", assignedBy: "ATI root" },
-  { userId: "U-1006", name: "Dawit Assefa", faydaId: "3512 2299 7710", phone: "+251 93 410 7788", email: "dawit.assefa@moa.gov.et", role: "DA", active: false, regionScope: "Oromia", woredaScope: "Cheliya", effectiveFrom: "02 May 2016", effectiveTo: "30 Jun 2026", assignedBy: "System (separation)" },
+  { userId: "U-1001", name: "Tadesse Alemu", faydaId: "3512 4498 7712", phone: "+251 91 234 5678", email: "tadesse.alemu@gmail.com", role: "DA", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "12 Mar 2019", effectiveTo: "—", assignedBy: "System (onboarding)" },
+  { userId: "U-1002", name: "Kebede Alemu", faydaId: "3512 7733 1188", phone: "+251 92 771 9080", email: "kebede.alemu@gmail.com", role: "Supervisor", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "01 Jan 2024", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
+  { userId: "U-1003", name: "Almaz Tesfaye", faydaId: "3512 2201 8843", phone: "+251 91 300 4412", email: "almaz.tesfaye@gmail.com", role: "CommsOfficer", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "15 May 2025", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
+  { userId: "U-1004", name: "Getachew Bekele", faydaId: "3512 9910 3321", phone: "+251 91 900 1234", email: "getachew.bekele@gmail.com", role: "Executive", active: true, regionScope: "Oromia", woredaScope: "All (read)", effectiveFrom: "01 Jul 2023", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
+  { userId: "U-1005", name: "Yonas Haile", faydaId: "3512 1188 5544", phone: "+251 91 555 0101", email: "yonas.haile@gmail.com", role: "Admin", active: true, regionScope: "All regions", woredaScope: "All", effectiveFrom: "01 Jan 2023", effectiveTo: "—", assignedBy: "ATI root" },
+  { userId: "U-1006", name: "Dawit Assefa", faydaId: "3512 2299 7710", phone: "+251 91 780 2231", email: "dawit.assefa@gmail.com", role: "DA", active: false, regionScope: "Oromia", woredaScope: "Cheliya", effectiveFrom: "02 May 2016", effectiveTo: "30 Jun 2026", assignedBy: "System (separation)" },
 ];
 
 const ROLE_TONE: Record<Role, PillTone> = { DA: "green", Supervisor: "blue", Executive: "purple", Admin: "red", CommsOfficer: "amber" };
@@ -86,10 +86,10 @@ export function UsersRoles() {
   const regionOptions = optionsOf(users.map((u) => u.regionScope));
   const scopeOptions = optionsOf(users.map((u) => u.woredaScope));
   const filterFields: FilterFieldConfig[] = [
-    { key: "role", label: "Role", allLabel: "All roles", placeholder: "All roles", options: roleOptions },
+    { key: "role", label: "Role", allLabel: "All roles", placeholder: "All Roles", options: roleOptions },
     { key: "active", label: "Active", allLabel: "All users", placeholder: "All", options: activeOptions },
-    { key: "region", label: "Region scope", allLabel: "All regions", placeholder: "All regions", options: regionOptions },
-    { key: "scope", label: "Woreda scope", allLabel: "All woreda scopes", placeholder: "All woreda scopes", options: scopeOptions },
+    { key: "region", label: "Region scope", allLabel: "All regions", placeholder: "All Regions", options: regionOptions },
+    { key: "scope", label: "Woreda scope", allLabel: "All woreda scopes", placeholder: "All Woreda Scopes", options: scopeOptions },
   ];
 
   const addUser = (draft: UserFormValues) => {
@@ -153,7 +153,7 @@ export function UsersRoles() {
         }
       />
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         {tab === "users" ? (
           <>
             <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
@@ -188,7 +188,7 @@ export function UsersRoles() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px] text-left text-[13.5px]">
-              <thead className="border-y border-line bg-surface text-[13px] text-slate-700"><tr><th className="px-4 py-3 font-medium">Role</th><th className="px-4 py-3 font-medium">Can</th><th className="px-4 py-3 font-medium">Cannot (hidden / disabled)</th></tr></thead>
+              <thead className="border-y border-line bg-surface text-[13px] text-slate-700"><tr><th className="px-4 py-3 font-semibold">Role</th><th className="px-4 py-3 font-semibold">Can</th><th className="px-4 py-3 font-semibold">Cannot (hidden / disabled)</th></tr></thead>
               <tbody>
                 {PERMISSIONS.map((p) => (
                   <tr key={p.role} className="border-b border-line-soft align-top">

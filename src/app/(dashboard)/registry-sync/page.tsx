@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { ModuleStrip } from "@/features/agents";
+import { AgentsPageHeader, ModuleStrip } from "@/features/agents";
 import { SyncEvents } from "./components/SyncEvents";
 
 export const metadata: Metadata = {
@@ -11,10 +10,7 @@ export const metadata: Metadata = {
 export default function RegistrySyncPage() {
   return (
     <div className="flex w-full flex-col gap-4">
-      <PageHeader
-        title="Registry sync"
-        description="Bidirectional synchronisation with the MoA master registry. Each event records entity, direction, timestamp and outcome; failures can be retried or bulk-reconciled."
-      />
+      <AgentsPageHeader />
       <ModuleStrip activeHref="/registry-sync" />
       <SyncEvents />
     </div>

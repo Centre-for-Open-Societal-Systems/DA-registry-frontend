@@ -1,7 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
+import { FormField } from "@/components/ui/FormField";
+import { Select } from "@/components/ui/Select";
+import { SEGMENTS, segmentName, useBeneficiariesStore } from "@/features/beneficiaries";
 import { AdvancedFiltersButton } from "@/components/ui/AdvancedFiltersButton";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -14,6 +20,7 @@ import {
   applyFilters,
   countActiveFilters,
   CROP_OPTIONS,
+  LIVESTOCK_OPTIONS,
   EMPTY_FILTERS,
   FARMER_FILTER_FIELDS,
   KEBELE_OPTIONS,
@@ -27,10 +34,11 @@ import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { TablePagination, usePagination } from "@/components/ui/TablePagination";
 import { RowAction } from "@/components/ui/RowAction";
 import { Banner } from "@/components/ui/Banner";
-import { downloadCsv, fileDate, type CsvColumn } from "@/lib/download";
+import { fileDate, type CsvColumn } from "@/lib/download";
+import { downloadTable, formatLabel } from "@/lib/export";
 import type { Farmer } from "@/features/farmers";
 
-const SEARCH_PLACEHOLDER = searchPlaceholder(["Farmer Details", "Kebele", "Crop", "Registered date", "Status"]);
+const SEARCH_PLACEHOLDER = searchPlaceholder(["Farmer Details", "Kebele", "Crop", "Livestock", "Registered date", "Status"]);
 
 // The visible table columns (Farmer Details split into name / email / phone).
 const EXPORT_COLUMNS: CsvColumn<Farmer>[] = [
@@ -42,20 +50,40 @@ const EXPORT_COLUMNS: CsvColumn<Farmer>[] = [
   { header: "Woreda", value: (f) => f.woreda },
   { header: "Crop", value: (f) => f.crop },
   { header: "Land (ha)", value: (f) => f.landHa },
+  { header: "Livestock", value: (f) => f.livestock },
+  { header: "Livestock (heads)", value: (f) => f.livestockHeads },
   { header: "Registered date", value: (f) => `${f.registeredAt} ${f.registeredTime}` },
   { header: "Status", value: (f) => f.status },
   { header: "Status reason", value: (f) => f.statusReason ?? "" },
 ];
 
 export function FarmersTable() {
-  // First four rows start selected, matching the design's selected-state example.
-  const [selected, setSelected] = useState<Set<string>>(
-    () => new Set(FARMERS.slice(0, 4).map((f) => f.id)),
-  );
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [filters, setFilters] = useState<FarmerFilters>(EMPTY_FILTERS);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<ReactNode>(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [segmentId, setSegmentId] = useState(SEGMENTS[0].id);
+  const linkBeneficiaries = useBeneficiariesStore((s) => s.link);
+
+  const selectedFarmers = FARMERS.filter((f) => selected.has(f.id));
+
+  const addToBeneficiaries = () => {
+    const { added, skipped } = linkBeneficiaries([...selected], segmentId);
+    const parts = [
+      added.length > 0 && `${added.length} farmer${added.length === 1 ? "" : "s"} added to “${segmentName(segmentId)}” — Pending verification.`,
+      skipped.length > 0 && `Already in this segment: ${skipped.join(", ")}.`,
+    ].filter(Boolean);
+    setNotice(
+      <>
+        {parts.join(" ")}{" "}
+        <Link href="/beneficiaries" className="font-semibold underline">View beneficiaries</Link>
+      </>,
+    );
+    setSelected(new Set());
+    setIsAddOpen(false);
+  };
 
   const rows = applyFilters(FARMERS, filters).filter((farmer) => matchesQuery(query, farmer));
   const activeFilterCount = countActiveFilters(filters);
@@ -77,7 +105,7 @@ export function FarmersTable() {
     });
 
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-hidden p-0 shadow-card">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2.5">
@@ -92,12 +120,17 @@ export function FarmersTable() {
 
           <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
 
+          {selected.size > 0 && (
+            <Button variant="brand" size="md" onClick={() => { setSegmentId(SEGMENTS[0].id); setIsAddOpen(true); }}>
+              Add to beneficiaries ({selected.size})
+            </Button>
+          )}
+
           <ExportButton
-            label="Export Report"
             disabled={rows.length === 0}
-            onClick={() => {
-              downloadCsv(`farmers-report-${fileDate()}.csv`, rows, EXPORT_COLUMNS);
-              setNotice(`Exported ${rows.length} farmer${rows.length === 1 ? "" : "s"} matching the current search and filters (CSV).`);
+            onExport={(format) => {
+              downloadTable(format, `farmers-report-${fileDate()}`, rows, EXPORT_COLUMNS, "Farmers report");
+              setNotice(`Exported ${rows.length} farmer${rows.length === 1 ? "" : "s"} matching the current search and filters (${formatLabel(format)}).`);
             }}
           />
         </div>
@@ -107,30 +140,33 @@ export function FarmersTable() {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] border-collapse text-left">
+        <table className="w-full min-w-[1020px] border-collapse text-left">
           <thead>
-            <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
-              <th className="w-16 px-6 py-3">
+            <tr className="border-y border-line bg-surface text-[14px] font-semibold text-slate-500">
+              <th className="w-14 px-4 py-3 align-middle">
                 <Checkbox checked={allSelected} onChange={toggleAll} aria-label="Select all farmers" />
               </th>
-              <th className="px-4 py-3 font-medium">Farmer Details</th>
-              <th className="px-4 py-3 font-medium">
+              <th className="px-4 py-3 font-semibold">Farmer Details</th>
+              <th className="px-4 py-3 font-semibold">
                 <FilterDropdown label="Kebele" allLabel="All kebeles" options={KEBELE_OPTIONS} selected={filters.kebele} onApply={setColumnFilter("kebele")} />
               </th>
-              <th className="px-4 py-3 font-medium">
+              <th className="px-4 py-3 font-semibold">
                 <FilterDropdown label="Crop" allLabel="All crops" options={CROP_OPTIONS} selected={filters.crop} onApply={setColumnFilter("crop")} />
               </th>
-              <th className="px-4 py-3 text-center font-medium">Registered date</th>
-              <th className="px-4 py-3 text-center font-medium">
+              <th className="px-4 py-3 font-semibold">
+                <FilterDropdown label="Livestock" allLabel="All livestock" options={LIVESTOCK_OPTIONS} selected={filters.livestock} onApply={setColumnFilter("livestock")} />
+              </th>
+              <th className="px-4 py-3 text-center font-semibold">Registered date</th>
+              <th className="px-4 py-3 text-center font-semibold">
                 <FilterDropdown label="Status" allLabel="All Status" options={STATUS_OPTIONS} selected={filters.status} onApply={setColumnFilter("status")} />
               </th>
-              <th className="px-4 py-3 text-center font-medium">Action</th>
+              <th className="px-4 py-3 text-center font-semibold">Action</th>
             </tr>
           </thead>
           <tbody className="text-[14px] text-slate-700">
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-6"><EmptyState title="No farmers match the selected filters" hint="Clear a filter or try a different search." /></td>
+                <td colSpan={8} className="px-4 py-6"><EmptyState title="No farmers match the selected filters" hint="Clear a filter or try a different search." /></td>
               </tr>
             )}
             {pageRows.map((farmer) => {
@@ -143,7 +179,7 @@ export function FarmersTable() {
                     isSelected ? "bg-brand-wash" : "hover:bg-surface",
                   )}
                 >
-                  <td className="px-4 py-3.5">
+                  <td className="w-14 px-4 py-3.5 align-middle">
                     <Checkbox
                       checked={isSelected}
                       onChange={() => toggleOne(farmer.id)}
@@ -155,13 +191,16 @@ export function FarmersTable() {
                       <FarmerAvatar name={farmer.name} avatar={farmer.avatar} />
                       <div className="leading-tight">
                         <p className="font-medium text-ink">{farmer.name}</p>
-                        <p className="mt-0.5 text-[13px] text-muted">{farmer.email}</p>
+                        <p className="mt-0.5 text-[13px] text-muted">{farmer.phone}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3.5">{farmer.kebele}</td>
                   <td className="px-4 py-3.5">
                     {farmer.crop} {farmer.landHa} ha
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {farmer.livestock} {farmer.livestockHeads} heads
                   </td>
                   <td className="px-4 py-3.5 text-center leading-tight">
                     {farmer.registeredAt}
@@ -192,10 +231,39 @@ export function FarmersTable() {
           setFilters({
             kebele: next.kebele ?? new Set(),
             crop: next.crop ?? new Set(),
+            livestock: next.livestock ?? new Set(),
             status: next.status ?? new Set(),
           })
         }
       />
+
+      <Modal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        title="Add to Beneficiaries"
+        subtitle={`${selectedFarmers.length} farmer${selectedFarmers.length === 1 ? "" : "s"} selected`}
+        footer={<><Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button><Button variant="brand" onClick={addToBeneficiaries}>Add</Button></>}
+      >
+        <div className="flex flex-col gap-4">
+          <FormField label="Segment" htmlFor="bulk-segment" required hint="Membership is verified against the segment rule before enrolment.">
+            <Select id="bulk-segment" value={segmentId} onChange={(e) => setSegmentId(e.target.value)}>
+              {SEGMENTS.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </Select>
+          </FormField>
+          <div>
+            <p className="text-[14px] font-medium text-ink">Farmers</p>
+            <ul className="mt-2 flex max-h-[220px] flex-col gap-2 overflow-y-auto">
+              {selectedFarmers.map((f) => (
+                <li key={f.id} className="flex items-center gap-2.5 text-[14px]">
+                  <FarmerAvatar name={f.name} avatar={f.avatar} />
+                  <span className="text-ink">{f.name}</span>
+                  <span className="text-[13px] text-muted">{f.kebele} · {f.crop} · {f.livestock}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </Modal>
     </Card>
   );
 }

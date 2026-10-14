@@ -55,14 +55,14 @@ interface TablePaginationProps {
   onPageSizeChange: (size: number) => void;
 }
 
-const BOX = "flex h-9 min-w-9 items-center justify-center rounded-md border px-2.5 text-[13.5px] font-medium transition-colors";
+const BOX = "flex h-8 min-w-8 items-center justify-center rounded-lg border px-2.5 text-sm font-semibold transition-all duration-200";
 
 // Table footer: "Showing [10] of N items" on the left, Previous · 1 2 3 … 10 · Next on the right.
 export function TablePagination({ page, pageSize, total, itemLabel, onPageChange, onPageSizeChange }: TablePaginationProps) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  // Everything fits on the smallest page — no footer needed.
-  if (total <= PAGE_SIZES[0]) return null;
+  // Every list shows its footer (even a single page) so the total and page size are always visible; only an empty list has none.
+  if (total === 0) return null;
 
   return (
     <div className="flex flex-col gap-3 border-t border-line px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between">
@@ -111,7 +111,7 @@ export function TablePagination({ page, pageSize, total, itemLabel, onPageChange
               aria-label={`Page ${item}`}
               className={cn(
                 BOX,
-                page === item ? "border-brand-green bg-brand-green text-white" : "border-zinc-200 bg-white text-slate-700 hover:bg-zinc-50",
+                page === item ? "border-brand-green-bright bg-brand-green-bright text-white shadow-md" : "border-transparent text-gray-600 hover:-translate-y-0.5 hover:border-gray-200 hover:bg-white hover:text-brand-green-bright hover:shadow-md",
               )}
             >
               {item}

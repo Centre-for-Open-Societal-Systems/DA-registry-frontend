@@ -14,6 +14,8 @@ export interface VisitRecord {
   status: VisitStatus;
   plotRef: string;
   durationMin: number;
+  /** Supervisor who assigned this visit to the DA; absent when the DA planned it themselves. */
+  assignedBy?: string;
 }
 
 export interface VisitTimelineEntry {

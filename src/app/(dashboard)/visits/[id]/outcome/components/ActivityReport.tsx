@@ -4,20 +4,21 @@ import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { ExportButton } from "@/components/ui/ExportButton";
 import { StatCard } from "@/components/ui/StatCard";
-import { downloadCsv, fileDate } from "@/lib/download";
+import { fileDate } from "@/lib/download";
+import { downloadTable, type ExportFormat } from "@/lib/export";
 import { FarmerAvatar } from "@/features/farmers";
 import { ACTIVITY_REPORT, SUBMITTED_OUTCOMES } from "@/features/visits";
 
 // One CSV: the week's metrics first, then every submitted outcome row.
 type ReportRow = { section: string; farmer: string; kebele: string; purpose: string; summary: string; date: string; metric: string; value: string };
 
-function exportReport(stats: { label: string; value: string }[]) {
+function exportReport(format: ExportFormat, stats: { label: string; value: string }[]) {
   const blank = { farmer: "", kebele: "", purpose: "", summary: "", date: "" };
   const rows: ReportRow[] = [
     ...stats.map((s) => ({ section: `Metric (${ACTIVITY_REPORT.weekLabel})`, ...blank, metric: s.label, value: s.value })),
     ...SUBMITTED_OUTCOMES.map((o) => ({ section: "Submitted outcome", farmer: o.farmerName, kebele: o.kebele, purpose: o.purpose, summary: o.summary, date: o.date, metric: "", value: "" })),
   ];
-  downloadCsv(`activity-report-${fileDate()}.csv`, rows, [
+  downloadTable(format, `activity-report-${fileDate()}`, rows, [
     { header: "Section", value: (r) => r.section },
     { header: "Metric", value: (r) => r.metric },
     { header: "Value", value: (r) => r.value },
@@ -89,7 +90,7 @@ export function ActivityReport() {
   ];
 
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-hidden p-0 shadow-card">
       <div className="flex flex-col gap-3 border-b border-line px-5 py-3.5 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-[15px] font-semibold text-ink">Activity report — {ACTIVITY_REPORT.weekLabel}</h2>
@@ -102,7 +103,7 @@ export function ActivityReport() {
           >
             Activity Log &rarr;
           </Link>
-          <ExportButton label="Export Report" onClick={() => exportReport(stats)} />
+          <ExportButton onExport={(format) => exportReport(format, stats)} />
         </div>
       </div>
 

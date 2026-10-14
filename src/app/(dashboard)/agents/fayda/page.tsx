@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { ModuleStrip } from "@/features/agents";
+import { AgentsPageHeader, ModuleStrip } from "@/features/agents";
 import { FaydaVerification } from "./components/FaydaVerification";
 
 export const metadata: Metadata = {
@@ -11,10 +10,7 @@ export const metadata: Metadata = {
 export default function FaydaPage() {
   return (
     <div className="flex w-full flex-col gap-4">
-      <PageHeader
-        title="Fayda verification"
-        description="Identity match against Ethiopia's national ID, with duplicate resolution (Merge / Keep / Escalate). Fayda is the external authority; the registry only records outcomes."
-      />
+      <AgentsPageHeader />
       <ModuleStrip activeHref="/agents/fayda" />
       <FaydaVerification />
     </div>

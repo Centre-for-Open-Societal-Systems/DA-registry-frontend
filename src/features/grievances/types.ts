@@ -12,7 +12,7 @@ export type GrievanceStatus =
 
 export type GrievancePriority = "Low" | "Medium" | "High" | "Critical";
 
-export type GrievanceCategory = "Input" | "Inputs" | "Schemes" | "Payments" | "Markets" | "Extension" | "Land";
+export type GrievanceCategory = "Inputs" | "Schemes" | "Payments" | "Markets" | "Extension" | "Land";
 
 export interface Grievance {
   ticketId: string;
@@ -27,8 +27,8 @@ export interface Grievance {
   submittedAt: string; // e.g. "May 28, 2026, 10:42 AM"
   attachments: number;
   responses: number;
-  /** FR-12: whether the DA raised it (own or on behalf) or the farmer submitted directly. */
-  raisedBy: "DA" | "Farmer";
+  /** FR-12: raised by the DA on behalf of a farmer, by the farmer directly, or for the DA themselves. */
+  raisedBy: "OnBehalf" | "Farmer" | "DA";
 }
 
 /** Stat-card buckets derived from record statuses. */

@@ -58,7 +58,7 @@ export function ServicesWorkspace({ farmer }: { farmer: Farmer }) {
         description="Credit and Marketplace are unrelated transactions with different counterparties and lifecycles, so they are kept on separate tabs."
       />
       {notice && <Banner tone={notice.tone} onDismiss={() => setNotice(null)}>{notice.text}</Banner>}
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
 
         {tab === "credit" && (
           <div className="flex flex-col gap-5 p-5">
@@ -148,7 +148,7 @@ export function ServicesWorkspace({ farmer }: { farmer: Farmer }) {
       </Card>
 
       {/* FR-05b-v mobile credit-application capture */}
-      <Modal isOpen={newCredit} onClose={() => setNewCredit(false)} title="New credit application" subtitle={`${farmer.name} · ${farmer.id} · Fayda ${farmer.status}`} size="lg"
+      <Modal isOpen={newCredit} onClose={() => setNewCredit(false)} title="New Credit Application" subtitle={`${farmer.name} · ${farmer.id} · Fayda ${farmer.status}`} size="lg"
         footer={<><Button variant="outline" onClick={() => setNewCredit(false)}>Cancel</Button><Button variant="brand" disabled={!credit.amount || credit.purpose.trim().length < 3 || farmer.status !== "Verified"} onClick={submitCredit}>Submit application</Button></>}
       >
         {farmer.status !== "Verified" && <Banner tone="warning" className="mb-4">This farmer is not Fayda-verified. A credit application requires a verified identity.</Banner>}

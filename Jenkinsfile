@@ -53,11 +53,13 @@ pipeline {
 
         stage('Install & test') {
             steps {
-                // npm project (package-lock.json); `npm run check` = lint + typecheck + vitest
+                // npm project (package-lock.json); `npm run check` = lint + typecheck + vitest.
+                // `next typegen` first: PageProps / LayoutProps are generated global types (Next 15.5+),
+                // and a clean checkout does not have them, so `tsc --noEmit` fails without it.
                 sh '''
                     docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e CI=true \
                         -v "$PWD":/app -w /app node:24-alpine \
-                        sh -c "npm ci && npm run check"
+                        sh -c "npm ci && npx next typegen && npm run check"
                 '''
             }
         }

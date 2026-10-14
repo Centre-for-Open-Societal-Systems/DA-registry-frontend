@@ -46,6 +46,8 @@ const SEED: QueueIssue[] = [
   { ref: "ISS-2033", subject: "ODK form rejects a valid Fayda ID", category: "Data / system", severity: "Medium", reporter: "Tadesse Alemu", woreda: "Bako Tibe", assignee: "Kebede Alemu (Supervisor)", slaDue: "17 Sep", slaBreached: false, status: "In Review", history: [{ at: "10 Sep 2026, 15:00", text: "Picked up for review" }] },
   { ref: "ISS-2027", subject: "Field tablet screen cracked", category: "Equipment / supplies", severity: "Medium", reporter: "Tadesse Alemu", woreda: "Bako Tibe", assignee: "IT support desk", slaDue: "15 Sep", slaBreached: false, status: "Assigned", history: [{ at: "09 Sep 2026, 08:30", text: "Assigned to IT support desk" }] },
   { ref: "ISS-2022", subject: "Unsafe footbridge on route to Koye Feche", category: "Safety", severity: "High", reporter: "Selamawit Haile", woreda: "Bako Tibe", assignee: "Logistics — Bako Tibe", slaDue: "11 Sep", slaBreached: true, status: "In Progress", history: [{ at: "08 Sep 2026, 14:10", text: "Assigned to Logistics" }] },
+  { ref: "ISS-2015", subject: "Transfer request to Gedo kebele not actioned", category: "HR", severity: "Low", reporter: "Selamawit Haile", woreda: "Bako Tibe", assignee: "Kebede Alemu (Supervisor)", slaDue: "19 Sep", slaBreached: false, status: "Reopened", history: [{ at: "11 Sep 2026, 10:30", text: "Reopened by reporter: transfer letter still not issued" }, { at: "29 Aug 2026, 14:00", text: "Resolved: forwarded to Woreda HR" }] },
+  { ref: "ISS-2009", subject: "Second power bank for field tablet", category: "Equipment / supplies", severity: "Low", reporter: "Hana Girma", woreda: "Bako Tibe", assignee: "Logistics — Bako Tibe", slaDue: "—", slaBreached: false, status: "Rejected", history: [{ at: "04 Sep 2026, 11:20", text: "Rejected: one power bank per DA under current supply plan" }] },
   { ref: "ISS-2004", subject: "Duplicate farmer records in Koye Feche", category: "Data / system", severity: "Low", reporter: "Tadesse Alemu", woreda: "Bako Tibe", assignee: "IT support desk", slaDue: "—", slaBreached: false, status: "Resolved", history: [{ at: "02 Sep 2026, 16:45", text: "Resolved: records merged by data team" }] },
   { ref: "ISS-1987", subject: "Fuel allowance form unavailable", category: "Operational", severity: "Low", reporter: "Hana Girma", woreda: "Bako Tibe", assignee: "Kebede Alemu (Supervisor)", slaDue: "—", slaBreached: false, status: "Closed", history: [{ at: "20 Aug 2026, 09:00", text: "Closed: form restored" }] },
 ];
@@ -92,11 +94,11 @@ export function IssueQueue() {
   const assigneeOptions = optionsOf(issues.map((i) => i.assignee), ASSIGNEES);
   const woredaOptions = optionsOf(issues.map((i) => i.woreda), WOREDAS);
   const filterFields: FilterFieldConfig[] = [
-    { key: "category", label: "Category", allLabel: "All categories", placeholder: "All categories", options: categoryOptions },
-    { key: "severity", label: "Severity", allLabel: "All severities", placeholder: "All severities", options: severityOptions },
+    { key: "category", label: "Category", allLabel: "All categories", placeholder: "All Categories", options: categoryOptions },
+    { key: "severity", label: "Severity", allLabel: "All severities", placeholder: "All Severities", options: severityOptions },
     { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: statusOptions },
-    { key: "assignee", label: "Assignee", allLabel: "All assignees", placeholder: "All assignees", options: assigneeOptions },
-    { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All woredas", options: woredaOptions },
+    { key: "assignee", label: "Assignee", allLabel: "All assignees", placeholder: "All Assignees", options: assigneeOptions },
+    { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All Woredas", options: woredaOptions },
   ];
 
   const rows = useMemo(() => {
@@ -189,7 +191,7 @@ export function IssueQueue() {
         <StatCard label="Resolved (30d)" value={String(stats.resolved30)} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M20 6L9 17l-5-5")} />
       </div>
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-[15px] font-semibold text-ink">Issue queue — Bako Tibe</h2>
@@ -227,7 +229,7 @@ export function IssueQueue() {
         <Modal
           isOpen
           onClose={() => setAction(null)}
-          title={{ assign: "Assign issue", info: "Request more information", resolve: "Resolve issue", reopen: "Reopen issue" }[action.type]}
+          title={{ assign: "Assign Issue", info: "Request More Information", resolve: "Resolve Issue", reopen: "Reopen Issue" }[action.type]}
           subtitle={`${action.issue.ref} · ${action.issue.subject}`}
           footer={<><Button variant="outline" onClick={() => setAction(null)}>Cancel</Button><Button variant="brand" disabled={action.type !== "assign" && note.trim().length < 3} onClick={commit}>{{ assign: "Assign", info: "Send request", resolve: "Mark resolved", reopen: "Reopen" }[action.type]}</Button></>}
         >

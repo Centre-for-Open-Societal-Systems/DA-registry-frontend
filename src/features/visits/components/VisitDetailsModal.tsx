@@ -31,7 +31,7 @@ export function VisitDetailsModal({ visit, onClose, onReschedule }: VisitDetails
     <Modal
       isOpen
       onClose={onClose}
-      title="Visit details"
+      title="Visit Details"
       titleAddon={<VisitStatusPill status={visit.status} className="min-w-0" />}
       size="xl"
       footer={

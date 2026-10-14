@@ -75,7 +75,7 @@ export function GrievanceResponsePanel({ onSubmitResponse, onAddNote }: Grievanc
 
   return (
     <section className="rounded-xl border border-line bg-white">
-      <div className="flex overflow-x-auto border-b border-line px-2" role="tablist">
+      <div className="flex flex-wrap border-b border-line px-2" role="tablist">
         <button type="button" role="tab" aria-selected={tab === "response"} onClick={() => setTab("response")} className={tabClass(tab === "response")}>
           <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21h18v-2H3v2zM5 10h2v7H5v-7zm4 0h2v7H9v-7zm4 0h2v7h-2v-7zm4 0h2v7h-2v-7zM12 2L2 7v2h20V7L12 2z" /></svg>
           Dept Response<span className="hidden sm:inline">&nbsp;(Appendix D)</span>

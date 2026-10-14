@@ -1,0 +1,479 @@
+diff --git a/next.config.ts b/next.config.ts
+index cd98ac3..03cd5b7 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
+   images: {
+     remotePatterns: [{ protocol: "https", hostname: "i.ytimg.com", pathname: "/vi/**" }],
+   },
++  // API calls go to /api/v1 on this app and are proxied to the backend, so the browser needs no CORS setup.
++  // Set API_BASE_URL to point at another backend.
++  async rewrites() {
++    const backend = process.env.API_BASE_URL ?? "http://127.0.0.1:8200";
++    return [{ source: "/api/v1/:path*", destination: `${backend}/api/v1/:path*` }];
++  },
+ };
+ 
+ export default nextConfig;
+diff --git a/src/app/(auth)/login/components/LoginCard.tsx b/src/app/(auth)/login/components/LoginCard.tsx
+index 1074f2d..004def6 100644
+--- a/src/app/(auth)/login/components/LoginCard.tsx
++++ b/src/app/(auth)/login/components/LoginCard.tsx
+@@ -6,17 +6,25 @@ import { useRouter } from "next/navigation";
+ import { Button } from "@/components/ui/Button";
+ import { Input } from "@/components/ui/Input";
+ import { ErrorAlert } from "@/components/ui/ErrorAlert";
+-import { findAccount, useRegisteredAccountsStore, type DemoAccount } from "@/features/auth";
++import { login } from "@/features/auth";
++import { ApiError } from "@/lib/api";
+ import { useAuthStore } from "@/store/useAuthStore";
+ import { AUTH_INPUT, AUTH_LABEL, AuthCard, PasswordInput } from "../../components/AuthCard";
+ import { ForgotPasswordModal } from "./ForgotPasswordModal";
+ import { ContactAdminModal } from "./ContactAdminModal";
+ 
++function loginErrorMessage(err: unknown): string {
++  if (!(err instanceof ApiError)) return "Something went wrong while signing in. Please try again.";
++  if (err.status === 401 || err.status === 403) return "Email or password is incorrect. Check your credentials and try again.";
++  if (err.status === 0 || err.status >= 500) return "Could not reach the server. Please try again in a moment.";
++  return err.message;
++}
++
+ export function LoginCard() {
+   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+   const [isContactOpen, setIsContactOpen] = useState(false);
+   const [error, setError] = useState<string | null>(null);
+-  const registeredAccounts = useRegisteredAccountsStore((s) => s.accounts);
++  const [isSubmitting, setIsSubmitting] = useState(false);
+   const router = useRouter();
+   const signIn = useAuthStore((s) => s.signIn);
+   const hasHydrated = useAuthStore((s) => s.hasHydrated);
+@@ -27,24 +35,22 @@ export function LoginCard() {
+     if (hasHydrated && isAuthenticated) router.replace("/dashboard");
+   }, [hasHydrated, isAuthenticated, router]);
+ 
+-  // No auth backend yet: the account list decides both identity and role (see features/auth/accounts).
+-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
++  // The backend checks the credentials and sets the session cookie; identity and role come from its response.
++  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+     e.preventDefault();
++    if (isSubmitting) return;
+     const form = new FormData(e.currentTarget);
+-    const account = findAccount(String(form.get("email") ?? ""), String(form.get("password") ?? ""), registeredAccounts);
+-
+-    if (!account) {
+-      setError("Email or password is incorrect. Check your credentials and try again.");
+-      return;
+-    }
+-
+-    completeSignIn(account);
+-  };
+-
+-  const completeSignIn = (account: DemoAccount) => {
+     setError(null);
+-    signIn({ id: account.email, name: account.name, email: account.email }, account.role);
+-    router.push("/dashboard");
++    setIsSubmitting(true);
++
++    try {
++      const { user, role, tokens } = await login(String(form.get("email") ?? ""), String(form.get("password") ?? ""), form.get("remember") === "on");
++      signIn(user, role, tokens);
++      router.push("/dashboard");
++    } catch (err) {
++      setError(loginErrorMessage(err));
++      setIsSubmitting(false);
++    }
+   };
+ 
+   // Automatically clear URL query parameters if they exist
+@@ -61,8 +67,8 @@ export function LoginCard() {
+           {error && <ErrorAlert message={error} />}
+ 
+           <div className="flex flex-col gap-1.5">
+-            <label className={AUTH_LABEL} htmlFor="email">Email address</label>
+-            <Input id="email" name="email" type="email" placeholder="Enter your email address" required className={AUTH_INPUT} />
++            <label className={AUTH_LABEL} htmlFor="email">Email or username</label>
++            <Input id="email" name="email" type="text" autoComplete="username" placeholder="Enter your email or username" required className={AUTH_INPUT} />
+           </div>
+ 
+           <div className="flex flex-col gap-1.5">
+@@ -102,8 +108,8 @@ export function LoginCard() {
+             </button>
+           </div>
+ 
+-          <Button type="submit" variant="brand" size="lg" className="mt-2 short:mt-1 h-11 short:h-10 w-full rounded-md transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98]">
+-            <span className='font-semibold'>Sign in</span>
++          <Button type="submit" variant="brand" size="lg" disabled={isSubmitting} className="mt-2 short:mt-1 h-11 short:h-10 w-full rounded-md transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100">
++            <span className='font-semibold'>{isSubmitting ? "Signing in…" : "Sign in"}</span>
+           </Button>
+ 
+           <div className="flex items-center gap-3 text-sm text-zinc-400">
+diff --git a/src/features/auth/index.ts b/src/features/auth/index.ts
+index 21644e2..c20eb9c 100644
+--- a/src/features/auth/index.ts
++++ b/src/features/auth/index.ts
+@@ -1,3 +1,5 @@
+ // Public API of the auth feature. Import from "@/features/auth", never from files inside it.
+ export * from "./accounts";
+ export * from "./registeredAccounts";
++export * from "./login";
++export * from "./session";
+diff --git a/src/features/auth/login.test.ts b/src/features/auth/login.test.ts
+new file mode 100644
+index 0000000..f64b0d9
+--- /dev/null
++++ b/src/features/auth/login.test.ts
+@@ -0,0 +1,26 @@
++import { describe, expect, it } from "vitest";
++import { toLoginResult, toPortalRole } from "./login";
++
++describe("toLoginResult", () => {
++  it("reads the login response", () => {
++    const res = {
++      data: { access_token: "a", expires_in: 900, refresh_token: "r", token_type: "Bearer", roles: ["Development Agent"], user: "da@moa.et" },
++    };
++    expect(toLoginResult(res, 1000)).toEqual({
++      user: { id: "da@moa.et", name: "da@moa.et", email: "da@moa.et" },
++      role: "DA",
++      tokens: { accessToken: "a", refreshToken: "r", expiresAt: 901_000 },
++    });
++  });
++});
++
++describe("toPortalRole", () => {
++  it("picks the most senior portal role", () => {
++    expect(toPortalRole(["Development Agent", "Supervisor", "Executive", "Administrator"])).toBe("Admin");
++    expect(toPortalRole(["Supervisor", "Communications Officer"])).toBe("Supervisor");
++  });
++
++  it("falls back to DA when no portal role is held", () => {
++    expect(toPortalRole(["Sales User"])).toBe("DA");
++  });
++});
+diff --git a/src/features/auth/login.ts b/src/features/auth/login.ts
+new file mode 100644
+index 0000000..46fae63
+--- /dev/null
++++ b/src/features/auth/login.ts
+@@ -0,0 +1,54 @@
++import { apiPost } from "@/lib/api";
++import type { Role } from "@/lib/rbac";
++
++/** Successful POST /api/v1/auth/login — and /auth/refresh, which answers in the same shape. */
++export interface LoginResponse {
++  data: {
++    access_token: string;
++    /** Seconds the access token stays valid. */
++    expires_in: number;
++    refresh_token: string;
++    token_type: string;
++    roles: string[];
++    /** Backend user id, e.g. "Administrator" or the user's email. */
++    user: string;
++  };
++}
++
++export interface LoginResult {
++  user: { id: string; name: string; email: string };
++  role: Role;
++  tokens: { accessToken: string; refreshToken: string; expiresAt: number };
++}
++
++// Role the portal falls back to when the account holds none of the portal's roles.
++const FALLBACK_ROLE: Role = "DA";
++
++/** POST /api/v1/auth/login. Wrong credentials come back as ApiError with status 401. */
++export async function login(usr: string, pwd: string, rememberMe: boolean): Promise<LoginResult> {
++  const res = await apiPost<LoginResponse>("/auth/login", { usr: usr.trim(), pwd, remember_me: rememberMe });
++  return toLoginResult(res, Date.now());
++}
++
++export function toLoginResult({ data }: LoginResponse, now: number): LoginResult {
++  return {
++    // The response carries only the user id, which is the email for every account except Administrator.
++    user: { id: data.user, name: data.user, email: data.user },
++    role: toPortalRole(data.roles),
++    tokens: { accessToken: data.access_token, refreshToken: data.refresh_token, expiresAt: now + data.expires_in * 1000 },
++  };
++}
++
++// An account can hold several backend roles (Administrator holds all of them), so the most senior one wins.
++const ROLE_PRIORITY: [Role, string[]][] = [
++  ["Admin", ["Administrator", "OAN Administrator", "System Manager"]],
++  ["Executive", ["Executive"]],
++  ["Supervisor", ["Supervisor"]],
++  ["CommsOfficer", ["Communications Officer"]],
++  ["DA", ["Development Agent"]],
++];
++
++export function toPortalRole(backendRoles: string[]): Role {
++  const held = new Set(backendRoles);
++  return ROLE_PRIORITY.find(([, names]) => names.some((n) => held.has(n)))?.[0] ?? FALLBACK_ROLE;
++}
+diff --git a/src/features/auth/session.test.ts b/src/features/auth/session.test.ts
+new file mode 100644
+index 0000000..ab90a7b
+--- /dev/null
++++ b/src/features/auth/session.test.ts
+@@ -0,0 +1,80 @@
++import { beforeEach, describe, expect, it, vi } from "vitest";
++import { useAuthStore } from "@/store/useAuthStore";
++import { authRequest, getAccessToken, refreshSession } from "./session";
++
++// Minimal in-memory Storage so the persisted store and logout's draft cleanup run under Node.
++class MemoryStorage implements Storage {
++  private map = new Map<string, string>();
++  get length() { return this.map.size; }
++  clear() { this.map.clear(); }
++  getItem(k: string) { return this.map.get(k) ?? null; }
++  key(i: number) { return [...this.map.keys()][i] ?? null; }
++  removeItem(k: string) { this.map.delete(k); }
++  setItem(k: string, v: string) { this.map.set(k, String(v)); }
++}
++
++const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status });
++const refreshed = (n: number) =>
++  json(200, { data: { access_token: `access-${n}`, expires_in: 900, refresh_token: `refresh-${n}`, token_type: "Bearer", roles: [], user: "u" } });
++
++const fetchMock = vi.fn<typeof fetch>();
++
++function signInWith(expiresAt: number) {
++  useAuthStore.getState().signIn({ id: "u", name: "u", email: "u" }, "Admin", { accessToken: "access-0", refreshToken: "refresh-0", expiresAt });
++}
++
++beforeEach(() => {
++  globalThis.sessionStorage = new MemoryStorage();
++  globalThis.localStorage = new MemoryStorage();
++  fetchMock.mockReset();
++  vi.stubGlobal("fetch", fetchMock);
++});
++
++describe("refreshSession", () => {
++  it("stores the rotated pair and spends the refresh token only once for concurrent callers", async () => {
++    signInWith(0);
++    fetchMock.mockResolvedValueOnce(refreshed(1));
++
++    const results = await Promise.all([refreshSession(), refreshSession(), getAccessToken()]);
++
++    expect(results).toEqual(["access-1", "access-1", "access-1"]);
++    expect(fetchMock).toHaveBeenCalledTimes(1);
++    expect(JSON.parse(fetchMock.mock.calls[0][1]!.body as string)).toEqual({ refresh_token: "refresh-0" });
++    expect(useAuthStore.getState().tokens?.refreshToken).toBe("refresh-1");
++  });
++
++  it("signs out when the backend rejects the refresh token", async () => {
++    signInWith(0);
++    fetchMock.mockResolvedValueOnce(json(401, { message: "Invalid refresh token" }));
++
++    await expect(refreshSession()).resolves.toBeNull();
++    expect(useAuthStore.getState().isAuthenticated).toBe(false);
++  });
++
++  it("keeps the session on a network error", async () => {
++    signInWith(0);
++    fetchMock.mockRejectedValueOnce(new TypeError("offline"));
++
++    await expect(refreshSession()).rejects.toMatchObject({ status: 0 });
++    expect(useAuthStore.getState().tokens?.refreshToken).toBe("refresh-0");
++  });
++});
++
++describe("authRequest", () => {
++  it("uses the stored token while it is fresh", async () => {
++    signInWith(Date.now() + 600_000);
++    fetchMock.mockResolvedValueOnce(json(200, { ok: true }));
++
++    await authRequest("/things");
++
++    expect(new Headers(fetchMock.mock.calls[0][1]!.headers).get("Authorization")).toBe("Bearer access-0");
++  });
++
++  it("refreshes and retries once after a 401", async () => {
++    signInWith(Date.now() + 600_000);
++    fetchMock.mockResolvedValueOnce(json(401, {})).mockResolvedValueOnce(refreshed(1)).mockResolvedValueOnce(json(200, { ok: true }));
++
++    await expect(authRequest("/things")).resolves.toEqual({ ok: true });
++    expect(new Headers(fetchMock.mock.calls[2][1]!.headers).get("Authorization")).toBe("Bearer access-1");
++  });
++});
+diff --git a/src/features/auth/session.ts b/src/features/auth/session.ts
+new file mode 100644
+index 0000000..e02950b
+--- /dev/null
++++ b/src/features/auth/session.ts
+@@ -0,0 +1,59 @@
++import { ApiError, apiPost, apiRequest, type ApiRequest } from "@/lib/api";
++import { useAuthStore } from "@/store/useAuthStore";
++import { toLoginResult, type LoginResponse } from "./login";
++
++// Refresh this long before the access token's expiry, so a request never leaves with a token about to lapse.
++const EXPIRY_SKEW_MS = 30_000;
++
++// Refresh tokens are single-use: the backend rotates them and rejects a reused one with 401. Concurrent
++// callers therefore share one in-flight refresh instead of each spending the same token.
++let inflight: Promise<string | null> | null = null;
++
++/**
++ * POST /api/v1/auth/refresh and store the new token pair. Resolves to the new access token, or null when
++ * the session is over (no refresh token, or the backend rejected it) — the user is then signed out.
++ * Network and server errors are rethrown and keep the session, so a flaky connection does not log anyone out.
++ */
++export function refreshSession(): Promise<string | null> {
++  inflight ??= (async () => {
++    const refreshToken = useAuthStore.getState().tokens?.refreshToken;
++    if (!refreshToken) return null;
++    try {
++      const res = await apiPost<LoginResponse>("/auth/refresh", { refresh_token: refreshToken });
++      const { tokens } = toLoginResult(res, Date.now());
++      useAuthStore.getState().setTokens(tokens);
++      return tokens.accessToken;
++    } catch (err) {
++      if (err instanceof ApiError && (err.status === 400 || err.status === 401)) {
++        useAuthStore.getState().logout();
++        return null;
++      }
++      throw err;
++    }
++  })().finally(() => {
++    inflight = null;
++  });
++  return inflight;
++}
++
++/** A usable access token, refreshing first when the stored one has expired or is about to. */
++export async function getAccessToken(): Promise<string | null> {
++  const tokens = useAuthStore.getState().tokens;
++  if (!tokens) return null;
++  if (tokens.expiresAt - EXPIRY_SKEW_MS > Date.now()) return tokens.accessToken;
++  return refreshSession();
++}
++
++/** apiRequest for signed-in calls: attaches the Bearer token and retries once after a 401 with a fresh one. */
++export async function authRequest<T>(path: string, init: Omit<ApiRequest, "accessToken"> = {}): Promise<T> {
++  const accessToken = await getAccessToken();
++  if (!accessToken) throw new ApiError("Your session has ended. Please sign in again.", 401);
++  try {
++    return await apiRequest<T>(path, { ...init, accessToken });
++  } catch (err) {
++    if (!(err instanceof ApiError) || err.status !== 401) throw err;
++    const fresh = await refreshSession();
++    if (!fresh) throw err;
++    return apiRequest<T>(path, { ...init, accessToken: fresh });
++  }
++}
+diff --git a/src/lib/api.ts b/src/lib/api.ts
+new file mode 100644
+index 0000000..c8958c9
+--- /dev/null
++++ b/src/lib/api.ts
+@@ -0,0 +1,49 @@
++// Thin fetch wrapper for the backend. Requests go to this app's /api/v1, which next.config proxies to the
++// backend, so the browser never makes a cross-origin call.
++
++export class ApiError extends Error {
++  constructor(
++    message: string,
++    /** HTTP status; 0 when the request never reached the server. */
++    readonly status: number,
++  ) {
++    super(message);
++    this.name = "ApiError";
++  }
++}
++
++export interface ApiRequest {
++  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
++  body?: unknown;
++  /** Sent as `Authorization: Bearer …`; signed-in calls get it from features/auth (authRequest). */
++  accessToken?: string;
++}
++
++export async function apiRequest<T>(path: string, { method = "GET", body, accessToken }: ApiRequest = {}): Promise<T> {
++  const headers: Record<string, string> = { Accept: "application/json" };
++  if (body !== undefined) headers["Content-Type"] = "application/json";
++  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
++
++  let res: Response;
++  try {
++    res = await fetch(`/api/v1${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
++  } catch {
++    throw new ApiError("Could not reach the server. Check your connection and try again.", 0);
++  }
++
++  const data = await res.json().catch(() => null);
++  if (!res.ok) throw new ApiError(errorMessage(data) ?? `Request failed (${res.status}).`, res.status);
++  return data as T;
++}
++
++export const apiPost = <T>(path: string, body: unknown) => apiRequest<T>(path, { method: "POST", body });
++
++// Error bodies carry their text under `message` (Frappe), `error` or `detail`; take the first readable one.
++function errorMessage(data: unknown): string | undefined {
++  if (!data || typeof data !== "object") return undefined;
++  const d = data as Record<string, unknown>;
++  for (const value of [d.message, d.error, d.detail]) {
++    if (typeof value === "string" && value.trim()) return value;
++  }
++  return undefined;
++}
+diff --git a/src/store/useAuthStore.ts b/src/store/useAuthStore.ts
+index 93e14f7..8f15c12 100644
+--- a/src/store/useAuthStore.ts
++++ b/src/store/useAuthStore.ts
+@@ -9,16 +9,28 @@ export interface AuthUser {
+   email: string;
+ }
+ 
++/** Bearer tokens from POST /api/v1/auth/login. */
++export interface AuthTokens {
++  accessToken: string;
++  refreshToken: string;
++  /** Epoch ms after which the access token is rejected. */
++  expiresAt: number;
++}
++
+ interface AuthState {
+   user: AuthUser | null;
+   isAuthenticated: boolean;
++  /** Null for sessions not issued by the backend (the local Register flow). */
++  tokens: AuthTokens | null;
+   /** Active RBAC role, fixed by the account signed in at /login; drives nav visibility and gated actions. */
+   role: Role;
+   /** False until the persisted session has been read back (see AuthHydration); guards wait on it. */
+   hasHydrated: boolean;
+   setUser: (user: AuthUser) => void;
+   /** Sign-in result: identity and role land together so the dashboard renders for the right role. */
+-  signIn: (user: AuthUser, role: Role) => void;
++  signIn: (user: AuthUser, role: Role, tokens?: AuthTokens) => void;
++  /** Swaps in a refreshed token pair without touching identity or role. */
++  setTokens: (tokens: AuthTokens) => void;
+   logout: () => void;
+   setHasHydrated: (value: boolean) => void;
+ }
+@@ -30,14 +42,16 @@ export const useAuthStore = create<AuthState>()(
+     (set) => ({
+       user: null,
+       isAuthenticated: false,
++      tokens: null,
+       role: DEFAULT_ROLE,
+       hasHydrated: false,
+       setUser: (user) => set({ user, isAuthenticated: true }),
+-      signIn: (user, role) => set({ user, role, isAuthenticated: true }),
++      signIn: (user, role, tokens) => set({ user, role, tokens: tokens ?? null, isAuthenticated: true }),
++      setTokens: (tokens) => set({ tokens }),
+       logout: () => {
+         // Drafts hold farmer and visit personal data; none of it may outlive the session.
+         clearAllDrafts();
+-        set({ user: null, isAuthenticated: false, role: DEFAULT_ROLE });
++        set({ user: null, isAuthenticated: false, tokens: null, role: DEFAULT_ROLE });
+       },
+       setHasHydrated: (value) => set({ hasHydrated: value }),
+     }),
+@@ -46,7 +60,7 @@ export const useAuthStore = create<AuthState>()(
+       name: "oan-auth",
+       // Rehydrated after mount (see AuthHydration) so the first client render matches the server HTML.
+       skipHydration: true,
+-      partialize: (s) => ({ user: s.user, isAuthenticated: s.isAuthenticated, role: s.role }),
++      partialize: (s) => ({ user: s.user, isAuthenticated: s.isAuthenticated, role: s.role, tokens: s.tokens }),
+       // Runs after every rehydrate, including the empty-storage case, so the guard never waits forever.
+       onRehydrateStorage: () => (state) => state?.setHasHydrated(true),
+     },

@@ -37,7 +37,7 @@ export function ExceptionsPanel({ compact = false }: { compact?: boolean }) {
   };
 
   return (
-    <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="p-0 shadow-card">
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-4">
         <div>
           <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink">

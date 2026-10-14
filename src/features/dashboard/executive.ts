@@ -68,7 +68,7 @@ export const REGION_SUMMARY: RegionSummary = {
   ),
   openGrievances: WOREDA_ROLLUPS.reduce((s, w) => s + w.openGrievances, 0),
   atRiskKebeles: allKebeles.filter((k) => k.status === "At risk").length,
-  updatedAt: "15 Sept 2026",
+  updatedAt: "15 Sep 2026",
 };
 
 /** Kebeles needing regional attention, worst coverage first. */

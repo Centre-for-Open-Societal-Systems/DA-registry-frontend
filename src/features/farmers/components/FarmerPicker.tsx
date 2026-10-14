@@ -27,7 +27,7 @@ export function FarmerPicker({ selected, onSelect, matches, query, showCount, on
           <div className="min-w-0 flex-1">
             <p className="text-[14.5px] font-semibold text-ink">{selected.name}</p>
             <p className="mt-0.5 truncate text-[13px] text-slate-600">
-              {registryCode(selected)} · {selected.kebele} · {selected.crop} {selected.landHa} ha · last visit 34 days ago
+              {registryCode(selected)} · {selected.kebele} · {selected.crop} {selected.landHa} ha · {selected.livestock} {selected.livestockHeads} heads · last visit 34 days ago
             </p>
           </div>
           <button
@@ -64,7 +64,7 @@ export function FarmerPicker({ selected, onSelect, matches, query, showCount, on
                 <span className="min-w-0 flex-1">
                   <span className="block text-[14px] font-medium text-ink">{f.name}</span>
                   <span className="block truncate text-[12.5px] text-muted">
-                    {registryCode(f)} · {f.kebele} · {f.crop} {f.landHa} ha
+                    {registryCode(f)} · {f.kebele} · {f.crop} {f.landHa} ha · {f.livestock} {f.livestockHeads} heads
                   </span>
                 </span>
               </button>

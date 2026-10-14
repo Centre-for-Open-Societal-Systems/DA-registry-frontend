@@ -3,14 +3,17 @@
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatCard } from "@/components/ui/StatCard";
 import { Pill } from "@/components/ui/Pill";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
+import { SearchInput } from "@/components/ui/SearchInput";
+import { AdvancedFiltersButton } from "@/components/ui/AdvancedFiltersButton";
+import { AdvancedFiltersDrawer, type FilterFieldConfig } from "@/components/ui/AdvancedFiltersDrawer";
+import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { TablePagination, usePagination } from "@/components/ui/TablePagination";
 import { cn } from "@/lib/utils";
-import { STATUS_TONE, WOREDA_HEALTH, type KebeleStatus } from "@/features/dashboard";
+import { STATUS_TONE, SUPERVISOR_WOREDA as w, type KebeleStatus } from "@/features/dashboard";
 import { DateRangeDropdown } from "./DateRangeDropdown";
 
 const STATUSES: KebeleStatus[] = ["On track", "Watch", "At risk"];
@@ -24,37 +27,48 @@ const icon = (d: string) => (
   </svg>
 );
 
-const TH = "whitespace-nowrap px-4 py-3 font-medium";
+const TH = "whitespace-nowrap px-4 py-3 font-semibold";
+const SEARCH_PLACEHOLDER = searchPlaceholder(["Kebele", "Farmers", "Agents", "Visit %", "Last sync", "Status"]);
 
-// Supervisor home: woreda programme health with kebele breakdown (role home varies — FSD §2.4 / §3.9).
+// Supervisor home: programme health of their own woreda with kebele breakdown (role home varies — FSD §2.4 / §3.9).
 export function SupervisorDashboard() {
-  const [woredaIdx, setWoredaIdx] = useState(0);
   const [kebeleFilter, setKebeleFilter] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<Set<string>>(new Set());
-  const w = WOREDA_HEALTH[woredaIdx];
+  const [agentsFilter, setAgentsFilter] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState("");
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const kebeleOptions: FilterOption[] = w.kebeles.map((k) => ({ value: k.kebele, label: k.kebele, count: 1 }));
   const statusOptions: FilterOption[] = STATUSES.map((s) => ({ value: s, label: s, count: w.kebeles.filter((k) => k.status === s).length }));
-  const countOf = (s: KebeleStatus) => w.kebeles.filter((k) => k.status === s).length;
+  const agentsOptions: FilterOption[] = [...new Set(w.kebeles.map((k) => k.agents))]
+    .sort((a, b) => a - b)
+    .map((n) => ({ value: String(n), label: `${n} ${n === 1 ? "agent" : "agents"}`, count: w.kebeles.filter((k) => k.agents === n).length }));
+
+  const filterFields: FilterFieldConfig[] = [
+    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All Kebeles", options: kebeleOptions },
+    { key: "status", label: "Status", allLabel: "All statuses", placeholder: "All Statuses", options: statusOptions },
+    { key: "agents", label: "Agents", allLabel: "Any number of agents", placeholder: "Any Number Of Agents", options: agentsOptions },
+  ];
+  const activeFilterCount = [kebeleFilter, statusFilter, agentsFilter].filter((set) => set.size > 0).length;
 
   const rows = useMemo(
-    () => w.kebeles.filter((k) => (kebeleFilter.size === 0 || kebeleFilter.has(k.kebele)) && (statusFilter.size === 0 || statusFilter.has(k.status))),
-    [w, kebeleFilter, statusFilter],
+    () =>
+      w.kebeles.filter(
+        (k) =>
+          (kebeleFilter.size === 0 || kebeleFilter.has(k.kebele)) &&
+          (statusFilter.size === 0 || statusFilter.has(k.status)) &&
+          (agentsFilter.size === 0 || agentsFilter.has(String(k.agents))) &&
+          matchesQuery(query, k, `${k.visitPct}%`),
+      ),
+    [kebeleFilter, statusFilter, agentsFilter, query],
   );
 
   const { pageRows, paginationProps } = usePagination(rows);
   const firstIndex = (paginationProps.page - 1) * paginationProps.pageSize;
 
-  const selectWoreda = (i: number) => {
-    setWoredaIdx(i);
-    setKebeleFilter(new Set());
-    setStatusFilter(new Set());
-  };
-
   return (
     <div className="flex w-full flex-col gap-4">
       <PageHeader
-        tabBar={<SegmentTabs label="Woreda" tabs={WOREDA_HEALTH.map((item, i) => ({ key: String(i), label: item.woreda }))} active={String(woredaIdx)} onChange={(k) => selectWoreda(Number(k))} />}
         title={`${w.woreda} - Programme Health`}
         description={`Kebele-level performance across ${w.kebeles.length} kebeles · update ${w.updatedAt}`}
         actions={<DateRangeDropdown />}
@@ -77,34 +91,18 @@ export function SupervisorDashboard() {
       </div>
 
       {/* Kebele breakdown */}
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <Card className="overflow-hidden p-0 shadow-card">
+        <div className="flex flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:justify-between">
           <h2 className="text-[16px] font-semibold text-ink">Kebele breakdown - {w.woreda}</h2>
-          {/* Quick status chips — they drive the same status filter as the column header. */}
-          <div className="flex flex-wrap items-center gap-2">
-            {STATUSES.map((s) => {
-              const active = statusFilter.size === 1 && statusFilter.has(s);
-              return (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setStatusFilter(active ? new Set() : new Set([s]))}
-                  aria-pressed={active}
-                  className={cn("rounded-full transition-shadow", active && "ring-2 ring-brand-green/40 ring-offset-1")}
-                >
-                  <Pill tone={STATUS_TONE[s]}>
-                    {s} <span className="ml-1 text-[11px]">{countOf(s)}</span>
-                  </Pill>
-                </button>
-              );
-            })}
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
+            <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
+            <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
           </div>
         </div>
-
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] border-collapse text-left">
             <thead>
-              <tr className="border-y border-line bg-surface text-[12.5px] uppercase tracking-wide text-slate-700">
+              <tr className="border-y border-line bg-surface text-[14px] font-semibold text-slate-500">
                 <th className={cn(TH, "w-16 text-center")}>S.No.</th>
                 <th className={TH}><FilterDropdown label="KEBELE" allLabel="All kebeles" options={kebeleOptions} selected={kebeleFilter} onApply={setKebeleFilter} /></th>
                 <th className={cn(TH, "text-center")}>Farmers</th>
@@ -116,7 +114,7 @@ export function SupervisorDashboard() {
             </thead>
             <tbody className="text-[14px] text-slate-700">
               {rows.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-6"><EmptyState title="No kebeles match the selected filters" hint="Clear a filter to see every kebele." /></td></tr>
+                <tr><td colSpan={7} className="px-4 py-6"><EmptyState title="No kebeles match the selected filters" hint="Clear a filter or try a different search." /></td></tr>
               )}
               {pageRows.map((k, i) => (
                 <tr key={`${k.kebele}-${i}`} className="border-b border-line-soft transition-colors last:border-0 hover:bg-surface">
@@ -140,6 +138,18 @@ export function SupervisorDashboard() {
           </table>
         </div>
         {rows.length > 0 && <TablePagination {...paginationProps} itemLabel={`${w.woreda} List`} />}
+
+        <AdvancedFiltersDrawer
+          isOpen={isFiltersOpen}
+          onClose={() => setIsFiltersOpen(false)}
+          fields={filterFields}
+          filters={{ kebele: kebeleFilter, status: statusFilter, agents: agentsFilter }}
+          onApply={(next) => {
+            setKebeleFilter(next.kebele ?? new Set());
+            setStatusFilter(next.status ?? new Set());
+            setAgentsFilter(next.agents ?? new Set());
+          }}
+        />
       </Card>
     </div>
   );

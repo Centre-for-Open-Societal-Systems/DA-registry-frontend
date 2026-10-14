@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { useRef, useState, type ChangeEvent, type DragEvent, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
@@ -15,10 +15,12 @@ interface ProfilePhotoUploadProps {
   name?: string;
   /** Show the Remove button next to Upload (off where a photo is mandatory, e.g. the agent profile). */
   allowRemove?: boolean;
+  /** Shown in the circle while no photo is picked, e.g. the initials avatar; defaults to a person icon. */
+  fallback?: ReactNode;
   className?: string;
 }
 
-export function ProfilePhotoUpload({ initialPreview = null, showActions = true, name, allowRemove = true, className }: ProfilePhotoUploadProps) {
+export function ProfilePhotoUpload({ initialPreview = null, showActions = true, name, allowRemove = true, fallback, className }: ProfilePhotoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(initialPreview);
   const [isDragging, setIsDragging] = useState(false);
@@ -98,7 +100,7 @@ export function ProfilePhotoUpload({ initialPreview = null, showActions = true, 
           {preview ? (
             // eslint-disable-next-line @next/next/no-img-element -- local blob URL preview; next/image cannot optimize object URLs
             <img src={preview} alt="Profile preview" className="h-full w-full object-cover" />
-          ) : (
+          ) : fallback ?? (
             <div className="flex h-full w-full items-center justify-center text-zinc-400">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />

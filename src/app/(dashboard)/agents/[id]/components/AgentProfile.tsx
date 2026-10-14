@@ -6,13 +6,13 @@ import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { Modal } from "@/components/ui/Modal";
+import { FileDropInput } from "@/components/ui/FileDropInput";
 import { Button } from "@/components/ui/Button";
 import { Banner } from "@/components/ui/Banner";
 import { FormField } from "@/components/ui/FormField";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { StatCard } from "@/components/ui/StatCard";
-import { useAuthStore } from "@/store/useAuthStore";
 import { ACTIVE_TONE, APPROVAL_TONE, FAYDA_TONE, ONBOARDING_QUEUE, PUBLICATION_TONE, SYNC_EVENTS } from "@/features/agents";
 import type { Agent } from "@/features/agents";
 import { downloadCsv } from "@/lib/download";
@@ -54,24 +54,23 @@ function Field({ label, value, mono }: { label: string; value: string; mono?: bo
   );
 }
 
-// Appendix C.2 "DA profile 360": tabs Overview / Activity / Documents / History; Suggest correction; Initiate lifecycle (Part 2 hand-off).
+// Appendix C.2 "DA profile 360": tabs Overview / Activity / Documents / History; Request update.
 export function AgentProfile({ agent }: { agent: Agent }) {
-  const role = useAuthStore((s) => s.role);
   const [tab, setTab] = useState<Tab>("overview");
-  const [correctionOpen, setCorrectionOpen] = useState(false);
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [updateFiles, setUpdateFiles] = useState<File[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [viewDoc, setViewDoc] = useState<AgentDocument | null>(null);
   const initials = agent.fullName.split(" ").map((p) => p[0]).slice(0, 2).join("");
   const onboarding = ONBOARDING_QUEUE.find((o) => o.daId === agent.daId);
   const syncEvents = SYNC_EVENTS.filter((e) => e.entityRef.startsWith(agent.daId));
-  const canInitiateLifecycle = role === "Supervisor" || role === "Admin";
 
   return (
     <div className="flex w-full flex-col gap-4">
       <BackLink href="/agents" label="Back to Agents" />
 
       {/* Header */}
-      <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="shadow-card">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-green text-[20px] font-bold text-white">{initials}</div>
@@ -87,14 +86,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <button type="button" onClick={() => setCorrectionOpen(true)} className="inline-flex h-9 items-center whitespace-nowrap rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green transition-colors hover:bg-brand-wash">Suggest correction</button>
-            {canInitiateLifecycle && (
-              <span title="Available in Part 2 — DA lifecycle transitions (transfer, promotion, leave, retirement…).">
-                <button type="button" disabled aria-disabled="true" title="Available in Part 2" className="inline-flex h-9 cursor-not-allowed items-center gap-2 whitespace-nowrap rounded-md bg-brand-green px-3.5 text-[13.5px] font-semibold text-white opacity-50">
-                  Initiate lifecycle <span className="rounded bg-white/20 px-1.5 text-[10px] uppercase tracking-wider">Part 2</span>
-                </button>
-              </span>
-            )}
+            <button type="button" onClick={() => { setUpdateFiles([]); setUpdateOpen(true); }} className="inline-flex h-9 items-center whitespace-nowrap rounded-md border border-brand-green bg-white px-3.5 text-[13.5px] font-semibold text-brand-green transition-colors hover:bg-brand-wash">Request update</button>
           </div>
         </div>
       </Card>
@@ -108,7 +100,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
 
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <SegmentTabs<Tab> tabs={[{ key: "overview", label: "Overview" }, { key: "activity", label: "Activity" }, { key: "documents", label: "Documents", count: DOCUMENTS.length }, { key: "history", label: "History" }]} active={tab} onChange={setTab} />
 
         {tab === "overview" && (
@@ -199,7 +191,7 @@ export function AgentProfile({ agent }: { agent: Agent }) {
         <Modal
           isOpen
           onClose={() => setViewDoc(null)}
-          title={viewDoc.state === "Agrilearn-auto" ? "Agrilearn certificate" : "Document details"}
+          title={viewDoc.state === "Agrilearn-auto" ? "Agrilearn Certificate" : "Document Details"}
           subtitle={`${agent.fullName} · ${agent.daId}`}
           titleAddon={<Pill tone={DOC_TONE[viewDoc.state]}>{viewDoc.state}</Pill>}
           footer={
@@ -243,24 +235,25 @@ export function AgentProfile({ agent }: { agent: Agent }) {
         </Modal>
       )}
 
-      <Modal isOpen={correctionOpen} onClose={() => setCorrectionOpen(false)} title="Suggest a correction" subtitle={`${agent.fullName} · ${agent.daId}`}
-        footer={<><Button variant="outline" onClick={() => setCorrectionOpen(false)}>Cancel</Button><Button variant="brand" onClick={() => { setCorrectionOpen(false); setNotice("Correction submitted to the Woreda supervisor for review. Verified identity fields (name, Fayda ID) can only change via Fayda re-verification."); }}>Submit for review</Button></>}
+      <Modal isOpen={updateOpen} onClose={() => setUpdateOpen(false)} title="Request an Update" subtitle={`${agent.fullName} · ${agent.daId}`}
+        footer={<><Button variant="outline" onClick={() => setUpdateOpen(false)}>Cancel</Button><Button variant="brand" onClick={() => { setUpdateOpen(false); setNotice(`Update request${updateFiles.length ? ` with ${updateFiles.length} supporting document${updateFiles.length === 1 ? "" : "s"}` : ""} sent to the Woreda supervisor for review. Verified identity fields (name, Fayda ID) can only change via Fayda re-verification.`); }}>Submit request</Button></>}
       >
         <div className="flex flex-col gap-4">
-          <FormField label="Field" htmlFor="corr-field" required>
-            <Select id="corr-field" defaultValue="phone">
+          <FormField label="Field to update" htmlFor="update-field" required>
+            <Select id="update-field" defaultValue="phone">
               <option value="phone">Phone</option>
               <option value="tier">Education tier</option>
               <option value="spec">Specialisation</option>
               <option value="kebele">Assigned kebele (routes to Assignment)</option>
             </Select>
           </FormField>
-          <FormField label="Proposed value" htmlFor="corr-value" required>
-            <input id="corr-value" className="h-11 w-full rounded-lg border border-zinc-300 px-3 text-sm focus:border-emerald-600 focus:outline-none" placeholder="New value" />
+          <FormField label="New value" htmlFor="update-value" required>
+            <input id="update-value" className="h-11 w-full rounded-lg border border-zinc-300 px-3 text-sm focus:border-emerald-600 focus:outline-none" placeholder="Enter the updated value" />
           </FormField>
-          <FormField label="Reason" htmlFor="corr-reason" required hint="Recorded in the audit trail with your identity and timestamp.">
-            <Textarea id="corr-reason" rows={3} placeholder="Why this record needs correcting" />
+          <FormField label="Reason for update" htmlFor="update-reason" required hint="Recorded in the audit trail with your identity and timestamp.">
+            <Textarea id="update-reason" rows={3} placeholder="Why this record needs updating" />
           </FormField>
+          <FileDropInput label="Supporting documents" actionLabel="Upload documents" files={updateFiles} onChange={setUpdateFiles} />
         </div>
       </Modal>
     </div>

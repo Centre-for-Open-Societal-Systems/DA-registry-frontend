@@ -20,12 +20,15 @@ export function FeedbackTabs() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
+        // A single tab is just noise — DAs only report, so they get no tab bar.
         tabBar={
-          <SegmentTabs<Tab>
-            tabs={canRunQueue ? [{ key: "queue", label: "Issue queue" }, { key: "report", label: "Report an issue" }] : [{ key: "report", label: "Report an issue" }]}
-            active={active}
-            onChange={setTab}
-          />
+          canRunQueue ? (
+            <SegmentTabs<Tab>
+              tabs={[{ key: "queue", label: "Issue queue" }, { key: "report", label: "Report an issue" }]}
+              active={active}
+              onChange={setTab}
+            />
+          ) : undefined
         }
         title="Internal Feedback"
         description="Operational, equipment, payment/incentive, safety and data/system issues raised by DAs to their supervisor — distinct from farmer grievances and from performance feedback."

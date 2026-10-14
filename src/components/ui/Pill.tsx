@@ -14,7 +14,7 @@ const TONES: Record<PillTone, string> = {
 // Colour-coded status chip. Callers map their domain status → tone (see features/*/data.ts).
 export function Pill({ tone = "slate", children, className, dot }: { tone?: PillTone; children: React.ReactNode; className?: string; dot?: boolean }) {
   return (
-    <span className={cn("inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[12px] font-medium", TONES[tone], className)}>
+    <span className={cn("inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1 text-[13px] font-semibold", TONES[tone], className)}>
       {dot && <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />}
       {children}
     </span>

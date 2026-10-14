@@ -6,7 +6,7 @@ import { ProfileActionStrip } from "./ProfileActions";
 
 export function ProfileHeader({ farmer }: { farmer: Farmer }) {
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-hidden p-0 shadow-card">
       <div className="px-4 py-5">
         <div className="flex items-start gap-5">
           <FarmerAvatar name={farmer.name} avatar={farmer.avatar} size="lg" />

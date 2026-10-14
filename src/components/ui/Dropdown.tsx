@@ -10,6 +10,8 @@ export interface DropdownOption {
   label: string;
   /** Optional secondary line rendered under the label. */
   description?: string;
+  /** Shown but not selectable, e.g. a "Select …" placeholder row. */
+  disabled?: boolean;
 }
 
 interface DropdownProps {
@@ -20,6 +22,8 @@ interface DropdownProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  /** Classes for the field itself (height, border colour…); `className` sets the wrapper. */
+  triggerClassName?: string;
   /** Which edge of the trigger the menu aligns to when it is wider than the trigger. */
   align?: "left" | "right";
   /** Custom trigger content for the selected option; defaults to its label. */
@@ -48,6 +52,7 @@ export function Dropdown({
   placeholder = "Select…",
   disabled,
   className,
+  triggerClassName,
   align = "left",
   renderValue,
   searchable,
@@ -149,7 +154,7 @@ export function Dropdown({
       setHighlight((h) => Math.max(h - 1, 0));
     } else if (e.key === "Enter" || (e.key === " " && !searchable)) {
       e.preventDefault();
-      if (visible[highlight]) choose(visible[highlight]);
+      if (visible[highlight] && !visible[highlight].disabled) choose(visible[highlight]);
     } else if (e.key === "Escape") {
       // Close only the menu, not a modal it sits in (the modal listens on document too)
       e.stopPropagation();
@@ -194,7 +199,8 @@ export function Dropdown({
             autoComplete="off"
             className={cn(
               "h-11 w-full truncate rounded-lg border bg-white pl-3 pr-10 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:bg-zinc-50",
-              isOpen ? "border-emerald-600 ring-1 ring-emerald-600" : "border-zinc-300 hover:border-zinc-400"
+              isOpen ? "border-emerald-600 ring-1 ring-emerald-600" : "border-zinc-300 hover:border-zinc-400",
+              triggerClassName,
             )}
           />
           {chevron}
@@ -214,7 +220,8 @@ export function Dropdown({
         className={cn(
           "flex h-11 w-full items-center justify-between gap-3 rounded-lg border bg-white px-3 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:bg-zinc-50",
           isOpen ? "border-emerald-600 ring-1 ring-emerald-600" : "border-zinc-300 hover:border-zinc-400",
-          selected ? "text-zinc-900" : "text-zinc-400"
+          selected && !selected.disabled ? "text-zinc-900" : "text-zinc-400",
+          triggerClassName,
         )}
       >
         <span className="min-w-0 flex-1 truncate">{selected ? (renderValue ? renderValue(selected) : selected.label) : placeholder}</span>
@@ -241,12 +248,14 @@ export function Dropdown({
                   key={option.value}
                   role="option"
                   aria-selected={isSelected}
+                  aria-disabled={option.disabled || undefined}
                   onMouseEnter={() => setHighlight(i)}
-                  onClick={() => choose(option)}
+                  onClick={() => !option.disabled && choose(option)}
                   className={cn(
                     "cursor-pointer border-b border-line-soft px-4 py-3 text-slate-700 transition-colors last:border-b-0",
                     isHighlighted && "bg-surface",
-                    isSelected && "bg-brand-mint font-medium text-brand-green"
+                    isSelected && !option.disabled && "bg-brand-mint font-medium text-brand-green",
+                    option.disabled && "cursor-default bg-surface font-semibold text-slate-600"
                   )}
                 >
                   <span className={cn("block", searchable ? "truncate" : "whitespace-nowrap")}>{option.label}</span>

@@ -37,9 +37,9 @@ export interface Issue {
 
 export const RELATED_OPTIONS = [
   "Kebele: Bako Tibe",
-  "Kebele: Kebele 01",
-  "Kebele: Kebele 02",
-  "Farmer: Abebe Bekele",
+  "Kebele: Gedo",
+  "Kebele: Dendi",
+  "Farmer: Abebe Kebede",
   "Visit: 12 Jun — Bako Tibe",
   "Not related to a specific record",
 ];

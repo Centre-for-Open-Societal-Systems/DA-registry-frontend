@@ -47,7 +47,7 @@ export function IssuancePipeline() {
   const filterFields: FilterFieldConfig[] = [
     { key: "fayda", label: "Fayda match", allLabel: "All Fayda results", placeholder: "All", options: faydaOptions },
     { key: "uniqueness", label: "Uniqueness", allLabel: "All uniqueness results", placeholder: "All", options: uniquenessOptions },
-    { key: "state", label: "State", allLabel: "All states", placeholder: "All states", options: stateOptions },
+    { key: "state", label: "State", allLabel: "All states", placeholder: "All States", options: stateOptions },
   ];
 
   const rows = events.filter(
@@ -80,11 +80,11 @@ export function IssuancePipeline() {
   ];
 
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-hidden p-0 shadow-card">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-[15px] font-semibold text-ink">Issuance pipeline</h2>
+          <h2 className="text-[15px] font-semibold text-ink">DA-ID management</h2>
           <p className="mt-0.5 text-[12.5px] text-ink-soft">A DA-ID is minted only after a Fayda match and a uniqueness check; every generation event is timestamped.</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">

@@ -48,7 +48,7 @@ export function ApprovalsWorkspace() {
             onApprove={() => a.decide([selected.id], "approve", "")}
           />
         ) : (
-          <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+          <Card className="shadow-card">
             <EmptyState title="Select a request" hint="Choose a request from the queue to verify its data and audit trail." />
           </Card>
         )}

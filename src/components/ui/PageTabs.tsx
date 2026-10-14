@@ -7,7 +7,7 @@ export interface PageTab {
 }
 
 /** Tab strip container: sits flush at the top of a card, rounded to the card's corners. */
-export const TAB_STRIP = "flex overflow-x-auto rounded-t-xl border-b border-line [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+export const TAB_STRIP = "flex flex-wrap rounded-t-xl border-b border-line";
 
 /** One tab: divided from its neighbour; the active tab is tinted with a green underline. Shared by PageTabs and SegmentTabs. */
 export const tabClass = (active: boolean) =>

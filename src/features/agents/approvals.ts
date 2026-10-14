@@ -48,7 +48,7 @@ export const APPROVAL_REQUESTS: ApprovalRequest[] = [
     place: "Adama",
     kebele: "Kebele 05",
     woreda: "Adama woreda",
-    submittedAt: "Today, 9:40 AM",
+    submittedAt: "06 Oct 2026, 9:40 AM",
     submittedBy: { name: "Almaz Wolde", agentId: "DA-4402", initials: "AW" },
     status: "Awaiting verification",
     data: [
@@ -61,8 +61,8 @@ export const APPROVAL_REQUESTS: ApprovalRequest[] = [
       { label: "Fayda match", value: "Verified", verified: true },
     ],
     trail: [
-      { label: "Submitted", detail: "by Almaz Wolde (Development Agent)", at: "Today, 9:40 AM" },
-      { label: "Auto-checked", detail: "Geographical bounds & phone format verified", at: "Today, 9:41 AM" },
+      { label: "Submitted", detail: "by Almaz Wolde (Development Agent)", at: "06 Oct 2026, 9:40 AM" },
+      { label: "Auto-checked", detail: "Geographical bounds & phone format verified", at: "06 Oct 2026, 9:41 AM" },
       { label: "Awaiting review", detail: "Woreda Extension Officer — Dr. Tewodros M. · Adama woreda", at: "Current", current: true },
     ],
   },
@@ -73,7 +73,7 @@ export const APPROVAL_REQUESTS: ApprovalRequest[] = [
     place: "Assigned kebele 12",
     kebele: "Kebele 12",
     woreda: "Adama woreda",
-    submittedAt: "Today, 8:15 AM",
+    submittedAt: "06 Oct 2026, 8:15 AM",
     submittedBy: { name: "Bekele Negash", agentId: "DA-4388", initials: "BN" },
     status: "Awaiting verification",
     data: [
@@ -83,7 +83,7 @@ export const APPROVAL_REQUESTS: ApprovalRequest[] = [
       { label: "Institution", value: "Haramaya University" },
       { label: "Certificate", value: "Attached (PDF)", verified: true },
     ],
-    trail: trail("Today, 8:15 AM", "Bekele Negash", "Certificate file attached and readable"),
+    trail: trail("06 Oct 2026, 8:15 AM", "Bekele Negash", "Certificate file attached and readable"),
   },
   {
     id: "SUB-89377-ET",
@@ -92,7 +92,7 @@ export const APPROVAL_REQUESTS: ApprovalRequest[] = [
     place: "Assigned kebele 07",
     kebele: "Kebele 07",
     woreda: "Adama woreda",
-    submittedAt: "Yesterday, 4:30 PM",
+    submittedAt: "05 Oct 2026, 4:30 PM",
     submittedBy: { name: "Chaltu Dida", agentId: "DA-4371", initials: "CD" },
     status: "Awaiting verification",
     data: [
@@ -101,7 +101,7 @@ export const APPROVAL_REQUESTS: ApprovalRequest[] = [
       { label: "New value", value: "+251 93 440 7812" },
       { label: "OTP confirmation", value: "Confirmed", verified: true },
     ],
-    trail: trail("Yesterday, 4:30 PM", "Chaltu Dida", "Phone format verified · OTP confirmed"),
+    trail: trail("05 Oct 2026, 4:30 PM", "Chaltu Dida", "Phone format verified · OTP confirmed"),
   },
   {
     id: "SUB-89351-ET",
@@ -110,7 +110,7 @@ export const APPROVAL_REQUESTS: ApprovalRequest[] = [
     place: "Adama",
     kebele: "Kebele 09",
     woreda: "Adama woreda",
-    submittedAt: "Yesterday, 2:10 PM",
+    submittedAt: "05 Oct 2026, 2:10 PM",
     submittedBy: { name: "Almaz Wolde", agentId: "DA-4402", initials: "AW" },
     status: "Awaiting verification",
     data: [
@@ -119,7 +119,7 @@ export const APPROVAL_REQUESTS: ApprovalRequest[] = [
       { label: "Reason", value: "Closer to residence" },
       { label: "Farmers affected", value: "212" },
     ],
-    trail: trail("Yesterday, 2:10 PM", "Almaz Wolde", "Kebele 09 has an open DA slot"),
+    trail: trail("05 Oct 2026, 2:10 PM", "Almaz Wolde", "Kebele 09 has an open DA slot"),
   },
   {
     id: "SUB-89210-ET",
@@ -128,7 +128,7 @@ export const APPROVAL_REQUESTS: ApprovalRequest[] = [
     place: "Chefe",
     kebele: "Chefe",
     woreda: "Adama woreda",
-    submittedAt: "Oct 24, 11:05 AM",
+    submittedAt: "24 Sep 2026, 11:05 AM",
     submittedBy: { name: "Tadesse Alemu", agentId: "DA-4290", initials: "TA" },
     status: "Awaiting verification",
     data: [
@@ -136,7 +136,7 @@ export const APPROVAL_REQUESTS: ApprovalRequest[] = [
       { label: "Training course", value: "Animal Health Basics (ATI)" },
       { label: "Course status", value: "Completed", verified: true },
     ],
-    trail: trail("Oct 24, 11:05 AM", "Tadesse Alemu", "Course completion record found"),
+    trail: trail("24 Sep 2026, 11:05 AM", "Tadesse Alemu", "Course completion record found"),
   },
 ];
 

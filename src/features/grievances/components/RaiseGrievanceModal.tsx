@@ -52,7 +52,7 @@ export function RaiseGrievanceModal({ isOpen, onClose, farmerId }: Props) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={close} title="Raise a grievance" subtitle="Submitted to the external OAN Grievance Service — triage, response and closure happen there." size="lg"
+    <Modal isOpen={isOpen} onClose={close} title="Raise a Grievance" subtitle="Submitted to the external OAN Grievance Service — triage, response and closure happen there." size="lg"
       footer={result ? <Button variant="brand" onClick={close}>Done</Button> : (
         <>
           <Button variant="outline" onClick={close}>Cancel</Button>
@@ -97,7 +97,6 @@ export function RaiseGrievanceModal({ isOpen, onClose, farmerId }: Props) {
           </FormField>
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setAttachments((a) => [...a, `photo-${a.length + 1}.jpg`])} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-[13px] font-medium text-slate-700 hover:bg-zinc-50">Add photo</button>
-            <button type="button" onClick={() => setAttachments((a) => [...a, `voice-note-${a.length + 1}.m4a`])} className="inline-flex shrink-0 whitespace-nowrap h-9 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-[13px] font-medium text-slate-700 hover:bg-zinc-50">Record voice note</button>
             {attachments.map((a) => <span key={a} className="rounded-full border border-slate-200 bg-surface px-2.5 py-0.5 font-mono text-[12px] text-slate-600">{a}</span>)}
           </div>
           <div className="rounded-lg border border-line bg-surface p-3 text-[12.5px] leading-relaxed text-ink-soft">

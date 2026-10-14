@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getFarmer } from "@/features/farmers";
+import { getCropSownDetails, getFarmer } from "@/features/farmers";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { ProfileStats } from "./components/ProfileStats";
 import { ProfileTabs } from "./components/ProfileTabs";
 import { ProfileOverview } from "./components/ProfileOverview";
 import { HoldingsSection } from "./components/HoldingsSection";
-import { CropHistorySection } from "./components/CropHistorySection";
+import { CropSownSection } from "./components/CropSownSection";
+import { LivestockSection } from "./components/LivestockSection";
+import { LivestockHistorySection } from "./components/LivestockHistorySection";
 import { VisitHistorySection } from "./components/VisitHistorySection";
 import { DocumentsSection } from "./components/DocumentsSection";
+import { AdvisorySection } from "./components/AdvisorySection";
 import { BackLink } from "@/components/ui/BackLink";
 
 export async function generateMetadata(props: PageProps<"/farmers/[id]">): Promise<Metadata> {
@@ -34,9 +37,12 @@ export default async function FarmerProfilePage(props: PageProps<"/farmers/[id]"
         panels={{
           Overview: <ProfileOverview />,
           Holdings: <HoldingsSection />,
-          "Crop history": <CropHistorySection />,
+          "Crop Sown Details": <CropSownSection tabs={getCropSownDetails(farmer)} />,
+          "Livestock Details": <LivestockSection />,
+          "Livestock history": <LivestockHistorySection />,
           "Visit history": <VisitHistorySection />,
           Documents: <DocumentsSection />,
+          Advisory: <AdvisorySection farmerId={farmer.id} />,
         }}
       />
     </div>

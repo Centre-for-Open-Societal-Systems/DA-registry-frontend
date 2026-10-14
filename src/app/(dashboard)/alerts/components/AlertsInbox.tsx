@@ -45,7 +45,7 @@ export function AlertsInbox() {
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_380px]">
       <div className="flex flex-col gap-4">
         {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
-        <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="overflow-hidden p-0 shadow-card">
           {list.length === 0 ? (
             <EmptyState title={tab === "inbox" ? "Inbox is clear" : "Nothing handled yet"} hint="Incoming knowledge, emergency, weather-source and informational signals land here." />
           ) : (
@@ -77,7 +77,7 @@ export function AlertsInbox() {
       </div>
 
       {/* Notification centre (FR-10b): unread filter alongside the full list; tab state reflects the active view */}
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
           <h2 className="text-[15px] font-semibold text-ink">Notifications</h2>
           <button type="button" disabled={unread.length === 0} onClick={() => setNotifs((prev) => prev.map((n) => ({ ...n, read: true })))} className="text-[12.5px] font-semibold text-brand-green hover:underline disabled:text-subtle disabled:no-underline">Mark all read</button>

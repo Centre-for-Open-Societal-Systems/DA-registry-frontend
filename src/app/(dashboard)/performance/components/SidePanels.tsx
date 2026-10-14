@@ -4,7 +4,7 @@ import { FARMER_SATISFACTION, SUPERVISOR_FEEDBACK, UPCOMING_REVIEWS } from "@/fe
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="p-0 shadow-card">
       <h2 className="border-b border-line px-5 py-3.5 text-[15px] font-semibold text-ink">{title}</h2>
       <div className="px-5 py-4">{children}</div>
     </Card>

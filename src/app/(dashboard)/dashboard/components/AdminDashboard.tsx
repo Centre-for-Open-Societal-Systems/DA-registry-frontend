@@ -41,10 +41,10 @@ const AVATAR_TONES: Record<ActivityTone, string> = {
 export function AdminDashboard() {
   return (
     <div className="flex w-full flex-col gap-4">
-      <Card className="relative z-50 flex w-full flex-col justify-between gap-4 px-4 py-5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] md:flex-row md:items-center">
+      <Card className="relative z-50 flex w-full flex-col justify-between gap-4 px-4 py-5 shadow-card md:flex-row md:items-center">
         <div>
           <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">Dashboard</h1>
-          <p className="mt-1.5 text-[14px] text-ink-soft">National registry overview · all regions</p>
+          <p className="hidden mt-1.5 text-[14px] text-ink-soft">National registry overview · all regions</p>
         </div>
         <DateRangeDropdown />
       </Card>
@@ -56,14 +56,14 @@ export function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.6fr_1fr]">
-        <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="p-0 shadow-card">
           <h2 className="border-b border-line px-5 py-3.5 text-[15px] font-semibold text-ink">Monthly Registrations Trend</h2>
           <div className="px-5 py-5">
             <RegistrationsTrendChart points={REGISTRATIONS_TREND} seriesLabel="New Farmers (2024)" />
           </div>
         </Card>
 
-        <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="p-0 shadow-card">
           <h2 className="border-b border-line px-5 py-3.5 text-[15px] font-semibold text-ink">Recent Activity</h2>
           <ul className="flex flex-col gap-3 p-4">
             {RECENT_ACTIVITY.map((item) => (

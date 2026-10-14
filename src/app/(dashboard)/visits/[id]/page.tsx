@@ -24,10 +24,10 @@ export default async function VisitPlannerPage(props: PageProps<"/visits/[id]">)
     <div className="flex w-full flex-col gap-4">
       <BackLink href="/visits" />
 
-      <Card className="flex flex-col gap-4 px-4 py-5 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] md:flex-row md:items-center md:justify-between">
+      <Card className="flex flex-col gap-4 px-4 py-5 shadow-card md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[22px]">Visit Planner</h1>
-          <p className="mt-1 text-[13.5px] text-ink-soft">{PLANNER_WEEK.range}</p>
+          <p className="hidden mt-1 text-[13.5px] text-ink-soft">{PLANNER_WEEK.range}</p>
         </div>
         <div className="flex items-center gap-3">
           <Link

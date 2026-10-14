@@ -16,7 +16,8 @@ import { AdvancedFiltersDrawer, type FilterSelection } from "@/components/ui/Adv
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
 import { TablePagination, usePagination } from "@/components/ui/TablePagination";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
-import { downloadCsv, fileDate, type CsvColumn } from "@/lib/download";
+import { fileDate, type CsvColumn } from "@/lib/download";
+import { downloadTable, formatLabel } from "@/lib/export";
 import {
   AGENT_PERFORMANCE,
   PERFORMANCE_AGENT_OPTIONS,
@@ -88,7 +89,7 @@ export function PerformanceRegistry({ tierFilter, onTierFilterChange }: Performa
 
   return (
     <div id={PERFORMANCE_REGISTRY_ID} className="scroll-mt-4">
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-hidden p-0 shadow-card">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
@@ -102,11 +103,10 @@ export function PerformanceRegistry({ tierFilter, onTierFilterChange }: Performa
           <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
 
           <ExportButton
-            label="Export file"
             disabled={rows.length === 0}
-            onClick={() => {
-              downloadCsv(`agent-performance-${fileDate()}.csv`, rows, EXPORT_COLUMNS);
-              setNotice(`Exported ${rows.length} agent${rows.length === 1 ? "" : "s"} matching the current filters (CSV).`);
+            onExport={(format) => {
+              downloadTable(format, `agent-performance-${fileDate()}`, rows, EXPORT_COLUMNS, "Agent performance");
+              setNotice(`Exported ${rows.length} agent${rows.length === 1 ? "" : "s"} matching the current filters (${formatLabel(format)}).`);
             }}
           />
         </div>
@@ -131,23 +131,23 @@ export function PerformanceRegistry({ tierFilter, onTierFilterChange }: Performa
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1080px] border-collapse text-left">
           <thead>
-            <tr className="border-y border-line bg-surface text-[13px] font-medium text-slate-700">
-              <th className="whitespace-nowrap px-4 py-3 font-medium">
+            <tr className="border-y border-line bg-surface text-[14px] font-semibold text-slate-500">
+              <th className="whitespace-nowrap px-4 py-3 font-semibold">
                 <FilterDropdown label="Agent" allLabel="All agents" options={PERFORMANCE_AGENT_OPTIONS} selected={filters.agent} onApply={setFilter("agent")} />
               </th>
-              <th className="px-4 py-3 font-medium">
+              <th className="px-4 py-3 font-semibold">
                 <FilterDropdown label="Kebele" allLabel="All kebeles" options={PERFORMANCE_KEBELE_OPTIONS} selected={filters.kebele} onApply={setFilter("kebele")} />
               </th>
-              <th className="px-4 py-3 font-medium">
+              <th className="px-4 py-3 font-semibold">
                 <FilterDropdown label="Tier" allLabel="All tiers" options={PERFORMANCE_TIER_OPTIONS} selected={tierFilter} onApply={onTierFilterChange} />
               </th>
-              <th className="px-4 py-3 font-medium">Visits</th>
-              <th className="px-4 py-3 font-medium">Quality score</th>
-              <th className="px-4 py-3 font-medium">Training completion</th>
-              <th className="px-4 py-3 text-center font-medium">
+              <th className="px-4 py-3 font-semibold">Visits</th>
+              <th className="px-4 py-3 font-semibold">Quality score</th>
+              <th className="px-4 py-3 font-semibold">Training completion</th>
+              <th className="px-4 py-3 text-center font-semibold">
                 <FilterDropdown label="Status" allLabel="All Status" options={PERFORMANCE_STATUS_OPTIONS} selected={filters.status} onApply={setFilter("status")} />
               </th>
-              <th className="px-4 py-3 text-center font-medium">Action</th>
+              <th className="px-4 py-3 text-center font-semibold">Action</th>
             </tr>
           </thead>
           <tbody className="text-[14px] text-slate-700">

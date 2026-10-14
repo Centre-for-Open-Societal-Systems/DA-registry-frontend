@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/Card";
+import { Pill } from "@/components/ui/Pill";
 import { cn } from "@/lib/utils";
 import { GOALS, type GoalStatus } from "@/features/performance";
 
@@ -10,10 +11,12 @@ const STATUS_STYLES: Record<GoalStatus, { pill: string; bar: string; pct: string
 
 export function GoalsCard() {
   return (
-    <Card className="p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="p-0 shadow-card">
       <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
         <h2 className="text-[15px] font-semibold text-ink">My goals</h2>
-        <span className="text-[13px] text-muted">Coaching plan metrics</span>
+        <span className="flex items-center gap-2 text-[13px] text-muted">
+          Coaching plan metrics <Pill tone="slate">Part 2 preview</Pill>
+        </span>
       </div>
 
       <ul>

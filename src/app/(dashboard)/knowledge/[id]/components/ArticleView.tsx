@@ -11,7 +11,7 @@ export function ArticleView({ article }: { article: Article }) {
       <BackLink href="/knowledge" label="Back to Knowledge Base" />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
-        <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="shadow-card">
           <div className="flex flex-wrap items-center gap-2">
             <Pill tone="green">{article.category}</Pill>
             <span className="text-[12.5px] text-muted">{article.author} · updated {article.updatedAt} · {article.languages.includes("am") ? "English · Amharic" : "English"}</span>
@@ -24,14 +24,14 @@ export function ArticleView({ article }: { article: Article }) {
         </Card>
 
         <div className="flex flex-col gap-4">
-          <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+          <Card className="shadow-card">
             <h2 className="text-[15px] font-semibold text-ink">SMS-ready snippet</h2>
             <p className="mt-2 rounded-lg border border-line bg-surface p-3 text-[13px] leading-relaxed text-ink">{article.snippet}</p>
             <p className="mt-1.5 text-[12px] text-muted">{article.snippet.length} characters · {Math.ceil(article.snippet.length / 160)} segment{article.snippet.length > 160 ? "s" : ""}</p>
             <SendToFarmersButton article={article} />
             <p className="mt-2 text-center text-[12px] text-muted">Dispatched via the Broadcast engine and logged.</p>
           </Card>
-          <Card className="shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+          <Card className="shadow-card">
             <h2 className="text-[15px] font-semibold text-ink">Dissemination</h2>
             <dl className="mt-2 grid grid-cols-2 gap-2 text-[13px]">
               <dt className="text-muted">Total sends</dt><dd className="text-right font-medium text-ink">{article.sends}</dd>

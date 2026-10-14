@@ -14,31 +14,15 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { Select } from "@/components/ui/Select";
-import { Dropdown, type DropdownOption } from "@/components/ui/Dropdown";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { useAuthStore } from "@/store/useAuthStore";
 import { FARMERS, FarmerAvatar } from "@/features/farmers";
+import { SEGMENTS, segmentName, useBeneficiariesStore, type Beneficiary, type Segment } from "@/features/beneficiaries";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { cn } from "@/lib/utils";
-
-// Rule-based beneficiary segments (Appendix C.3). Rules are edited by Supervisor/Admin only (Appendix D row 1).
-interface Segment {
-  id: string;
-  name: string;
-  rule: string;
-  scheme: string;
-  members: number;
-  tone: PillTone;
-  icon: "leaf" | "cash" | "drop" | "people";
-}
-const SEGMENTS: Segment[] = [
-  { id: "seg-input", name: "Input subsidy — teff & wheat", rule: "primary crop ∈ {Teff, Wheat} AND land ≥ 0.5 ha", scheme: "MoA input voucher 2026/27", members: 142, tone: "green", icon: "leaf" },
-  { id: "seg-credit", name: "Credit-eligible smallholders", rule: "Fayda verified AND no open credit application", scheme: "Access to Credit (partner banks)", members: 123, tone: "blue", icon: "cash" },
-  { id: "seg-drought", name: "Drought-response kebeles", rule: "kebele ∈ {Koye Feche, Amarti Gibe}", scheme: "Emergency seed distribution", members: 118, tone: "amber", icon: "drop" },
-  { id: "seg-women", name: "Women-headed households", rule: "household head = female", scheme: "Livelihood grant (ATI)", members: 64, tone: "purple", icon: "people" },
-];
 
 // Card colours per segment tone: tinted panel, left accent, icon tile and member count.
 const SEGMENT_STYLE: Partial<Record<PillTone, { card: string; tile: string; count: string }>> = {
@@ -55,59 +39,37 @@ const SEGMENT_ICONS: Record<Segment["icon"], ReactNode> = {
   people: <><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8" /></>,
 };
 
-interface Beneficiary {
-  avatar?: string;
-  id: string;
-  name: string;
-  kebele: string;
-  crop: string;
-  segmentId: string;
-  status: "Enrolled" | "Pending verification" | "Removed";
-  linkedAt: string;
-}
-
-const SEED: Beneficiary[] = FARMERS.map((f, i) => ({
-  id: f.id,
-  name: f.name,
-  avatar: f.avatar,
-  kebele: f.kebele,
-  crop: f.crop,
-  segmentId: SEGMENTS[i % SEGMENTS.length].id,
-  status: i % 3 === 2 ? "Pending verification" : "Enrolled",
-  linkedAt: ["22 Sep 2026", "21 Sep 2026", "19 Sep 2026", "16 Sep 2026", "13 Sep 2026", "09 Sep 2026", "02 Sep 2026", "28 Aug 2026", "21 Aug 2026", "14 Aug 2026"][i],
-}));
-
 const STATUSES = ["Enrolled", "Pending verification"];
 
-const SEARCH_PLACEHOLDER = searchPlaceholder(["Farmer", "Kebele", "Primary crop", "Segment", "Status", "Linked"]);
+const SEARCH_PLACEHOLDER = searchPlaceholder(["Farmer", "Kebele", "Primary crop", "Primary livestock", "Segment", "Status", "Linked"]);
 
 const optionsOf = (values: string[], order?: readonly string[], label?: (v: string) => string): FilterOption[] =>
   (order ?? [...new Set(values)]).map((value) => ({ value, label: label ? label(value) : value, count: values.filter((v) => v === value).length }));
 
-// Secondary line makes the farmer search match kebele, woreda, crop and phone as well as the name.
-const FARMER_OPTIONS: DropdownOption[] = FARMERS.map((f) => ({ value: f.id, label: f.name, description: `${f.kebele} · ${f.woreda} · ${f.crop} · ${f.phone}` }));
-
-const segmentName = (id: string) => SEGMENTS.find((s) => s.id === id)?.name ?? id;
 
 interface BeneficiaryFilters extends FilterSelection {
   farmer: Set<string>;
   kebele: Set<string>;
   crop: Set<string>;
+  livestock: Set<string>;
   segment: Set<string>;
   status: Set<string>;
 }
-const EMPTY: BeneficiaryFilters = { farmer: new Set(), kebele: new Set(), crop: new Set(), segment: new Set(), status: new Set() };
+const EMPTY: BeneficiaryFilters = { farmer: new Set(), kebele: new Set(), crop: new Set(), livestock: new Set(), segment: new Set(), status: new Set() };
 
 export function BeneficiariesWorkspace() {
   const role = useAuthStore((s) => s.role);
   const canEditRules = role === "Supervisor" || role === "Admin";
-  const [rows, setRows] = useState<Beneficiary[]>(SEED);
+  const rows = useBeneficiariesStore((s) => s.rows);
+  const linkFarmers = useBeneficiariesStore((s) => s.link);
+  const removeLink = useBeneficiariesStore((s) => s.remove);
   const [filters, setFilters] = useState<BeneficiaryFilters>(EMPTY);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [removing, setRemoving] = useState<Beneficiary | null>(null);
-  const [addFarmer, setAddFarmer] = useState("");
+  const [addFarmers, setAddFarmers] = useState<Set<string>>(() => new Set());
+  const [farmerQuery, setFarmerQuery] = useState("");
   const [addSegment, setAddSegment] = useState(SEGMENTS[0].id);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -122,13 +84,15 @@ export function BeneficiariesWorkspace() {
   const farmerOptions = optionsOf(linked.map((b) => b.name));
   const kebeleOptions = optionsOf(linked.map((b) => b.kebele));
   const cropOptions = optionsOf(linked.map((b) => b.crop));
+  const livestockOptions = optionsOf(linked.map((b) => b.livestock));
   const segmentOptions = optionsOf(linked.map((b) => b.segmentId), SEGMENTS.map((s) => s.id), segmentName);
   const statusOptions = optionsOf(linked.map((b) => b.status), STATUSES);
   const filterFields: FilterFieldConfig[] = [
-    { key: "farmer", label: "Farmer", allLabel: "All farmers", placeholder: "All farmers", options: farmerOptions },
-    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All kebeles", options: kebeleOptions },
-    { key: "crop", label: "Primary crop", allLabel: "All crops", placeholder: "All crops", options: cropOptions },
-    { key: "segment", label: "Segment", allLabel: "All segments", placeholder: "All segments", options: segmentOptions },
+    { key: "farmer", label: "Farmer", allLabel: "All farmers", placeholder: "All Farmers", options: farmerOptions },
+    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All Kebeles", options: kebeleOptions },
+    { key: "crop", label: "Primary crop", allLabel: "All crops", placeholder: "All Crops", options: cropOptions },
+    { key: "livestock", label: "Primary livestock", allLabel: "All livestock", placeholder: "All Livestock", options: livestockOptions },
+    { key: "segment", label: "Segment", allLabel: "All segments", placeholder: "All Segments", options: segmentOptions },
     { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: statusOptions },
   ];
 
@@ -140,24 +104,49 @@ export function BeneficiariesWorkspace() {
         has(filters.farmer, b.name) &&
         has(filters.kebele, b.kebele) &&
         has(filters.crop, b.crop) &&
+        has(filters.livestock, b.livestock) &&
         has(filters.segment, b.segmentId) &&
         has(filters.status, b.status) &&
         matchesQuery(query, b, segmentName(b.segmentId)),
     );
   }, [rows, filters, query]);
 
+  const pickerMatches = FARMERS.filter((f) => matchesQuery(farmerQuery, f.name, f.kebele, f.woreda, f.crop, f.livestock, f.phone));
+  const allMatchesPicked = pickerMatches.length > 0 && pickerMatches.every((f) => addFarmers.has(f.id));
+
+  const togglePick = (id: string) =>
+    setAddFarmers((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const togglePickAll = () =>
+    setAddFarmers((prev) => {
+      const next = new Set(prev);
+      for (const f of pickerMatches) {
+        if (allMatchesPicked) next.delete(f.id);
+        else next.add(f.id);
+      }
+      return next;
+    });
+
   const add = () => {
-    const f = FARMERS.find((x) => x.id === addFarmer);
-    if (!f) return;
-    setRows((prev) => [{ id: f.id, name: f.name, kebele: f.kebele, crop: f.crop, segmentId: addSegment, status: "Pending verification", linkedAt: "Just now" }, ...prev.filter((b) => b.id !== f.id)]);
-    setNotice(`${f.name} added to “${SEGMENTS.find((s) => s.id === addSegment)?.name}” — Pending verification against the segment rule. The Farmer Registry record is untouched.`);
+    if (addFarmers.size === 0) return;
     setAddOpen(false);
+    const { added, skipped } = linkFarmers([...addFarmers], addSegment);
+    const parts = [
+      added.length > 0 && `${added.length === 1 ? added[0] : `${added.length} farmers`} added to â€œ${segmentName(addSegment)}â€ â€” Pending verification against the segment rule. The Farmer Registry record is untouched.`,
+      skipped.length > 0 && `Already in this segment: ${skipped.join(", ")}.`,
+    ].filter(Boolean);
+    setNotice(parts.join(" "));
   };
 
   const remove = () => {
     if (!removing) return;
-    setRows((prev) => prev.map((b) => (b.id === removing.id ? { ...b, status: "Removed" } : b)));
-    setNotice(`Link removed for ${removing.name}. This only detaches the beneficiary segment — the farmer's master record in the Farmer Registry is never deleted from here.`);
+    removeLink(removing.id);
+    setNotice(`Link removed for ${removing.name}. This only detaches the beneficiary segment â€” the farmer's master record in the Farmer Registry is never deleted from here.`);
     setRemoving(null);
   };
 
@@ -175,6 +164,7 @@ export function BeneficiariesWorkspace() {
     },
     { key: "kebele", header: <FilterDropdown label="Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setFilter("kebele")} />, cell: (b) => b.kebele },
     { key: "crop", header: <FilterDropdown label="Primary Crop" allLabel="All crops" options={cropOptions} selected={filters.crop} onApply={setFilter("crop")} />, cell: (b) => b.crop },
+    { key: "livestock", header: <FilterDropdown label="Primary Livestock" allLabel="All livestock" options={livestockOptions} selected={filters.livestock} onApply={setFilter("livestock")} />, cell: (b) => b.livestock },
     {
       key: "segment",
       align: "center",
@@ -191,17 +181,17 @@ export function BeneficiariesWorkspace() {
       header: <FilterDropdown label="Status" allLabel="All Status" options={statusOptions} selected={filters.status} onApply={setFilter("status")} />,
       cell: (b) => <Pill tone={b.status === "Enrolled" ? "green" : "amber"} className="font-semibold">{b.status}</Pill>,
     },
-    {
-      key: "actions",
-      header: "Action",
-      align: "center",
-      cell: (b) =>
-        canEditRules ? (
-          <RowAction tone="danger" icon="remove" onClick={() => setRemoving(b)} className="bg-danger-wash">Remove</RowAction>
-        ) : (
-          <span className="text-[12.5px] text-subtle">—</span>
-        ),
-    },
+    // Only Supervisor/Admin can remove a link; for other roles the column would be all dashes, so it is left out.
+    ...(canEditRules
+      ? [
+          {
+            key: "actions",
+            header: "Action",
+            align: "center",
+            cell: (b) => <RowAction tone="danger" icon="remove" onClick={() => setRemoving(b)} className="bg-danger-wash">Remove</RowAction>,
+          } satisfies Column<Beneficiary>,
+        ]
+      : []),
   ];
 
   return (
@@ -210,7 +200,7 @@ export function BeneficiariesWorkspace() {
         title="Beneficiaries"
         description="Rule-based segments that link farmers to schemes. Removing a link never deletes a Farmer Registry record."
         actions={
-          <Button variant="brand" size="md" className="px-6" onClick={() => { setAddFarmer(""); setAddOpen(true); }}>
+          <Button variant="brand" size="md" className="px-6" onClick={() => { setAddFarmers(new Set()); setFarmerQuery(""); setAddOpen(true); }}>
             Add beneficiary
           </Button>
         }
@@ -240,7 +230,7 @@ export function BeneficiariesWorkspace() {
                   </svg>
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-[14px] font-semibold text-ink">{s.name.replace(" — ", " - ")}</span>
+                  <span className="block text-[14px] font-semibold text-ink">{s.name.replace(" â€” ", " - ")}</span>
                   <span className="block text-[12px] text-muted">{s.scheme}</span>
                 </span>
               </div>
@@ -248,7 +238,6 @@ export function BeneficiariesWorkspace() {
                 <span className="flex min-h-[46px] flex-1 items-center rounded-md border border-line bg-white px-3 py-2 text-[12px] leading-snug text-ink-soft">{s.rule}</span>
                 <span className={cn("shrink-0 text-[24px] font-semibold", style.count)}>{s.members}</span>
               </div>
-              {canEditRules && <span className="text-[12px] font-semibold text-brand-green">Edit rule</span>}
             </button>
           );
         })}
@@ -256,7 +245,7 @@ export function BeneficiariesWorkspace() {
 
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
 
-      <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-[16px] font-semibold text-ink">{singleSegment ? segmentName(singleSegment) : "All beneficiaries"}</h2>
@@ -267,7 +256,7 @@ export function BeneficiariesWorkspace() {
             <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
           </div>
         </div>
-        <DataTable itemLabel="beneficiaries" columns={columns} rows={visible} rowKey={(b) => b.id} minWidth="960px" emptyTitle="No beneficiaries match the selected filters" emptyHint="Clear a filter or try a different search." />
+        <DataTable itemLabel="beneficiaries" columns={columns} rows={visible} rowKey={(b) => b.id} minWidth="1080px" emptyTitle="No beneficiaries match the selected filters" emptyHint="Clear a filter or try a different search." />
 
         <AdvancedFiltersDrawer
           isOpen={isFiltersOpen}
@@ -279,6 +268,7 @@ export function BeneficiariesWorkspace() {
               farmer: next.farmer ?? new Set(),
               kebele: next.kebele ?? new Set(),
               crop: next.crop ?? new Set(),
+              livestock: next.livestock ?? new Set(),
               segment: next.segment ?? new Set(),
               status: next.status ?? new Set(),
             })
@@ -286,12 +276,59 @@ export function BeneficiariesWorkspace() {
         />
       </Card>
 
-      <Modal isOpen={addOpen} onClose={() => setAddOpen(false)} title="Add beneficiary" subtitle="Link a farmer from your list to a segment"
-        footer={<><Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button><Button variant="brand" onClick={add} disabled={!addFarmer}>Add</Button></>}
+      <Modal isOpen={addOpen} onClose={() => setAddOpen(false)} title="Add Beneficiary" subtitle="Link farmers from your list to a segment"
+        footer={<><Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button><Button variant="brand" onClick={add} disabled={addFarmers.size === 0}>{addFarmers.size > 1 ? `Add ${addFarmers.size} farmers` : "Add"}</Button></>}
       >
         <div className="flex flex-col gap-4">
-          <FormField label="Farmer" htmlFor="ben-farmer" required hint="Only farmers linked to you appear here (Farmer Registry is the source of records).">
-            <Dropdown id="ben-farmer" value={addFarmer} onChange={setAddFarmer} options={FARMER_OPTIONS} placeholder="Search or select a farmer" searchable searchPlaceholder="Search name, kebele, crop, phone…" noResultsText="No farmers match your search" />
+          <FormField label={`Farmers${addFarmers.size > 0 ? ` (${addFarmers.size} selected)` : ""}`} htmlFor="ben-farmer" required hint="Only farmers linked to you appear here (Farmer Registry is the source of records).">
+            {/* Same look as the table-column filter panel (FilterDropdown), but empty means none picked, not all. */}
+            <div className="flex flex-col overflow-hidden rounded-xl border border-line bg-white text-[14px] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)]">
+              <label className={cn("flex shrink-0 cursor-pointer items-center gap-3 border-b border-line px-4 py-2.5", allMatchesPicked ? "bg-brand-mint" : "bg-white hover:bg-surface")}>
+                <Checkbox checked={allMatchesPicked} onChange={togglePickAll} disabled={pickerMatches.length === 0} aria-label="All farmers" />
+                <span className={cn("flex flex-1 items-center gap-1.5 font-semibold", allMatchesPicked ? "text-brand-green" : "text-ink")}>
+                  {farmerQuery.trim() ? "All matching farmers" : "All farmers"}
+                  {allMatchesPicked && (
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.2 14.2l-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4-6 6z" />
+                    </svg>
+                  )}
+                </span>
+                <span className={cn("rounded-md px-2 py-0.5 text-[13px] font-semibold", allMatchesPicked ? "bg-emerald-100 text-brand-green" : "bg-line-soft text-slate-600")}>
+                  {pickerMatches.length}
+                </span>
+              </label>
+
+              <div className="shrink-0 border-b border-line px-3 py-2.5">
+                <label className="relative block">
+                  <svg className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M20 20l-3.5-3.5" />
+                  </svg>
+                  <input
+                    id="ben-farmer"
+                    type="search"
+                    value={farmerQuery}
+                    onChange={(e) => setFarmerQuery(e.target.value)}
+                    placeholder="Search farmersâ€¦"
+                    aria-label="Search farmers by name, kebele, crop, livestock or phone"
+                    className="h-9 w-full rounded-md border border-zinc-200 bg-surface pl-8 pr-3 text-[13.5px] text-ink placeholder:text-muted focus:border-brand-green focus:outline-none"
+                  />
+                </label>
+              </div>
+
+              <ul className="max-h-[240px] min-h-0 overflow-y-auto overscroll-contain green-scrollbar">
+                {pickerMatches.length === 0 && <li className="px-4 py-4 text-center text-[13px] text-muted">No matches for â€œ{farmerQuery.trim()}â€</li>}
+                {pickerMatches.map((f) => (
+                  <li key={f.id} className="border-b border-line-soft last:border-0">
+                    <label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface">
+                      <Checkbox checked={addFarmers.has(f.id)} onChange={() => togglePick(f.id)} aria-label={f.name} />
+                      <span className="flex-1 text-ink">{f.name}</span>
+                      <span className="rounded-md bg-line-soft px-2 py-0.5 text-[13px] font-semibold text-slate-600">{f.kebele}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </FormField>
           <FormField label="Segment" htmlFor="ben-segment" required hint="Membership is verified against the segment rule before enrolment.">
             <Select id="ben-segment" value={addSegment} onChange={(e) => setAddSegment(e.target.value)}>{SEGMENTS.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</Select>
@@ -300,10 +337,10 @@ export function BeneficiariesWorkspace() {
       </Modal>
 
       {removing && (
-        <Modal isOpen onClose={() => setRemoving(null)} title="Remove beneficiary link?" subtitle={removing.name}
+        <Modal isOpen onClose={() => setRemoving(null)} title="Remove Beneficiary Link?" subtitle={removing.name}
           footer={<><Button variant="outline" onClick={() => setRemoving(null)}>Cancel</Button><Button className="bg-danger text-white hover:bg-red-700" onClick={remove}>Remove link</Button></>}
         >
-          <p className="text-[14px] leading-relaxed text-ink-soft">This detaches the farmer from the segment and its scheme. It never deletes the farmer&apos;s master record — that lives in the Farmer Registry.</p>
+          <p className="text-[14px] leading-relaxed text-ink-soft">This detaches the farmer from the segment and its scheme. It never deletes the farmer&apos;s master record â€” that lives in the Farmer Registry.</p>
         </Modal>
       )}
     </>

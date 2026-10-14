@@ -26,7 +26,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={id}
             className={cn(
-              "h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600",
+              "h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20",
               startAdornment && "pl-10",
               endAdornment && "pr-10",
               className,

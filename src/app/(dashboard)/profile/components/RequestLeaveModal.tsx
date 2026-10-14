@@ -62,7 +62,7 @@ export function RequestLeaveModal({ isOpen, onClose, onSubmit }: RequestLeaveMod
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Request leave"
+      title="Request Leave"
       bodyClassName="px-4 py-4"
       footer={
         <>

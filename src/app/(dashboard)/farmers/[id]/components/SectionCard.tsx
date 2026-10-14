@@ -11,7 +11,7 @@ interface SectionCardProps {
 
 export function SectionCard({ title, action, children, className, bodyClassName }: SectionCardProps) {
   return (
-    <section className={cn("flex flex-col overflow-hidden rounded-xl border border-line bg-white shadow-[0px_1px_3px_rgba(0,0,0,0.04)]", className)}>
+    <section className={cn("flex flex-col overflow-hidden rounded-xl border border-line bg-white shadow-card", className)}>
       <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
         <h2 className="text-[15px] font-semibold text-ink">{title}</h2>
         {action}

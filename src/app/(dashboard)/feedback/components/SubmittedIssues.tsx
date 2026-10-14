@@ -25,7 +25,7 @@ export function SubmittedIssues({ issues }: { issues: Issue[] }) {
   const queued = issues.filter((i) => i.status === "Queued (offline)");
 
   return (
-    <Card className="flex min-h-0 flex-1 flex-col p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="flex min-h-0 flex-1 flex-col p-0 shadow-card">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3.5">
         <h2 className="text-[15px] font-semibold text-ink">My submitted issues</h2>
         <IssueFilter selected={filter} onChange={setFilter} />

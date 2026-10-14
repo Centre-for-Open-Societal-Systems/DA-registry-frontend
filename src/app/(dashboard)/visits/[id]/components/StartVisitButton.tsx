@@ -66,7 +66,7 @@ export function StartVisitButton({ visitId, next }: { visitId: string; next: Tod
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        title="Start visit"
+        title="Start Visit"
         subtitle={`${next.farmerName} · planned arrival ${next.plannedArrival}`}
         bodyClassName="px-4 py-4 sm:px-6"
         footer={

@@ -14,7 +14,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200",
   outline: "border border-zinc-200 bg-white text-ink hover:bg-zinc-50",
   ghost: "text-zinc-900 hover:bg-zinc-100",
-  brand: "bg-brand-green font-semibold text-white hover:bg-brand-green-dark",
+  brand: "bg-brand-green font-bold text-white hover:bg-brand-green-dark",
   brandOutline: "border border-brand-green bg-white font-semibold text-brand-green hover:bg-brand-wash",
   danger: "bg-danger font-semibold text-white hover:bg-red-700",
   dangerOutline: "border border-danger bg-white font-semibold text-danger hover:bg-danger-wash",
@@ -32,7 +32,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-lg font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
           variantClasses[variant],
           sizeClasses[size],
           className,

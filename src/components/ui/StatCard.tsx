@@ -21,7 +21,7 @@ interface StatCardProps {
 // Hover matches the DA dashboard summary cards: card shadow lifts, icon tile pops up (design-system wide).
 export function StatCard({ label, value, icon, accent, tile, hint, valueClassName, className }: StatCardProps) {
   return (
-    <Card className={cn("group flex items-center justify-between px-4 py-4 shadow-[0px_1px_3px_rgba(0,0,0,0.04)] border-l-4 transition-shadow hover:shadow-md", accent, className)}>
+    <Card className={cn("group flex items-center justify-between px-4 py-4 border-l-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg", accent, className)}>
       <div className="min-w-0">
         <p className="text-[13.5px] text-ink-soft">{label}</p>
         <p className={cn("mt-1.5 text-[24px] font-semibold leading-none text-ink", valueClassName)}>{value}</p>

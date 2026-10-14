@@ -1,8 +1,17 @@
 import { FARMERS } from "../data";
 import type { Farmer } from "../types";
 
-// "Advisory" visits belong to the Part 2 Advisory module and are hidden until it ships.
-export const VISIT_TYPES = ["Crop Survey", "Livestock Survey", "Services", "Follow-up"];
+// "Advisory" visits capture the farmer's questions and the advice given (see AdvisoryQaFields).
+export const ADVISORY_VISIT = "Advisory";
+export const VISIT_TYPES = ["Crop Survey", "Livestock Survey", "Services", "Follow-up", ADVISORY_VISIT];
+
+/** One question raised by the farmer and the advice to give, on an Advisory visit. */
+export interface AdvisoryQa {
+  id: number;
+  question: string;
+  answer: string;
+}
+
 export const DURATIONS = ["30 min", "45 min", "60 min", "90 min"];
 export const PRIORITIES = ["High — overdue by 4 days", "Medium — due this week", "Low — routine"];
 export const PRIORITY_BY_LEVEL = { high: PRIORITIES[0], medium: PRIORITIES[1], low: PRIORITIES[2] } as const;

@@ -23,6 +23,13 @@ export const CROP_OPTIONS: FilterOption[] = [
   { value: "Chili pepper", label: "Chili pepper", count: 61 },
 ];
 
+export const LIVESTOCK_OPTIONS: FilterOption[] = [
+  { value: "Cattle", label: "Cattle", count: 512 },
+  { value: "Sheep", label: "Sheep", count: 284 },
+  { value: "Goats", label: "Goats", count: 231 },
+  { value: "Poultry", label: "Poultry", count: 197 },
+];
+
 export const STATUS_OPTIONS: FilterOption[] = [
   { value: "Verified", label: "Verified", count: 109 },
   { value: "Pending", label: "Pending approval", count: 109 },
@@ -42,6 +49,7 @@ export const EDUCATION_OPTIONS: FilterOption[] = [
 export const FARMER_FILTER_FIELDS: FilterFieldConfig[] = [
   { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All", options: KEBELE_OPTIONS },
   { key: "crop", label: "Crop", allLabel: "All crops", placeholder: "All", options: CROP_OPTIONS },
+  { key: "livestock", label: "Livestock", allLabel: "All livestock", placeholder: "All", options: LIVESTOCK_OPTIONS },
   { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: STATUS_OPTIONS },
   { key: "education", label: "Education", allLabel: "All education levels", placeholder: "All", options: EDUCATION_OPTIONS },
 ];
@@ -50,10 +58,11 @@ export const FARMER_FILTER_FIELDS: FilterFieldConfig[] = [
 export interface FarmerFilters extends FilterSelection {
   kebele: Set<string>;
   crop: Set<string>;
+  livestock: Set<string>;
   status: Set<string>;
 }
 
-export const EMPTY_FILTERS: FarmerFilters = { kebele: new Set(), crop: new Set(), status: new Set() };
+export const EMPTY_FILTERS: FarmerFilters = { kebele: new Set(), crop: new Set(), livestock: new Set(), status: new Set() };
 
 export function countActiveFilters(filters: FarmerFilters): number {
   return (Object.keys(filters) as (keyof FarmerFilters)[]).filter((key) => filters[key].size > 0).length;
@@ -68,6 +77,7 @@ export function applyFilters(farmers: Farmer[], filters: FarmerFilters): Farmer[
     (farmer) =>
       matchesKebele(farmer, filters.kebele) &&
       (filters.crop.size === 0 || filters.crop.has(farmer.crop)) &&
+      (filters.livestock.size === 0 || filters.livestock.has(farmer.livestock)) &&
       (filters.status.size === 0 || filters.status.has(farmer.status)),
   );
 }

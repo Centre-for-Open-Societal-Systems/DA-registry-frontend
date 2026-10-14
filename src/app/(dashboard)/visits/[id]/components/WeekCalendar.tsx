@@ -13,7 +13,7 @@ export function WeekCalendar() {
   const dayVisits = visitsOn(c.cursor);
 
   return (
-    <Card className="overflow-hidden p-0 shadow-[0px_1px_3px_rgba(0,0,0,0.04)]">
+    <Card className="overflow-hidden p-0 shadow-card">
       <CalendarToolbar label={c.label} unit={c.unit} onCurrent={c.onCurrent} onStep={c.step} onToday={c.goToday} view={c.view} onViewChange={c.changeView} />
 
       {c.view === "Week" && (
