@@ -178,7 +178,7 @@ export const CROP_SOWN_FORM: CropSownTabDef[] = [
         ["crop_year", "Crop Year", "text"],
         ["production_season", "Production Season", "select", SEASONS],
       ]),
-      section("address", "Address", [
+      section("address", "Address / Location", [
         ["geo_code_hierarchy_json", "Location Hierarchy", "geo"],
         ["latitude", "Geo Latitude", "text"],
         ["longitude", "Geo Longitude", "text"],
@@ -469,7 +469,7 @@ export function getCropSownRecord(farmer: Farmer): CropSownValues {
       production_season: "Meher",
     },
     address: {
-      geo_code_hierarchy_json: `${farmer.region} › ${zone} › ${woreda} › ${farmer.kebele}`,
+      geo_code_hierarchy_json: `${farmer.region} > ${zone} > ${woreda} > ${farmer.kebele}`,
       latitude: plot.lat,
       longitude: plot.lng,
     },
@@ -601,7 +601,11 @@ export function getCropSownPrefill(farmer: Farmer): CropSownValues {
 /** Farmers whose Farmer ID matches (case-insensitive). IDs are not guaranteed unique yet, so this can return several. */
 export function findFarmersById(farmerId: string): Farmer[] {
   const wanted = farmerId.trim().toUpperCase();
-  return wanted ? FARMERS.filter((f) => registryCode(f) === wanted) : [];
+  if (!wanted) return [];
+  const normalized = wanted.startsWith("FR-") ? wanted : `FR-${wanted}`;
+  return FARMERS.filter(
+    (f) => registryCode(f) === wanted || registryCode(f) === normalized || f.name.toUpperCase().includes(wanted),
+  );
 }
 
 export { registryCode };

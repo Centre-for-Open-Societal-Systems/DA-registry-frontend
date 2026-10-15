@@ -26,7 +26,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={id}
             className={cn(
-              "h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20",
+              "h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-all duration-150 placeholder:text-zinc-400 hover:border-brand-green hover:ring-1 hover:ring-brand-green/20 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:hover:border-gray-200 disabled:hover:ring-0",
               startAdornment && "pl-10",
               endAdornment && "pr-10",
               className,

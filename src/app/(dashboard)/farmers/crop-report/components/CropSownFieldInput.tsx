@@ -1,7 +1,7 @@
 "use client";
 
-import { Checkbox } from "@/components/ui/Checkbox";
 import { Input } from "@/components/ui/Input";
+import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
 import type { CropSownFieldDef } from "@/features/farmers";
@@ -16,16 +16,19 @@ interface CropSownFieldInputProps {
 }
 
 const MULTI_SEPARATOR = ", ";
-const READ_ONLY = "cursor-not-allowed border-gray-200 bg-surface text-ink-soft focus:border-gray-200 focus:ring-0";
+const READ_ONLY = "cursor-not-allowed border-gray-200 bg-surface text-ink-soft hover:border-gray-200 hover:ring-0 focus:border-gray-200 focus:ring-0";
 
 // One Crop Sown field, rendered by its registry type. Values stay strings (multi-select joins with ", ").
 export function CropSownFieldInput({ id, field, value, onChange, autoFilled = false }: CropSownFieldInputProps) {
+  const isRequired = field.key === "crop_year" || field.key === "production_season" || field.key === "land_prep_method";
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <label htmlFor={id} className="flex items-center gap-2 text-[14px] font-medium text-ink">
-        <span className="min-w-0">{field.label}</span>
+        <span className="min-w-0">
+          {field.label} {isRequired && <span className="text-danger">*</span>}
+        </span>
         {autoFilled && (
-          <span className="shrink-0 rounded-full bg-brand-tint px-2 py-px text-[11px] font-semibold text-brand-green" title="Fetched from the farmer's registry record">
+          <span className="shrink-0 rounded-full bg-[#ECFDF3] border border-[#C9E8D6] px-2 py-px text-[11px] font-semibold text-[#16A34A]" title="Fetched from the farmer's registry record">
             Auto-filled
           </span>
         )}
@@ -53,17 +56,16 @@ function Control({ id, field, value, onChange, autoFilled }: CropSownFieldInputP
     }
     case "multiselect": {
       const selected = value ? value.split(MULTI_SEPARATOR) : [];
-      const toggle = (o: string) =>
-        onChange((selected.includes(o) ? selected.filter((s) => s !== o) : [...selected, o]).join(MULTI_SEPARATOR));
       return (
-        <div id={id} role="group" aria-label={field.label} className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-2">
-          {field.options?.map((o) => (
-            <label key={o} className={cn("flex items-center gap-2 text-[14px] text-ink", autoFilled ? "cursor-not-allowed" : "cursor-pointer")}>
-              <Checkbox checked={selected.includes(o)} onChange={() => toggle(o)} disabled={autoFilled} />
-              {o}
-            </label>
-          ))}
-        </div>
+        <MultiSelectDropdown
+          id={id}
+          placeholder={`Select ${field.label}`}
+          options={field.options ?? []}
+          selected={selected}
+          onChange={(next) => onChange(next.join(MULTI_SEPARATOR))}
+          disabled={autoFilled}
+          className={cn(autoFilled && READ_ONLY)}
+        />
       );
     }
     case "radio":
@@ -78,7 +80,7 @@ function Control({ id, field, value, onChange, autoFilled }: CropSownFieldInputP
         </div>
       );
     case "date":
-      return <Input id={id} type="date" value={value} onChange={(e) => onChange(e.target.value)} readOnly={autoFilled} className={cn(autoFilled && READ_ONLY)} />;
+      return <Input id={id} type="date" value={value} onChange={(e) => onChange(e.target.value)} readOnly={autoFilled} className={cn(!autoFilled && "cursor-pointer", autoFilled && READ_ONLY)} />;
     case "number":
       return (
         <Input
