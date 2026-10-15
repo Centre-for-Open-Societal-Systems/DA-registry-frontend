@@ -24,8 +24,25 @@ export interface VisitPreset {
 }
 export const QUICK_FILTERS = ["Registered", "Input voucher redeemed this season"];
 
-/** Outcome shown in place of the form after Plan/Schedule or Save as draft (no visits API yet). */
-export type PlanVisitResult = { kind: "planned" | "draft"; farmer?: string; when: string };
+/** Outcome shown in place of the form after Plan/Schedule (sent to the visits API) or Save as draft (kept on this device). */
+export type PlanVisitResult = { kind: "planned" | "draft"; farmer?: string; when: string; visitId?: string };
+
+/** "45 min" → 45. */
+export const durationMinutes = (label: string) => parseInt(label, 10) || 45;
+
+/** "High — overdue by 4 days" → level "High" and reason "Overdue by 4 days". */
+export function splitPriority(label: string): { level: "Low" | "Medium" | "High"; reason?: string } {
+  const [head, ...rest] = label.split(" — ");
+  const level = head === "High" || head === "Low" ? head : "Medium";
+  const reason = rest.join(" — ").trim();
+  return { level, reason: reason ? reason[0].toUpperCase() + reason.slice(1) : undefined };
+}
+
+/** Values of the form's uncontrolled detail inputs (see VisitDetailsFields). */
+export function readVisitDetails() {
+  const value = (id: string) => (document.getElementById(id) as HTMLInputElement | HTMLSelectElement | null)?.value ?? "";
+  return { purpose: value("visit-purpose").trim(), date: value("visit-date"), time: value("visit-time"), duration: value("visit-duration"), priority: value("visit-priority") };
+}
 
 export const FORM_ID = "plan-visit-form";
 
@@ -33,11 +50,17 @@ export const FORM_ID = "plan-visit-form";
 export const FARMER_CHOICES = FARMERS.filter((f, i, all) => all.findIndex((o) => o.name === f.name) === i);
 
 /** Farmers whose name, phone or kebele contains the (lower-cased, trimmed) term; all of them when it is empty. */
-export const matchFarmers = (term: string) =>
-  term ? FARMER_CHOICES.filter((f) => `${f.name} ${f.phone} ${f.kebele}`.toLowerCase().includes(term)) : FARMER_CHOICES;
+export const matchFarmers = (term: string, choices: Farmer[] = FARMER_CHOICES) =>
+  term ? choices.filter((f) => `${f.name} ${f.phone} ${f.kebele}`.toLowerCase().includes(term)) : choices;
 
-// Mock registry id derived from the record (no registry backend yet).
-export const registryCode = (farmer: Farmer) => `FR-${(88000 + farmer.name.length * 31 + farmer.kebele.length * 7).toString().slice(0, 5)}`;
+const isSampleFarmer = (farmer: Farmer) => FARMERS.some((f) => f.id === farmer.id);
+
+/**
+ * The farmer's registry id: a farmer from GET /farmers already carries it as its id; a sample farmer gets a mock
+ * code derived from the record.
+ */
+export const registryCode = (farmer: Farmer) =>
+  isSampleFarmer(farmer) ? `FR-${(88000 + farmer.name.length * 31 + farmer.kebele.length * 7).toString().slice(0, 5)}` : farmer.id;
 
 /** Human-readable date/time from the (uncontrolled) date and time inputs. */
 export const readWhen = () => {

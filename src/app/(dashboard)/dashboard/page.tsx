@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { RoleDashboard } from "./components/RoleDashboard";
-import { TopHeader } from "./components/TopHeader";
-import { SummarySection } from "./components/SummarySection";
+import { AgentOverview } from "./components/AgentOverview";
 import { TodayPlanListSection } from "./components/TodayPlanListSection";
 import { QuickActionsSection } from "./components/QuickActionsSection";
 import { SupervisorDashboard } from "./components/SupervisorDashboard";
@@ -23,8 +22,7 @@ export default function DashboardPage() {
       comms={<CommsDashboard />}
       agent={
         <div className="flex w-full flex-col gap-4">
-          <TopHeader />
-          <SummarySection />
+          <AgentOverview />
           <TodayPlanListSection />
           <QuickActionsSection />
         </div>

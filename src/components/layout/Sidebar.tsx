@@ -104,16 +104,16 @@ function SectionHeader({ title, open, expanded, onToggle }: { title: string; ope
 // Appendix D: the signed-in identity + role is shown in the sidebar footer. The role is read-only —
 // it comes from the account signed in at /login and drives nav visibility and RBAC-gated actions.
 function IdentityFooter({ expanded }: { expanded: boolean }) {
-  const { user, role } = useAuthStore();
+  const { user, role, profile } = useAuthStore();
   const name = user?.name ?? "Tadesse Alemu";
   const initials = name.split(" ").map((p) => p[0]).slice(0, 2).join("");
   return (
     <div className={cn("shrink-0 border-t border-sidebar-line transition-[padding] duration-300", expanded ? "px-5 py-3.5" : "px-5 py-3.5 lg:px-[18px]")}>
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-gold text-[13px] font-bold text-brand-green-deep" title={`${name} · ${ROLE_LABELS[role]}`}>{initials}</div>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-gold text-[13px] font-bold text-brand-green-deep" title={`${name} · ${profile?.roleLabel ?? ROLE_LABELS[role]}`}>{initials}</div>
         <div className={cn("min-w-0 flex-1 overflow-hidden whitespace-nowrap transition-all duration-300", expanded ? "max-w-[170px] opacity-100" : "max-w-[170px] opacity-100 lg:max-w-0 lg:opacity-0")}>
           <p className="truncate text-[13px] font-semibold text-white">{name}</p>
-          <p className="truncate text-[11px] text-sidebar-subtext">{ROLE_SCOPES[role]}</p>
+          <p className="truncate text-[11px] text-sidebar-subtext">{profile?.scopeLabel ?? ROLE_SCOPES[role]}</p>
         </div>
       </div>
     </div>

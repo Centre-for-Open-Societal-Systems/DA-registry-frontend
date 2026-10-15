@@ -2,7 +2,13 @@ import { Card } from "@/components/ui/Card";
 import { AGENT_PROFILE } from "@/features/farmers";
 import { DateRangeDropdown } from "./DateRangeDropdown";
 
-export function TopHeader() {
+interface TopHeaderProps {
+  ranges?: readonly string[];
+  range?: string;
+  onRangeChange?: (range: string) => void;
+}
+
+export function TopHeader({ ranges, range, onRangeChange }: TopHeaderProps = {}) {
   const p = AGENT_PROFILE;
   const firstName = p.name.split(" ")[0];
 
@@ -15,7 +21,7 @@ export function TopHeader() {
         </p>
       </div>
 
-      <DateRangeDropdown />
+      <DateRangeDropdown ranges={ranges} defaultValue={range} onChange={onRangeChange} />
     </Card>
   );
 }

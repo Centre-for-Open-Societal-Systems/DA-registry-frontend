@@ -61,7 +61,7 @@ export function AuthCard({ tab, title, subtitle, wide, children }: AuthCardProps
 }
 
 /** Password field with the show/hide eye toggle. */
-export function PasswordInput({ id, name, placeholder = "••••••••" }: { id: string; name: string; placeholder?: string }) {
+export function PasswordInput({ id, name, placeholder = "••••••••", autoComplete }: { id: string; name: string; placeholder?: string; autoComplete?: string }) {
   const [show, setShow] = useState(false);
   return (
     <Input
@@ -69,8 +69,15 @@ export function PasswordInput({ id, name, placeholder = "•••••••�
       name={name}
       type={show ? "text" : "password"}
       placeholder={placeholder}
+      autoComplete={autoComplete}
       required
       className={AUTH_INPUT}
+      startAdornment={
+        <svg className="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="4" y="11" width="16" height="10" rx="2" />
+          <path d="M8 11V7a4 4 0 118 0v4" />
+        </svg>
+      }
       endAdornment={
         <button
           type="button"

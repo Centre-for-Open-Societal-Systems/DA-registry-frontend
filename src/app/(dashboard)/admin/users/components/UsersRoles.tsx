@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AdvancedFiltersButton } from "@/components/ui/AdvancedFiltersButton";
@@ -12,9 +12,13 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
+import { WOREDAS } from "@/features/agents";
+import { createRbacAssignment, generatePassword, isAssignableRole, registerUser } from "@/features/users";
+import { ApiError } from "@/lib/api";
 import { ROLE_LABELS, ROLES, type Role } from "@/lib/rbac";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
-import { UserFormModal, type UserFormValues } from "./UserFormModal";
+import { useAuthStore } from "@/store/useAuthStore";
+import { UserFormModal, parseDisplayDate, type UserFormValues } from "./UserFormModal";
 
 // §5 RBAC assignment: user_id, role, active, region_scope, woreda_scope, effective_from/to, assigned_by.
 interface RbacAssignment {
@@ -24,6 +28,7 @@ interface RbacAssignment {
   phone: string;
   email: string;
   role: Role;
+  daId: string;
   active: boolean;
   regionScope: string;
   woredaScope: string;
@@ -33,12 +38,12 @@ interface RbacAssignment {
 }
 
 const USERS: RbacAssignment[] = [
-  { userId: "U-1001", name: "Tadesse Alemu", faydaId: "3512 4498 7712", phone: "+251 91 234 5678", email: "tadesse.alemu@gmail.com", role: "DA", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "12 Mar 2019", effectiveTo: "—", assignedBy: "System (onboarding)" },
-  { userId: "U-1002", name: "Kebede Alemu", faydaId: "3512 7733 1188", phone: "+251 92 771 9080", email: "kebede.alemu@gmail.com", role: "Supervisor", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "01 Jan 2024", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
-  { userId: "U-1003", name: "Almaz Tesfaye", faydaId: "3512 2201 8843", phone: "+251 91 300 4412", email: "almaz.tesfaye@gmail.com", role: "CommsOfficer", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "15 May 2025", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
-  { userId: "U-1004", name: "Getachew Bekele", faydaId: "3512 9910 3321", phone: "+251 91 900 1234", email: "getachew.bekele@gmail.com", role: "Executive", active: true, regionScope: "Oromia", woredaScope: "All (read)", effectiveFrom: "01 Jul 2023", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
-  { userId: "U-1005", name: "Yonas Haile", faydaId: "3512 1188 5544", phone: "+251 91 555 0101", email: "yonas.haile@gmail.com", role: "Admin", active: true, regionScope: "All regions", woredaScope: "All", effectiveFrom: "01 Jan 2023", effectiveTo: "—", assignedBy: "ATI root" },
-  { userId: "U-1006", name: "Dawit Assefa", faydaId: "3512 2299 7710", phone: "+251 91 780 2231", email: "dawit.assefa@gmail.com", role: "DA", active: false, regionScope: "Oromia", woredaScope: "Cheliya", effectiveFrom: "02 May 2016", effectiveTo: "30 Jun 2026", assignedBy: "System (separation)" },
+  { userId: "U-1001", name: "Tadesse Alemu", faydaId: "3512 4498 7712", phone: "+251 91 234 5678", email: "tadesse.alemu@gmail.com", role: "DA", daId: "", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "12 Mar 2019", effectiveTo: "—", assignedBy: "System (onboarding)" },
+  { userId: "U-1002", name: "Kebede Alemu", faydaId: "3512 7733 1188", phone: "+251 92 771 9080", email: "kebede.alemu@gmail.com", role: "Supervisor", daId: "", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "01 Jan 2024", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
+  { userId: "U-1003", name: "Almaz Tesfaye", faydaId: "3512 2201 8843", phone: "+251 91 300 4412", email: "almaz.tesfaye@gmail.com", role: "CommsOfficer", daId: "", active: true, regionScope: "Oromia", woredaScope: "Bako Tibe", effectiveFrom: "15 May 2025", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
+  { userId: "U-1004", name: "Getachew Bekele", faydaId: "3512 9910 3321", phone: "+251 91 900 1234", email: "getachew.bekele@gmail.com", role: "Executive", daId: "", active: true, regionScope: "Oromia", woredaScope: "All (read)", effectiveFrom: "01 Jul 2023", effectiveTo: "—", assignedBy: "Yonas Haile (Admin)" },
+  { userId: "U-1005", name: "Yonas Haile", faydaId: "3512 1188 5544", phone: "+251 91 555 0101", email: "yonas.haile@gmail.com", role: "Admin", daId: "", active: true, regionScope: "All regions", woredaScope: "All", effectiveFrom: "01 Jan 2023", effectiveTo: "—", assignedBy: "ATI root" },
+  { userId: "U-1006", name: "Dawit Assefa", faydaId: "3512 2299 7710", phone: "+251 91 780 2231", email: "dawit.assefa@gmail.com", role: "DA", daId: "", active: false, regionScope: "Oromia", woredaScope: "Cheliya", effectiveFrom: "02 May 2016", effectiveTo: "30 Jun 2026", assignedBy: "System (separation)" },
 ];
 
 const ROLE_TONE: Record<Role, PillTone> = { DA: "green", Supervisor: "blue", Executive: "purple", Admin: "red", CommsOfficer: "amber" };
@@ -73,8 +78,13 @@ export function UsersRoles() {
   const [users, setUsers] = useState(USERS);
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<RbacAssignment | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<ReactNode>(null);
   const [adding, setAdding] = useState(false);
+  // Account registered but its role not yet assigned (the second call failed). Saving again reuses it
+  // instead of registering the same email twice, which the backend rejects.
+  const registered = useRef<{ email: string; userId: string; password: string } | null>(null);
+  const hasBackendSession = useAuthStore((s) => !!s.tokens);
+  const signedInName = `${useAuthStore((s) => s.user?.name) ?? "Admin"} (Admin)`;
   const [filters, setFilters] = useState<UserFilters>(EMPTY);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
@@ -92,13 +102,53 @@ export function UsersRoles() {
     { key: "scope", label: "Woreda scope", allLabel: "All woreda scopes", placeholder: "All Woreda Scopes", options: scopeOptions },
   ];
 
-  const addUser = (draft: UserFormValues) => {
-    const userId = `U-${1001 + users.length}`;
+  // Add user = two backend calls from one form: register the account with a generated password, then
+  // bind its role and scope with an RBAC assignment. Throwing keeps the form open with the message.
+  const addUser = async (draft: UserFormValues) => {
+    if (!hasBackendSession) throw new Error("Adding users needs a backend sign-in. Sign out, then sign in with your Administrator account.");
+    if (!isAssignableRole(draft.role)) throw new Error(`${ROLE_LABELS[draft.role]} cannot be assigned from here.`);
+    const role = draft.role;
+
+    const effectiveTo = parseDisplayDate(draft.effectiveTo);
+    const newUser = {
+      fullName: draft.name,
+      email: draft.email,
+      password: generatePassword(),
+      role,
+      daId: draft.daId,
+      regionScope: draft.regionScope,
+      // Region-wide roles ("All (read)") carry no Woreda.
+      woredaScope: WOREDAS.includes(draft.woredaScope) ? draft.woredaScope : undefined,
+      effectiveFrom: parseDisplayDate(draft.effectiveFrom),
+      effectiveTo: effectiveTo || undefined,
+    };
+
+    let account = registered.current?.email === draft.email ? registered.current : null;
+    try {
+      if (!account) {
+        const userId = await registerUser(newUser);
+        account = registered.current = { email: draft.email, userId, password: newUser.password };
+      }
+      await createRbacAssignment(account.userId, newUser);
+    } catch (err) {
+      const reason = err instanceof ApiError ? err.message : "Something went wrong. Please try again.";
+      throw new Error(account ? `The account for ${draft.email} was created, but its role could not be assigned: ${reason} Fix the details and save again; the account will not be created twice.` : reason);
+    }
+
+    registered.current = null;
+    const { userId, password } = account;
     // Fayda linking happens at first sign-in, so a new account starts without one
-    setUsers((prev) => [{ userId, faydaId: "", ...draft, assignedBy: "Yonas Haile (Admin)" }, ...prev]);
+    setUsers((prev) => [{ userId, faydaId: "", ...draft, active: true, woredaScope: newUser.woredaScope ?? draft.woredaScope, assignedBy: signedInName }, ...prev]);
     setAdding(false);
     setTab("users");
-    setNotice(`${draft.name} (${userId}) added as ${ROLE_LABELS[draft.role]} · ${draft.woredaScope}. An invite was sent to ${draft.phone}; the assignment is recorded in the audit log.`);
+    setNotice(
+      <>
+        {draft.name} added as {ROLE_LABELS[role]} · {draft.woredaScope}. They sign in with <span className="font-semibold">{draft.email}</span> and the temporary password{" "}
+        <code className="rounded bg-white/70 px-1.5 py-0.5 font-mono text-[13px] font-semibold">{password}</code>{" "}
+        <button type="button" onClick={() => void navigator.clipboard?.writeText(password)} className="font-semibold underline underline-offset-2 hover:no-underline">Copy</button>
+        . Share it with them now; it is not shown again.
+      </>,
+    );
   };
 
   const rows = users.filter(

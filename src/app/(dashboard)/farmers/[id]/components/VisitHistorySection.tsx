@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { VISITS } from "@/features/farmers";
+import { VISITS, type Visit } from "@/features/farmers";
 import { cn } from "@/lib/utils";
 import { SectionCard } from "./SectionCard";
 
-export function VisitHistorySection({ showViewAll = false }: { showViewAll?: boolean }) {
+/** `visits` from GET /farmers/{id}/visits (newest first); the sample history when omitted. */
+export function VisitHistorySection({ showViewAll = false, visits = VISITS }: { showViewAll?: boolean; visits?: Visit[] }) {
   return (
     <SectionCard
       title="Visit History"
@@ -16,11 +17,12 @@ export function VisitHistorySection({ showViewAll = false }: { showViewAll?: boo
       }
       bodyClassName="px-5 py-4"
     >
+      {visits.length === 0 && <p className="py-4 text-center text-[13.5px] text-muted">No visits with this farmer yet.</p>}
       <ol className="flex flex-col">
-        {VISITS.map((visit, index) => {
+        {visits.map((visit, index) => {
           const isLatest = index === 0;
           return (
-            <li key={visit.title} className="relative pb-5 pl-7 last:pb-2">
+            <li key={`${visit.title}-${visit.date}-${index}`} className="relative pb-5 pl-7 last:pb-2">
               {/* Timeline rail: the connector spans the whole row (including padding) so it meets the next dot */}
               <span
                 className={cn(

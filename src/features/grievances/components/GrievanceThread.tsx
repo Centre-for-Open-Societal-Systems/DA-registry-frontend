@@ -10,6 +10,7 @@ const AVATAR_COLORS: Record<ThreadMessage["kind"], string> = {
   submission: "bg-slate-700",
   "dept-response": "bg-success-ink",
   "status-change": "bg-subtle",
+  event: "bg-subtle",
   "internal-note": "bg-orange-600",
 };
 
@@ -72,7 +73,7 @@ export function GrievanceThread({ messages }: { messages: ThreadMessage[] }) {
       return next;
     });
 
-  const count = messages.filter((m) => m.kind !== "status-change").length;
+  const count = messages.filter((m) => m.kind !== "status-change" && m.kind !== "event").length;
 
   return (
     <section className="rounded-xl border border-line bg-white">
@@ -101,6 +102,20 @@ export function GrievanceThread({ messages }: { messages: ThreadMessage[] }) {
                 <svg className="h-3 w-3 text-subtle" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                 <GrievanceStatusPill status={m.to} className="px-2 py-0 text-[11.5px]" />
                 <span className="whitespace-nowrap">· by {m.by}</span>
+                <span className="whitespace-nowrap">· {m.at}</span>
+              </li>
+            );
+          }
+
+          if (m.kind === "event") {
+            return (
+              <li key={m.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 pl-1 text-[12px] text-muted">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-subtle">
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </span>
+                <span className="font-semibold capitalize text-ink">{m.action}</span>
+                {m.detail && <span>{m.detail}</span>}
+                <span className="whitespace-nowrap">· by {m.actor}</span>
                 <span className="whitespace-nowrap">· {m.at}</span>
               </li>
             );
