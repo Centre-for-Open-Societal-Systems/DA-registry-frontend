@@ -53,10 +53,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           required={required}
           disabled={disabled}
           value={current}
-          onChange={() => {}}
+          onChange={() => { }}
           tabIndex={-1}
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px opacity-0"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px opacity-0 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20"
+
+
         >
           {options.map((o) => (
             <option key={o.value} value={o.value} disabled={o.disabled}>
@@ -64,7 +66,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-      </div>
+      </div >
     );
   },
 );
