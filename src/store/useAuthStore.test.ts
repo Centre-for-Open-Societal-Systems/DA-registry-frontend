@@ -31,19 +31,19 @@ describe("logout", () => {
   });
 
   it("revokes the refresh token when the session has one", () => {
-    useAuthStore.setState({ refreshToken: "refresh-1" });
+    useAuthStore.setState({ tokens: { accessToken: "access-1", refreshToken: "refresh-1", expiresAt: 0 } });
 
     useAuthStore.getState().logout();
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("/api/v1/auth/logout");
     expect(JSON.parse(init!.body as string)).toEqual({ refresh_token: "refresh-1" });
-    expect(useAuthStore.getState().refreshToken).toBeNull();
+    expect(useAuthStore.getState().tokens).toBeNull();
   });
 
   it("still signs out when the backend is unreachable", () => {
     fetchMock.mockRejectedValue(new TypeError("offline"));
-    useAuthStore.setState({ refreshToken: "refresh-1" });
+    useAuthStore.setState({ tokens: { accessToken: "access-1", refreshToken: "refresh-1", expiresAt: 0 } });
 
     useAuthStore.getState().logout();
 
