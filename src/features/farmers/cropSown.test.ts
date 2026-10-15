@@ -5,7 +5,7 @@ import { FARMERS } from "./data";
 describe("Crop Sown form", () => {
   it("follows the Crop Sown Registry tab, section and field list", () => {
     expect(CROP_SOWN_FORM.map((t) => [t.label, t.sections.map((s) => [s.title, s.fields.length])])).toEqual([
-      ["Crop Sown", [["Farmer Identity", 5], ["Address", 3]]],
+      ["Crop Sown", [["Farmer Identity", 5], ["Address / Location", 3]]],
       ["Planning", [["Crop Planning Details", 43], ["Cluster Information Details", 42]]],
       ["Cultivation / Land Preparation", [["Cultivation / Land Preparation Details", 36], ["Cultivation Cluster Information Details", 42]]],
       ["Sowing", [["Sowing Details", 21], ["Infestation Incident Details", 41]]],

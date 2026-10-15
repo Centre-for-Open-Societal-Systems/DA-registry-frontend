@@ -6,14 +6,17 @@ export interface PageTab {
   href: string;
 }
 
-/** Tab strip container: sits flush at the top of a card, rounded to the card's corners. */
-export const TAB_STRIP = "flex flex-wrap rounded-t-xl border-b border-line";
+/** Tab strip container: sits flush at the top of a card, or as a standalone card strip. */
+export const TAB_STRIP =
+  "flex w-full items-center overflow-x-auto rounded-t-xl border border-line bg-white shadow-card no-scrollbar";
 
 /** One tab: divided from its neighbour; the active tab is tinted with a green underline. Shared by PageTabs and SegmentTabs. */
 export const tabClass = (active: boolean) =>
   cn(
-    "inline-flex min-w-[110px] flex-1 items-center justify-center gap-2 whitespace-nowrap border-r border-line px-5 py-3 text-[14px] transition-colors sm:flex-none",
-    active ? "-mb-px border-b-2 border-b-brand-green bg-brand-wash font-semibold text-brand-green" : "text-ink-soft hover:bg-surface hover:text-ink",
+    "inline-flex min-w-[110px] shrink-0 items-center justify-center gap-2 whitespace-nowrap border-r border-line px-5 py-3 text-[14px] transition-colors first:rounded-tl-xl sm:flex-none",
+    active
+      ? "-mb-px border-b-[3px] border-b-brand-green bg-brand-wash font-semibold text-brand-green"
+      : "text-ink-soft hover:bg-surface hover:text-ink",
   );
 
 // Link tabs across sibling routes (Farmers / Visits); rendered at the top of the page header card.
