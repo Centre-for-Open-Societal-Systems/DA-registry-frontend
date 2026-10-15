@@ -232,3 +232,13 @@ input:-webkit-autofill:focus {
   caret-color: var(--color-zinc-900);
   transition: background-color 9999s ease-out;
 }
+
+/* Date Input Calendar Icon */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+input[type="date"]:hover::-webkit-calendar-picker-indicator {
+  opacity: 1;
+}
