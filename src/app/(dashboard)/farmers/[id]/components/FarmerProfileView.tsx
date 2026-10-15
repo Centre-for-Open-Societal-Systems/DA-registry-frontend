@@ -11,6 +11,7 @@ import {
   fetchFarmerProfile,
   fetchFarmerVisits,
   getCropSownDetails,
+  getLivestockReportDetails,
   profileToFarmer,
   type Farmer,
   type Plot,
@@ -22,7 +23,7 @@ import { ProfileTabs } from "./ProfileTabs";
 import { ProfileOverview } from "./ProfileOverview";
 import { HoldingsSection } from "./HoldingsSection";
 import { CropSownSection } from "./CropSownSection";
-import { LivestockSection } from "./LivestockSection";
+import { LivestockDetailsSection } from "./LivestockDetailsSection";
 import { LivestockHistorySection } from "./LivestockHistorySection";
 import { VisitHistorySection } from "./VisitHistorySection";
 import { DocumentsSection } from "./DocumentsSection";
@@ -97,7 +98,7 @@ export function FarmerProfileView({ id, sample }: { id: string; sample?: Farmer 
           Overview: <ProfileOverview />,
           Holdings: fromApi ? <HoldingsSection plots={loaded.plots} /> : <HoldingsSection />,
           "Crop Sown Details": <CropSownSection tabs={getCropSownDetails(farmer)} />,
-          "Livestock Details": <LivestockSection />,
+          "Livestock Details": <LivestockDetailsSection tabs={getLivestockReportDetails(farmer)} />,
           "Livestock history": <LivestockHistorySection />,
           "Visit history": fromApi ? <VisitHistorySection visits={loaded.visits} /> : <VisitHistorySection />,
           Documents: <DocumentsSection />,
