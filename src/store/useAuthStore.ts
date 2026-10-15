@@ -10,21 +10,31 @@ export interface AuthUser {
   email: string;
 }
 
+/** Bearer tokens from POST /api/v1/auth/login, rotated by /auth/refresh (see features/auth/session). */
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+  /** Epoch ms after which the access token is rejected. */
+  expiresAt: number;
+}
+
 interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
   /**
-   * Backend refresh token, revoked on logout. Always null for now: sign-in still uses the demo accounts, and
-   * the backend login that will set it is parked (docs/patches/login-api.patch).
+   * Backend token pair; the refresh token is revoked on logout. Always null for now: sign-in still uses the
+   * demo accounts, and the backend login that will set it is parked (docs/patches/login-api.patch).
    */
-  refreshToken: string | null;
+  tokens: AuthTokens | null;
   /** Active RBAC role, fixed by the account signed in at /login; drives nav visibility and gated actions. */
   role: Role;
   /** False until the persisted session has been read back (see AuthHydration); guards wait on it. */
   hasHydrated: boolean;
   setUser: (user: AuthUser) => void;
   /** Sign-in result: identity and role land together so the dashboard renders for the right role. */
-  signIn: (user: AuthUser, role: Role) => void;
+  signIn: (user: AuthUser, role: Role, tokens?: AuthTokens) => void;
+  /** Swaps in a refreshed token pair without touching identity or role. */
+  setTokens: (tokens: AuthTokens) => void;
   logout: () => void;
   setHasHydrated: (value: boolean) => void;
 }
@@ -36,18 +46,19 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
-      refreshToken: null,
+      tokens: null,
       role: DEFAULT_ROLE,
       hasHydrated: false,
       setUser: (user) => set({ user, isAuthenticated: true }),
-      signIn: (user, role) => set({ user, role, isAuthenticated: true }),
+      signIn: (user, role, tokens) => set({ user, role, tokens: tokens ?? null, isAuthenticated: true }),
+      setTokens: (tokens) => set({ tokens }),
       logout: () => {
         // Drafts hold farmer and visit personal data; none of it may outlive the session.
         clearAllDrafts();
         // Revoke server-side too, so a copied refresh token is useless once the user has logged out.
-        const { refreshToken } = get();
+        const refreshToken = get().tokens?.refreshToken;
         if (refreshToken) void revokeRefreshToken(refreshToken);
-        set({ user: null, isAuthenticated: false, refreshToken: null, role: DEFAULT_ROLE });
+        set({ user: null, isAuthenticated: false, tokens: null, role: DEFAULT_ROLE });
       },
       setHasHydrated: (value) => set({ hasHydrated: value }),
     }),
@@ -56,7 +67,7 @@ export const useAuthStore = create<AuthState>()(
       name: "oan-auth",
       // Rehydrated after mount (see AuthHydration) so the first client render matches the server HTML.
       skipHydration: true,
-      partialize: (s) => ({ user: s.user, isAuthenticated: s.isAuthenticated, role: s.role, refreshToken: s.refreshToken }),
+      partialize: (s) => ({ user: s.user, isAuthenticated: s.isAuthenticated, role: s.role, tokens: s.tokens }),
       // Runs after every rehydrate, including the empty-storage case, so the guard never waits forever.
       onRehydrateStorage: () => (state) => state?.setHasHydrated(true),
     },

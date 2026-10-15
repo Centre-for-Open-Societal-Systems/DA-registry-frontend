@@ -64,6 +64,8 @@ export const NAV_GROUPS: NavGroup[] = [
       // Supervisor sees field operations here (visits + kebele assignment) instead of the registry-admin items
       { title: "Field Visits", href: "/visits", roles: ["Supervisor"], part: 1 },
       { title: "Assignments", href: "/assignments", roles: ["Supervisor"], part: 1 },
+      // Governed status changes (transfer, leave, retirement …) for a DA, with their audit trail.
+      { title: "Lifecycle Management", href: "/lifecycle", roles: ALL, part: 1 },
       { title: "Approvals", href: "/approvals", roles: ["Admin"], part: 1 },
       { title: "Registry Sync", href: "/registry-sync", roles: ["Admin"], part: 1 },
       // Internal Feedback (/feedback) is hidden from the sidebar; the page still opens by URL.
@@ -119,6 +121,7 @@ export const PAGE_TITLES: { prefix: string; title: string }[] = [
   { prefix: "/agents", title: "Agents" },
   { prefix: "/my-teams", title: "My Teams" },
   { prefix: "/approvals", title: "Approvals" },
+  { prefix: "/lifecycle", title: "Lifecycle Management" },
   { prefix: "/registry-sync", title: "Agents" },
   { prefix: "/feedback", title: "Internal Feedback" },
   { prefix: "/farmers/new", title: "Register Farmer" },
