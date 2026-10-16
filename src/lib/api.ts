@@ -14,19 +14,22 @@ export class ApiError extends Error {
 
 export interface ApiRequest {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  /** Sent as JSON, or as multipart/form-data when it is a FormData (file uploads). */
   body?: unknown;
   /** Sent as `Authorization: Bearer …`; signed-in calls get it from features/auth (authRequest). */
   accessToken?: string;
 }
 
 export async function apiRequest<T>(path: string, { method = "GET", body, accessToken }: ApiRequest = {}): Promise<T> {
+  const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   const headers: Record<string, string> = { Accept: "application/json" };
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  // A FormData body sets its own multipart Content-Type, boundary included.
+  if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
   let res: Response;
   try {
-    res = await fetch(`/api/v1${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+    res = await fetch(`/api/v1${path}`, { method, headers, body: body === undefined ? undefined : isForm ? body : JSON.stringify(body) });
   } catch {
     throw new ApiError("Could not reach the server. Check your connection and try again.", 0);
   }
@@ -39,9 +42,12 @@ export async function apiRequest<T>(path: string, { method = "GET", body, access
 export const apiPost = <T>(path: string, body: unknown) => apiRequest<T>(path, { method: "POST", body });
 
 // Error bodies carry their text under `message` (Frappe), `error` or `detail`; take the first readable one.
-function errorMessage(data: unknown): string | undefined {
+// A generic "Validation failed" names the broken fields under `details`, which say more than it does.
+export function errorMessage(data: unknown): string | undefined {
   if (!data || typeof data !== "object") return undefined;
   const d = data as Record<string, unknown>;
+  const fieldErrors = d.details && typeof d.details === "object" ? Object.values(d.details).filter((v): v is string => typeof v === "string" && !!v.trim()) : [];
+  if (fieldErrors.length > 0) return fieldErrors.join(" ");
   for (const value of [d.message, d.error, d.detail]) {
     if (typeof value === "string" && value.trim()) return value;
   }

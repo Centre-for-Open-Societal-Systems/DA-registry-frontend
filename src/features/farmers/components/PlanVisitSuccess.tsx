@@ -23,7 +23,7 @@ export function PlanVisitSuccess({ result, visitType, isSchedule, questionCount 
       <p className="mt-2 max-w-[420px] text-[14px] leading-relaxed text-ink-soft">
         {result.kind === "draft"
           ? `${visitType} visit${result.farmer ? ` with ${result.farmer}` : ""} for ${result.when}${questions} is saved as a draft on this device. Open Plan visit again to finish it.`
-          : `${visitType} visit${result.farmer ? ` with ${result.farmer}` : ""} on ${result.when}${questions}. The farmer is notified by SMS; the visit is queued and syncs when you are online.`}
+          : `${visitType} visit${result.farmer ? ` with ${result.farmer}` : ""} on ${result.when}${questions}${result.visitId ? ` is saved as ${result.visitId}` : ""}. The farmer is notified by SMS.`}
       </p>
     </div>
   );

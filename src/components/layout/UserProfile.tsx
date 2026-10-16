@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 
 export function UserProfile() {
   const router = useRouter();
-  const { user, role, logout } = useAuthStore();
+  const { user, role, profile, logout } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmingLogout, setIsConfirmingLogout] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -50,7 +50,7 @@ export function UserProfile() {
             {name}
           </p>
           <p className="mt-0.5 text-[13px] font-medium leading-tight text-gray-600">
-            {ROLE_LABELS[role]}
+            {profile?.roleLabel ?? ROLE_LABELS[role]}
           </p>
         </div>
         <svg className={`w-4 h-4 text-slate-700 ml-1 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'rotate-180' : 'group-hover:translate-y-[2px]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>

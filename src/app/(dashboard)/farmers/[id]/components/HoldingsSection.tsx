@@ -9,12 +9,17 @@ import { SectionCard } from "./SectionCard";
 
 const mapUrl = (p: Plot) => `https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lng}#map=16/${p.lat}/${p.lng}`;
 
-export function HoldingsSection() {
+// Registry plots have no centroid yet (lat/lng NaN): the details still open, without the map link or GPS row.
+const hasLocation = (p: Plot) => Number.isFinite(p.lat) && Number.isFinite(p.lng);
+
+/** `plots` from GET /farmers/{id}/plots; the sample plots when omitted. */
+export function HoldingsSection({ plots = PLOTS }: { plots?: Plot[] }) {
   const [viewing, setViewing] = useState<Plot | null>(null);
 
   return (
     <SectionCard title="Holdings and Plots" bodyClassName="flex flex-col gap-3">
-      {PLOTS.map((plot) => (
+      {plots.length === 0 && <p className="py-4 text-center text-[13.5px] text-muted">No plots recorded in the Farmer Registry.</p>}
+      {plots.map((plot) => (
         <div
           key={plot.code}
           className="flex items-center justify-between rounded-lg border border-line-soft bg-surface px-4 py-3"
@@ -50,6 +55,7 @@ export function HoldingsSection() {
           footer={
             <>
               <Button variant="outline" onClick={() => setViewing(null)}>Close</Button>
+              {hasLocation(viewing) && (
               <a
                 href={mapUrl(viewing)}
                 target="_blank"
@@ -58,6 +64,7 @@ export function HoldingsSection() {
               >
                 Open in map
               </a>
+              )}
             </>
           }
         >
@@ -68,7 +75,7 @@ export function HoldingsSection() {
               ["Soil", viewing.soil],
               ["Zone", viewing.zone],
               ["Tenure", viewing.tenure],
-              ["GPS (centroid)", `${viewing.lat.toFixed(4)}, ${viewing.lng.toFixed(4)}`],
+              ["GPS (centroid)", hasLocation(viewing) ? `${viewing.lat.toFixed(4)}, ${viewing.lng.toFixed(4)}` : "Not recorded"],
             ].map(([label, value]) => (
               <div key={label}>
                 <dt className="text-[12px] font-medium uppercase tracking-wider text-muted">{label}</dt>

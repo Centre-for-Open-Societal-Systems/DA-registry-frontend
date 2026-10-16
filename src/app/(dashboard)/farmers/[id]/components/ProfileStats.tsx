@@ -2,8 +2,9 @@ import { StatCard } from "@/components/ui/StatCard";
 import { PLOTS } from "@/features/farmers";
 import type { Farmer } from "@/features/farmers";
 
-export function ProfileStats({ farmer }: { farmer: Farmer }) {
-  const totalLandHa = PLOTS.slice(0, farmer.totalPlots).reduce((sum, plot) => sum + plot.areaHa, 0);
+/** `fromApi`: land is the registry's own total (farmer.landHa), not the sample plots. */
+export function ProfileStats({ farmer, fromApi = false }: { farmer: Farmer; fromApi?: boolean }) {
+  const totalLandHa = fromApi ? farmer.landHa : PLOTS.slice(0, farmer.totalPlots).reduce((sum, plot) => sum + plot.areaHa, 0);
 
   const stats = [
     {

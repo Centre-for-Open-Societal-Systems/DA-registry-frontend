@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/Card";
 export function QuickActionsSection() {
   const actions = [
     { title: "Submit Crop Report", desc: "Log yield and pest surveys", icon: "clipboard-list", href: "/farmers/crop-report" },
-    { title: "Submit Livestock Report", desc: "Log herd counts and vaccinations", icon: "livestock", href: "/visits/v-1015/outcome" },
+    { title: "Submit Livestock Report", desc: "Log herd counts and vaccinations", icon: "livestock", href: "/farmers/livestock-report" },
     { title: "Start Farm Visit", desc: "Activate GPS route and inspection logs", icon: "location", href: "/visits/v-1001" },
     { title: "Sync Queue", desc: "Offline captures and conflicts", icon: "sync", href: "/sync" },
   ];

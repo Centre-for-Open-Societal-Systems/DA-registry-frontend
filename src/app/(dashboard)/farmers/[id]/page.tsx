@@ -1,50 +1,22 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { getCropSownDetails, getFarmer } from "@/features/farmers";
-import { ProfileHeader } from "./components/ProfileHeader";
-import { ProfileStats } from "./components/ProfileStats";
-import { ProfileTabs } from "./components/ProfileTabs";
-import { ProfileOverview } from "./components/ProfileOverview";
-import { HoldingsSection } from "./components/HoldingsSection";
-import { CropSownSection } from "./components/CropSownSection";
-import { LivestockSection } from "./components/LivestockSection";
-import { LivestockHistorySection } from "./components/LivestockHistorySection";
-import { VisitHistorySection } from "./components/VisitHistorySection";
-import { DocumentsSection } from "./components/DocumentsSection";
-import { AdvisorySection } from "./components/AdvisorySection";
+import { getFarmer } from "@/features/farmers";
 import { BackLink } from "@/components/ui/BackLink";
+import { FarmerProfileView } from "./components/FarmerProfileView";
 
 export async function generateMetadata(props: PageProps<"/farmers/[id]">): Promise<Metadata> {
   const { id } = await props.params;
-  const farmer = getFarmer(id);
-  return {
-    title: farmer ? `${farmer.name} | OpenAgriNet` : "Farmer not found | OpenAgriNet",
-  };
+  // The profile itself loads on the client (it needs the signed-in user's token), so only sample ids have a name here.
+  const sample = getFarmer(id);
+  return { title: sample ? `${sample.name} | OpenAgriNet` : "Farmer profile | OpenAgriNet" };
 }
 
 export default async function FarmerProfilePage(props: PageProps<"/farmers/[id]">) {
   const { id } = await props.params;
-  const farmer = getFarmer(id);
-  if (!farmer) notFound();
 
   return (
     <div className="flex w-full flex-col gap-4">
       <BackLink href="/farmers" />
-
-      <ProfileHeader farmer={farmer} />
-      <ProfileStats farmer={farmer} />
-      <ProfileTabs
-        panels={{
-          Overview: <ProfileOverview />,
-          Holdings: <HoldingsSection />,
-          "Crop Sown Details": <CropSownSection tabs={getCropSownDetails(farmer)} />,
-          "Livestock Details": <LivestockSection />,
-          "Livestock history": <LivestockHistorySection />,
-          "Visit history": <VisitHistorySection />,
-          Documents: <DocumentsSection />,
-          Advisory: <AdvisorySection farmerId={farmer.id} />,
-        }}
-      />
+      <FarmerProfileView id={id} sample={getFarmer(id)} />
     </div>
   );
 }

@@ -223,6 +223,16 @@ body {
   scrollbar-color: var(--color-sidebar-scrollbar) transparent;
 }
 
+/* Browser autofill paints inputs pale blue; keep them white with the normal text colour, like every other field. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px white inset;
+  -webkit-text-fill-color: var(--color-zinc-900);
+  caret-color: var(--color-zinc-900);
+  transition: background-color 9999s ease-out;
+}
+
 /* Date Input Calendar Icon */
 input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
@@ -232,4 +242,3 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 input[type="date"]:hover::-webkit-calendar-picker-indicator {
   opacity: 1;
 }
-

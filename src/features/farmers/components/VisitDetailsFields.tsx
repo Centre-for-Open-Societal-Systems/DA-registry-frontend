@@ -58,7 +58,7 @@ export function VisitDetailsFields({ selected, preset, isSchedule }: VisitDetail
       {isSchedule && (!preset || preset.level === "high") ? (
         <Banner tone="error">{preset ? `Flagged for ${preset.reason.toLowerCase()} — high priority, aim to schedule within 48 hours.` : "This farmer is flagged as high priority — aim to schedule within 48 hours."}</Banner>
       ) : (
-        <Banner tone="warning">Planned offline — the visit is queued on this device and syncs when a connection is available.</Banner>
+        <Banner tone="info">The visit is saved to your plan and the farmer is notified by SMS. Save as draft keeps it on this device only.</Banner>
       )}
     </>
   );

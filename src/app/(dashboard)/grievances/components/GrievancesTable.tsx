@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SegmentTabs } from "@/components/ui/SegmentTabs";
@@ -10,15 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { RowAction } from "@/components/ui/RowAction";
 import { AdvancedFiltersDrawer, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
-import {
-  bucketOf,
-  GRIEVANCE_CATEGORY_OPTIONS,
-  GRIEVANCE_FILTER_FIELDS,
-  GRIEVANCE_PRIORITY_OPTIONS,
-  GRIEVANCE_STATUS_OPTIONS,
-  GRIEVANCES,
-  grievanceStatsFor,
-} from "@/features/grievances";
+import { bucketOf, GRIEVANCE_PAGE_MAX, grievanceFilterOptions, grievanceStatsFor, listGrievances, toGrievance } from "@/features/grievances";
 import { GrievanceBucketPill, GrievancePriorityPill } from "@/features/grievances";
 import { GrievanceDetailModal } from "@/features/grievances";
 import type { Grievance } from "@/features/grievances";
@@ -56,7 +48,29 @@ interface Filters extends FilterSelection {
 
 const EMPTY: Filters = { category: new Set(), status: new Set(), priority: new Set(), region: new Set() };
 
+type Loaded = { reload: number; rows: Grievance[]; total: number; error: string | null; at: Date };
+
 export function GrievancesTable() {
+  // GET /grievances is scoped by DA Services: a DA gets their own tickets, a Supervisor their Woreda's.
+  const [reload, setReload] = useState(0);
+  const [loaded, setLoaded] = useState<Loaded | null>(null);
+
+  useEffect(() => {
+    let current = true;
+    // One page at the API's maximum; the table filters and pages it here.
+    listGrievances({ page: 1, pageSize: GRIEVANCE_PAGE_MAX })
+      .then(({ items, total }) => current && setLoaded({ reload, rows: items.map(toGrievance), total, error: null, at: new Date() }))
+      .catch((err: unknown) => current && setLoaded((prev) => ({ reload, rows: prev?.rows ?? [], total: prev?.total ?? 0, error: err instanceof Error ? err.message : "Could not load grievances.", at: new Date() })));
+    return () => {
+      current = false;
+    };
+  }, [reload]);
+
+  const loading = loaded?.reload !== reload;
+  const all = loaded?.rows ?? [];
+  const options = grievanceFilterOptions(all);
+  const refresh = () => setReload((r) => r + 1);
+
   const [filters, setFilters] = useState<Filters>(EMPTY);
   const [query, setQuery] = useState("");
   // FR-12 raised-by filter: on behalf of a farmer, farmer-originated, or for the DA (external service records all three)
@@ -75,7 +89,7 @@ export function GrievancesTable() {
 
   // Every filter except status: the stat cards count these rows, so each card's number is exactly
   // what the table shows once that card (or the matching Status filter) is selected.
-  const scoped = GRIEVANCES.filter(
+  const scoped = all.filter(
     (g) =>
       (raisedBy === "All" || g.raisedBy === raisedBy) &&
       (filters.category.size === 0 || filters.category.has(g.category)) &&
@@ -105,9 +119,9 @@ export function GrievancesTable() {
         }
         title="Grievances"
         description="Raise and track grievances for yourself or on behalf of a farmer. Triage and resolution happen in the external Grievance Service - this surface is read-only for case handling."
-        actions={<RaiseGrievanceButton className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md bg-brand-green px-5 text-[14px] font-semibold text-white transition-colors hover:bg-brand-green-dark" />}
+        actions={<RaiseGrievanceButton onSubmitted={refresh} className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md bg-brand-green px-5 text-[14px] font-semibold text-white transition-colors hover:bg-brand-green-dark" />}
       />
-      <ServiceStatusBanner />
+      <ServiceStatusBanner loading={loading} error={loaded?.error ?? null} lastLoaded={loaded?.at ?? null} total={loaded?.total ?? 0} shown={all.length} onRetry={refresh} />
       <GrievanceStats
         active={activeCard}
         counts={stats}
@@ -149,22 +163,33 @@ export function GrievancesTable() {
                 <th className="whitespace-nowrap px-4 py-3 font-semibold">Ticket ID</th>
                 <th className="px-4 py-3 font-semibold">Details</th>
                 <th className="px-4 py-3 font-semibold">
-                  <FilterDropdown label="Category" allLabel="All categories" options={GRIEVANCE_CATEGORY_OPTIONS} selected={filters.category} onApply={setFilter("category")} />
+                  <FilterDropdown label="Category" allLabel="All categories" options={options.category} selected={filters.category} onApply={setFilter("category")} />
                 </th>
                 <th className="px-4 py-3 font-semibold">
-                  <FilterDropdown label="Priority" allLabel="All priorities" options={GRIEVANCE_PRIORITY_OPTIONS} selected={filters.priority} onApply={setFilter("priority")} />
+                  <FilterDropdown label="Priority" allLabel="All priorities" options={options.priority} selected={filters.priority} onApply={setFilter("priority")} />
                 </th>
                 <th className="px-4 py-3 font-semibold">Submitted</th>
                 <th className="px-4 py-3 font-semibold">
-                  <FilterDropdown label="Status" allLabel="All statuses" options={GRIEVANCE_STATUS_OPTIONS} selected={filters.status} onApply={setFilter("status")} />
+                  <FilterDropdown label="Status" allLabel="All statuses" options={options.status} selected={filters.status} onApply={setFilter("status")} />
                 </th>
                 <th className="px-4 py-3 text-center font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="text-[14px] text-slate-700">
-              {pageRows.length === 0 && (
+              {loading && all.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-6"><EmptyState title="No grievances match the selected filters" hint="Clear a filter or try a different search." /></td>
+                  <td colSpan={7} className="px-4 py-8 text-center text-[13.5px] text-muted">Loading grievances…</td>
+                </tr>
+              )}
+              {!loading && pageRows.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-6">
+                    {all.length === 0 ? (
+                      <EmptyState title={loaded?.error ? "Could not load grievances" : "No grievances yet"} hint={loaded?.error ?? "Grievances you raise show up here."} tone={loaded?.error ? "error" : "muted"} />
+                    ) : (
+                      <EmptyState title="No grievances match the selected filters" hint="Clear a filter or try a different search." />
+                    )}
+                  </td>
                 </tr>
               )}
               {pageRows.map((g) => (
@@ -173,9 +198,9 @@ export function GrievancesTable() {
                   <td className="px-4 py-4">
                     <p className="truncate text-[14.5px] font-semibold text-ink" title={g.title}>{g.title}</p>
                     <p className="mt-1 text-[13px] text-muted">
-                      {g.submitter} · {g.region}, {g.woreda}
+                      {[g.submitter, [g.region, g.woreda].filter(Boolean).join(", ")].filter(Boolean).join(" · ")}
                     </p>
-                    <p className="mt-0.5 text-[13px] text-muted">{g.type}</p>
+                    {g.type && <p className="mt-0.5 text-[13px] text-muted">{g.type}</p>}
                     <p className="mt-1 flex items-center gap-3 text-[12px] text-muted">
                       <span className="inline-flex items-center gap-1">
                         <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -227,7 +252,7 @@ export function GrievancesTable() {
       <AdvancedFiltersDrawer
         isOpen={isFiltersOpen}
         onClose={() => setIsFiltersOpen(false)}
-        fields={GRIEVANCE_FILTER_FIELDS}
+        fields={options.fields}
         filters={filters}
         onApply={(next) => {
           setFilters({

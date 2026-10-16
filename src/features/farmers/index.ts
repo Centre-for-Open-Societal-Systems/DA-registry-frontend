@@ -14,3 +14,5 @@ export * from "./components/PlanVisitButton";
 export * from "./components/PlanVisitModal";
 export * from "./components/ProfilePhotoUpload";
 export * from "./components/StatusPill";
+export * from "./farmersApi";
+export * from "./livestockReport";

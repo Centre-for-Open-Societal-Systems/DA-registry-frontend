@@ -21,7 +21,8 @@ export interface Grievance {
   region: string;
   woreda: string;
   type: string;
-  category: GrievanceCategory;
+  /** A sample category, or the Grievance Service category name (e.g. "Supply Chain") for API records. */
+  category: string;
   status: GrievanceStatus;
   priority: GrievancePriority;
   submittedAt: string; // e.g. "May 28, 2026, 10:42 AM"
@@ -29,6 +30,8 @@ export interface Grievance {
   responses: number;
   /** FR-12: raised by the DA on behalf of a farmer, by the farmer directly, or for the DA themselves. */
   raisedBy: "OnBehalf" | "Farmer" | "DA";
+  /** Set on records loaded from GET /grievances: the detail modal then reads the ticket from the API. */
+  fromApi?: boolean;
 }
 
 /** Stat-card buckets derived from record statuses. */
@@ -64,6 +67,15 @@ export type ThreadMessage =
       to: GrievanceStatus;
       by: string;
       at: string;
+    }
+  | {
+      /** A Grievance Service timeline event (GET /grievances/{id}/timeline), e.g. "assigned" or "escalated". */
+      kind: "event";
+      id: string;
+      action: string;
+      actor: string;
+      at: string;
+      detail: string;
     }
   | {
       kind: "internal-note";

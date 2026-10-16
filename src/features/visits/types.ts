@@ -16,6 +16,8 @@ export interface VisitRecord {
   durationMin: number;
   /** Supervisor who assigned this visit to the DA; absent when the DA planned it themselves. */
   assignedBy?: string;
+  /** Backend physical status (e.g. "In progress"); absent on sample records. */
+  physicalStatus?: string;
 }
 
 export interface VisitTimelineEntry {

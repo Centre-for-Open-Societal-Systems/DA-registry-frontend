@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -20,13 +20,28 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { useAuthStore } from "@/store/useAuthStore";
-import { KEBELES, WOREDAS } from "@/features/agents";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
-import { AGENT_STATUS_TONE, ASSIGNMENT_TONE, ASSIGNMENTS, KEBELE_COVERAGE, supervisorAssignmentsFor, type AgentAssignment, type AssociationMode, type Geofence } from "@/features/assignments";
+import {
+  AGENT_STATUS_TONE,
+  ASSIGNMENT_TONE,
+  assignAgent,
+  fetchCoverage,
+  fetchMyAssignment,
+  listAreas,
+  listAssignments,
+  listKebeles,
+  newClientOpId,
+  toAgentAssignment,
+  type AdminArea,
+  type AgentAssignment,
+  type AssignmentSummary,
+  type AssociationMode,
+  type CoverageResponse,
+} from "@/features/assignments";
 
 const icon = (d: string) => <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>;
 
-const STATUSES = ["Active", "Unassigned", "On-leave"];
+const STATUSES = ["Active", "Unassigned", "On-leave", "Separated"];
 const ASSIGNMENT_STATES = ["Proposed", "Validated", "Flagged", "Effective", "Superseded"];
 const COVERAGE_STATES = ["Full", "Agent on leave", "Flagged", "Uncovered"];
 const NO_KEBELE = "—";
@@ -39,6 +54,12 @@ const optionsOf = (values: string[], order?: readonly string[], label?: (v: stri
 
 const has = (set: Set<string>, value: string) => set.size === 0 || set.has(value);
 const countActive = (filters: FilterSelection) => Object.values(filters).filter((set) => set.size > 0).length;
+const messageOf = (err: unknown, fallback: string) => (err instanceof Error ? err.message : fallback);
+
+const isoToday = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
 
 interface AgentFilters extends FilterSelection {
   woreda: Set<string>;
@@ -54,26 +75,9 @@ interface CoverageFilters extends FilterSelection {
 }
 const EMPTY_COVERAGE_FILTERS: CoverageFilters = { woreda: new Set(), coverage: new Set() };
 
-// Kebeles under the selected woredas (every kebele when none is picked), plus the "no kebele yet" bucket.
-const kebelesFor = (woredas: Set<string>) => [
-  ...(woredas.size === 0 ? Object.values(KEBELES).flat() : [...woredas].flatMap((w) => KEBELES[w] ?? [])),
-  NO_KEBELE,
-];
-
-const pruneKebeles = (next: AgentFilters): AgentFilters => {
-  const allowed = new Set(kebelesFor(next.woreda));
-  return { ...next, kebele: new Set([...next.kebele].filter((k) => allowed.has(k))) };
-};
-
-const COVERAGE_WOREDA_OPTIONS = optionsOf(KEBELE_COVERAGE.map((k) => k.woreda));
-const COVERAGE_OPTIONS = optionsOf(KEBELE_COVERAGE.map((k) => k.coverage), COVERAGE_STATES);
-const COVERAGE_FILTER_FIELDS: FilterFieldConfig[] = [
-  { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All Woredas", options: COVERAGE_WOREDA_OPTIONS },
-  { key: "coverage", label: "Coverage", allLabel: "All coverage states", placeholder: "All", options: COVERAGE_OPTIONS },
-];
-
 interface Draft {
   daId: string;
+  /** Woreda and Kebele codes from the administrative-area master. */
   woreda: string;
   kebele: string;
   effectiveDate: string;
@@ -81,21 +85,24 @@ interface Draft {
   mode: AssociationMode | "";
   /** Opened from the header "Assign agent" button — the officer picks the agent in the modal. */
   pickAgent?: boolean;
+  /** One id per opened form, so a retried commit is not recorded twice. */
+  opId: string;
 }
 
-// Geofence validation (§4.2): deterministic stand-in for the boundary check — flagged when the DA's registered
-// home GPS falls outside the target kebele polygon. Amarti Gibe reproduces the known out-of-bounds case.
-const runGeofence = (kebele: string): { result: Geofence; reason?: string } =>
-  kebele === "Amarti Gibe" ? { result: "Out-of-bounds", reason: "Home GPS 2.4 km outside Amarti Gibe boundary" } : { result: "In-boundary" };
+type Loaded<T> = { data: T | null; error: string | null };
 
-// FR-05 Agent Assignment: agent list by Kebele + Woreda, coverage tiles, Assign / Reassign with effective date,
-// farmer-association mode and geofence validation. Reassignment supersedes the prior assignment.
+// FR-05 Agent Assignment (GET/POST /da-services/assignments): agent list by Kebele + Woreda, coverage tiles,
+// Assign / Reassign with effective date, farmer-association mode and the backend's geofence validation.
+// Reassignment supersedes the prior assignment. A DA sees their own posting (GET /assignments/me).
 export function AssignmentsWorkspace() {
   const role = useAuthStore((s) => s.role);
   const canAssign = role === "Supervisor" || role === "Admin";
   const isDA = role === "DA";
-  const user = useAuthStore((s) => s.user);
-  const [rows, setRows] = useState<AgentAssignment[]>(ASSIGNMENTS);
+  const [reload, setReload] = useState(0);
+  const [list, setList] = useState<Loaded<{ rows: AgentAssignment[]; summary: AssignmentSummary | null }> & { key: number } | null>(null);
+  const [coverage, setCoverage] = useState<Loaded<CoverageResponse> | null>(null);
+  const [woredaAreas, setWoredaAreas] = useState<AdminArea[]>([]);
+  const [kebeles, setKebeles] = useState<{ woreda: string; items: AdminArea[]; error: string | null } | null>(null);
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<AgentFilters>(EMPTY_AGENT_FILTERS);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -103,22 +110,92 @@ export function AssignmentsWorkspace() {
   const [coverageFilters, setCoverageFilters] = useState<CoverageFilters>(EMPTY_COVERAGE_FILTERS);
   const [isCoverageFiltersOpen, setIsCoverageFiltersOpen] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<{ tone: "success" | "warning"; title: string; body: string } | null>(null);
 
-  // A DA sees only the assignment their supervisor made for them; officers see (and edit) every row.
-  const scoped = useMemo(() => (isDA ? supervisorAssignmentsFor(user?.name ?? "") : rows), [isDA, user, rows]);
+  const woredaNames = useMemo(() => Object.fromEntries(woredaAreas.map((a) => [a.code, a.name_en])), [woredaAreas]);
+
+  // Woreda names for display and the assign form; rows fall back to codes if the master cannot be read.
+  useEffect(() => {
+    let current = true;
+    listAreas({ level: "Woreda" })
+      .then((areas) => current && setWoredaAreas(areas))
+      .catch(() => {});
+    return () => {
+      current = false;
+    };
+  }, []);
+
+  // Officers: the Woreda's agents, then its coverage tiles. A DA: their own posting.
+  useEffect(() => {
+    let current = true;
+    if (isDA) {
+      fetchMyAssignment()
+        .then((me) => current && setList({ key: reload, data: { rows: [toAgentAssignment(me)], summary: null }, error: null }))
+        .catch((err: unknown) => current && setList({ key: reload, data: null, error: messageOf(err, "Could not load your assignment.") }));
+      return () => {
+        current = false;
+      };
+    }
+    listAssignments()
+      .then(({ rows, summary }) => {
+        if (!current) return;
+        setList({ key: reload, data: { rows: rows.map((r) => toAgentAssignment(r)), summary }, error: null });
+        // A Supervisor's own Woreda is the backend default; other officers see the first Woreda in the list.
+        return fetchCoverage(role === "Supervisor" ? undefined : rows.find((r) => r.woreda)?.woreda ?? undefined);
+      })
+      .then((cov) => current && cov && setCoverage({ data: cov, error: null }))
+      .catch((err: unknown) => {
+        if (!current) return;
+        const message = messageOf(err, "Could not load assignments.");
+        setList((prev) => (prev?.key === reload ? prev : { key: reload, data: null, error: message }));
+        setCoverage({ data: null, error: message });
+      });
+    return () => {
+      current = false;
+    };
+  }, [isDA, reload, role]);
+
+  // Kebeles of the Woreda picked in the assign form.
+  const draftWoreda = draft?.woreda ?? "";
+  useEffect(() => {
+    if (!draftWoreda) return;
+    let current = true;
+    listKebeles(draftWoreda)
+      .then((items) => current && setKebeles({ woreda: draftWoreda, items, error: null }))
+      .catch((err: unknown) => current && setKebeles({ woreda: draftWoreda, items: [], error: messageOf(err, "Could not load kebeles.") }));
+    return () => {
+      current = false;
+    };
+  }, [draftWoreda]);
+
+  const loading = list?.key !== reload;
+  const rows = useMemo(
+    () => (list?.data?.rows ?? []).map((r) => ({ ...r, woreda: (r.woredaCode && woredaNames[r.woredaCode]) || r.woreda })),
+    [list, woredaNames],
+  );
+  const summary = list?.data?.summary ?? null;
+  const listError = loading ? null : (list?.error ?? null);
 
   const setFilter = (key: keyof AgentFilters) => (next: Set<string>) => setFilters((prev) => pruneKebeles({ ...prev, [key]: next }));
   const setCoverageFilter = (key: keyof CoverageFilters) => (next: Set<string>) => setCoverageFilters((prev) => ({ ...prev, [key]: next }));
 
-  const woredaOptions = optionsOf(scoped.map((r) => r.woreda), WOREDAS);
+  // Kebeles present under the selected woredas, plus the "no kebele yet" bucket.
+  const kebelesFor = (woredas: Set<string>) => [...new Set(rows.filter((r) => has(woredas, r.woreda)).map((r) => r.kebele ?? NO_KEBELE))];
+  const pruneKebeles = (next: AgentFilters): AgentFilters => {
+    const allowed = new Set(kebelesFor(next.woreda));
+    return { ...next, kebele: new Set([...next.kebele].filter((k) => allowed.has(k))) };
+  };
+
+  const woredaOptions = optionsOf(rows.map((r) => r.woreda));
   const kebeleOptions = optionsOf(
-    scoped.filter((r) => has(filters.woreda, r.woreda)).map((r) => r.kebele ?? NO_KEBELE),
-    kebelesFor(filters.woreda),
+    rows.filter((r) => has(filters.woreda, r.woreda)).map((r) => r.kebele ?? NO_KEBELE),
+    undefined,
     (k) => (k === NO_KEBELE ? "No kebele yet" : k),
   );
-  const statusOptions = optionsOf(scoped.map((r) => r.status), STATUSES);
-  const assignmentOptions = optionsOf(scoped.map((r) => r.assignmentStatus), ASSIGNMENT_STATES);
+  const statusOptions = optionsOf(rows.map((r) => r.status), STATUSES);
+  const assignmentOptions = optionsOf(rows.map((r) => r.assignmentStatus), ASSIGNMENT_STATES);
   const filterFields: FilterFieldConfig[] = [
     { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All Woredas", options: woredaOptions },
     { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All Kebeles", options: kebeleOptions },
@@ -127,7 +204,7 @@ export function AssignmentsWorkspace() {
   ];
 
   const visible = useMemo(() => {
-    return scoped.filter(
+    return rows.filter(
       (r) =>
         has(filters.woreda, r.woreda) &&
         has(filters.kebele, r.kebele ?? NO_KEBELE) &&
@@ -135,51 +212,84 @@ export function AssignmentsWorkspace() {
         has(filters.assignment, r.assignmentStatus) &&
         matchesQuery(query, r),
     );
-  }, [scoped, query, filters]);
+  }, [rows, query, filters]);
 
-  const coverageRows = KEBELE_COVERAGE.filter(
+  const coverageWoredaName = coverage?.data ? woredaNames[coverage.data.woreda] ?? coverage.data.woreda : "";
+  const coverageAll = (coverage?.data?.kebeles ?? []).map((k) => ({
+    kebele: k.kebele_name || k.kebele,
+    woreda: woredaNames[k.woreda] ?? k.woreda,
+    agents: k.agents,
+    farmers: k.farmers,
+    households: k.households,
+    coverage: k.coverage,
+  }));
+  const coverageWoredaOptions = optionsOf(coverageAll.map((k) => k.woreda));
+  const coverageOptions = optionsOf(coverageAll.map((k) => k.coverage), COVERAGE_STATES);
+  const coverageFilterFields: FilterFieldConfig[] = [
+    { key: "woreda", label: "Woreda", allLabel: "All woredas", placeholder: "All Woredas", options: coverageWoredaOptions },
+    { key: "coverage", label: "Coverage", allLabel: "All coverage states", placeholder: "All", options: coverageOptions },
+  ];
+  const coverageRows = coverageAll.filter(
     (k) => has(coverageFilters.woreda, k.woreda) && has(coverageFilters.coverage, k.coverage) && matchesQuery(coverageQuery, k),
   );
 
-  const mine = isDA ? scoped[0] : undefined;
+  const mine = isDA ? rows[0] : undefined;
   const kebelesCovered = new Set(rows.filter((r) => r.kebele).map((r) => r.kebele)).size;
-  const unassigned = rows.filter((r) => r.status === "Unassigned").length;
+  const unassigned = summary?.unassigned ?? rows.filter((r) => r.status === "Unassigned").length;
   const assigned = rows.filter((r) => r.farmers > 0);
   const avgLoad = Math.round(assigned.reduce((s, r) => s + r.farmers, 0) / Math.max(1, assigned.length));
 
+  const openForm = (next: Omit<Draft, "opId">) => {
+    setSaveError(null);
+    setDraft({ ...next, opId: newClientOpId() });
+  };
+
   const openAssign = (r: AgentAssignment) =>
-    setDraft({ daId: r.daId, woreda: r.woreda, kebele: r.kebele ?? "", effectiveDate: "2026-09-21", reason: "", mode: r.mode ?? "Automatic" });
+    openForm({ daId: r.daId, woreda: r.woredaCode ?? "", kebele: r.kebeleCode ?? "", effectiveDate: isoToday(), reason: "", mode: r.mode ?? "Automatic" });
 
   // Header "Assign agent": every field starts empty and the officer fills it in, agent included.
-  const openNewAssign = () =>
-    setDraft({ daId: "", woreda: "", kebele: "", effectiveDate: "", reason: "", mode: "", pickAgent: true });
+  const openNewAssign = () => openForm({ daId: "", woreda: rows.find((r) => r.woredaCode)?.woredaCode ?? "", kebele: "", effectiveDate: "", reason: "", mode: "", pickAgent: true });
 
   const draftAgent = draft ? rows.find((r) => r.daId === draft.daId) : undefined;
+  const draftKebeles = kebeles && kebeles.woreda === draft?.woreda ? kebeles : null;
 
-  const commit = () => {
-    if (!draft || !draft.mode) return;
-    const mode = draft.mode;
-    const check = runGeofence(draft.kebele);
-    const prior = rows.find((r) => r.daId === draft.daId)!;
-    const isReassign = Boolean(prior.kebele);
-    const farmers = draft.mode === "Automatic" ? KEBELE_COVERAGE.find((k) => k.kebele === draft.kebele)?.households ?? 150 : 0;
-    setRows((prev) =>
-      prev.map((r) =>
-        r.daId === draft.daId
-          ? { ...r, woreda: draft.woreda, kebele: draft.kebele, farmers: check.result === "In-boundary" ? farmers : r.farmers, status: r.status === "Unassigned" ? "Active" : r.status, assignmentStatus: check.result === "In-boundary" ? "Effective" : "Flagged", effectiveDate: draft.effectiveDate, geofence: check.result, geofenceReason: check.reason, mode, assignedBy: user?.name }
-          : r,
-      ),
-    );
-    if (check.result === "In-boundary") {
-      setOutcome({
-        tone: "success",
-        title: `${prior.agent} ${isReassign ? "reassigned" : "assigned"} to ${draft.kebele} — Validated (in-boundary), effective ${draft.effectiveDate}.`,
-        body: `${isReassign ? `Prior assignment (${prior.kebele}) is now Superseded. ` : ""}Farmer count recomputed (${draft.mode === "Automatic" ? "automatic from task list" : "manual selection pending"}); the Kebele coverage summary reflects the change. DA notified by SMS + app.`,
+  const commit = async () => {
+    if (!draft || !draft.mode || !draftAgent) return;
+    const kebeleName = draftKebeles?.items.find((k) => k.code === draft.kebele)?.name_en ?? draft.kebele;
+    const isReassign = Boolean(draftAgent.kebele);
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const decision = await assignAgent({
+        da_id: draft.daId,
+        kebele: draft.kebele,
+        effective_date: draft.effectiveDate,
+        reason: draft.reason.trim(),
+        mode: draft.mode,
+        client_op_id: draft.opId,
       });
-    } else {
-      setOutcome({ tone: "warning", title: `Assignment to ${draft.kebele} is Flagged (out-of-bounds).`, body: `${check.reason}. The assignment is recorded as Flagged with the reason and does not become Effective until a supervisor overrides or the boundary data is corrected.` });
+      const when = new Date(`${draft.effectiveDate}T00:00:00`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+      if (decision.state === "Flagged") {
+        setOutcome({
+          tone: "warning",
+          title: `Assignment of ${draftAgent.agent} to ${kebeleName} is Flagged (out-of-bounds).`,
+          body: `${decision.geofence_reason ?? "The DA's position is outside the Kebele boundary"}. It is recorded as Flagged and does not become Effective until a supervisor overrides it or the boundary data is corrected.`,
+        });
+      } else {
+        const check = decision.geofence_result === "In-boundary" ? "Validated (in-boundary)" : "geofence not checked (no DA position or Kebele boundary)";
+        setOutcome({
+          tone: "success",
+          title: `${draftAgent.agent} ${isReassign ? "reassigned" : "assigned"} to ${kebeleName} — ${check}, effective ${when}.`,
+          body: `${isReassign ? `Prior assignment (${draftAgent.kebele}) is now Superseded. ` : ""}Farmer association: ${draft.mode.toLowerCase()}. The DA has been notified.`,
+        });
+      }
+      setDraft(null);
+      setReload((n) => n + 1);
+    } catch (err) {
+      setSaveError(messageOf(err, "Could not save the assignment. Please try again."));
+    } finally {
+      setSaving(false);
     }
-    setDraft(null);
   };
 
   const assignedByColumn: Column<AgentAssignment> = { key: "assignedBy", header: "Assigned by", cell: (r) => r.assignedBy ?? <span className="text-subtle">—</span> };
@@ -209,7 +319,7 @@ export function AssignmentsWorkspace() {
       key: "actions", header: "Actions", align: "center",
       cell: (r) => (
         <div className="flex items-center justify-center gap-1.5">
-          {canAssign && <RowAction tone="solid" onClick={() => openAssign(r)}>{r.kebele ? "Reassign" : "Assign"}</RowAction>}
+          {canAssign && r.status !== "Separated" && <RowAction tone="solid" onClick={() => openAssign(r)}>{r.kebele ? "Reassign" : "Assign"}</RowAction>}
           <RowAction href={`/agents/${r.daId}`} icon="view">View</RowAction>
         </div>
       ),
@@ -248,7 +358,7 @@ export function AssignmentsWorkspace() {
         </div>
       ) : (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Agents" value={String(rows.length)} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z")} />
+        <StatCard label="Agents" value={String(summary?.agents ?? rows.length)} accent="border-l-brand-green" tile="bg-brand-tint text-brand-green" icon={icon("M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z")} />
         <StatCard label="Kebeles covered" value={String(kebelesCovered)} accent="border-l-blue-600" tile="bg-blue-50 text-blue-600" icon={icon("M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0zM12 13a3 3 0 100-6 3 3 0 000 6z")} />
         <StatCard label="Unassigned" value={String(unassigned)} accent="border-l-amber-600" tile="bg-warning-wash text-amber-600" icon={icon("M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 11l-4 4M18 11l4 4")} />
         <StatCard label="Average load" value={avgLoad.toLocaleString()} hint="farmers per assigned agent" accent="border-l-violet-600" tile="bg-violet-50 text-violet-600" icon={icon("M18 20V10M12 20V4M6 20v-6")} />
@@ -256,6 +366,7 @@ export function AssignmentsWorkspace() {
       )}
 
       {outcome && <Banner tone={outcome.tone} title={outcome.title} onDismiss={() => setOutcome(null)}>{outcome.body}</Banner>}
+      {listError && <Banner tone="error" title={isDA ? "Could not load your assignment" : "Could not load assignments"}>{listError}</Banner>}
 
       <Card className="overflow-hidden p-0 shadow-card">
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
@@ -265,7 +376,17 @@ export function AssignmentsWorkspace() {
             <AdvancedFiltersButton activeCount={countActive(filters)} onClick={() => setIsFiltersOpen(true)} />
           </div>
         </div>
-        <DataTable itemLabel="agents" columns={columns} rows={visible} rowKey={(r) => r.daId} minWidth="1000px" emptyTitle="No agents match the selected filters" emptyHint="Clear a filter or try a different search." />
+        <DataTable
+          itemLabel="agents"
+          columns={columns}
+          rows={visible}
+          rowKey={(r) => r.daId}
+          minWidth="1000px"
+          state={loading ? "loading" : listError ? "error" : "ready"}
+          onRetry={() => setReload((n) => n + 1)}
+          emptyTitle={rows.length === 0 ? (isDA ? "No assignment yet" : "No agents in this Woreda") : "No agents match the selected filters"}
+          emptyHint={rows.length === 0 ? undefined : "Clear a filter or try a different search."}
+        />
 
         <AdvancedFiltersDrawer
           isOpen={isFiltersOpen}
@@ -291,7 +412,7 @@ export function AssignmentsWorkspace() {
         <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="flex items-center gap-2 text-[15px] font-semibold text-ink">Kebele coverage summary <Pill tone="slate">Read-only</Pill></h2>
-            <p className="mt-0.5 text-[12.5px] text-ink-soft">Service coverage across kebeles in Bako Tibe. This reporting view is managed separately and is not edited from the assignment screen.</p>
+            <p className="mt-0.5 text-[12.5px] text-ink-soft">Service coverage across kebeles{coverageWoredaName ? ` in ${coverageWoredaName}` : ""}. This reporting view is managed separately and is not edited from the assignment screen.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
             <SearchInput value={coverageQuery} onChange={setCoverageQuery} placeholder={COVERAGE_SEARCH_PLACEHOLDER} />
@@ -302,22 +423,24 @@ export function AssignmentsWorkspace() {
           minWidth="720px"
           rowKey={(k) => k.kebele}
           rows={coverageRows}
-          emptyTitle="No kebeles match the selected filters"
-          emptyHint="Clear a filter or try a different search."
+          state={!coverage ? "loading" : coverage.error ? "error" : "ready"}
+          onRetry={() => setReload((n) => n + 1)}
+          emptyTitle={coverageAll.length === 0 ? "No kebeles in the area master for this Woreda" : "No kebeles match the selected filters"}
+          emptyHint={coverageAll.length === 0 ? undefined : "Clear a filter or try a different search."}
           columns={[
             { key: "kebele", header: "Kebele", cell: (k) => <span className="font-medium text-ink">{k.kebele}</span> },
-            { key: "woreda", header: <FilterDropdown label="Woreda" allLabel="All woredas" options={COVERAGE_WOREDA_OPTIONS} selected={coverageFilters.woreda} onApply={setCoverageFilter("woreda")} />, cell: (k) => k.woreda },
+            { key: "woreda", header: <FilterDropdown label="Woreda" allLabel="All woredas" options={coverageWoredaOptions} selected={coverageFilters.woreda} onApply={setCoverageFilter("woreda")} />, cell: (k) => k.woreda },
             { key: "agents", header: "Agents", align: "right", cell: (k) => k.agents },
             { key: "farmers", header: "Linked farmers", align: "right", cell: (k) => k.farmers.toLocaleString() },
-            { key: "hh", header: "Households", align: "right", cell: (k) => k.households.toLocaleString() },
-            { key: "cov", header: <FilterDropdown label="Coverage" allLabel="All coverage states" options={COVERAGE_OPTIONS} selected={coverageFilters.coverage} onApply={setCoverageFilter("coverage")} />, cell: (k) => <Pill tone={k.coverage === "Full" ? "green" : k.coverage === "Uncovered" ? "red" : "amber"}>{k.coverage}</Pill> },
+            { key: "hh", header: "Households", align: "right", cell: (k) => (k.households == null ? <span className="text-subtle">—</span> : k.households.toLocaleString()) },
+            { key: "cov", header: <FilterDropdown label="Coverage" allLabel="All coverage states" options={coverageOptions} selected={coverageFilters.coverage} onApply={setCoverageFilter("coverage")} />, cell: (k) => <Pill tone={k.coverage === "Full" ? "green" : k.coverage === "Uncovered" ? "red" : "amber"}>{k.coverage}</Pill> },
           ]}
         />
 
         <AdvancedFiltersDrawer
           isOpen={isCoverageFiltersOpen}
           onClose={() => setIsCoverageFiltersOpen(false)}
-          fields={COVERAGE_FILTER_FIELDS}
+          fields={coverageFilterFields}
           filters={coverageFilters}
           onApply={(next) =>
             setCoverageFilters({
@@ -330,23 +453,31 @@ export function AssignmentsWorkspace() {
       )}
 
       {draft && (
-        <Modal isOpen onClose={() => setDraft(null)} title={draftAgent?.kebele ? "Reassign Agent" : "Assign Agent"} subtitle={draftAgent ? `${draftAgent.agent} · ${draft.daId}` : "Select an agent"} size="lg"
-          footer={<><Button variant="outline" onClick={() => setDraft(null)}>Cancel</Button><Button variant="brand" disabled={!draftAgent || !draft.woreda || !draft.kebele || !draft.mode || !draft.effectiveDate || draft.reason.trim().length < 3} onClick={commit}>Validate &amp; commit</Button></>}
+        <Modal isOpen onClose={() => !saving && setDraft(null)} title={draftAgent?.kebele ? "Reassign Agent" : "Assign Agent"} subtitle={draftAgent ? `${draftAgent.agent} · ${draft.daId}` : "Select an agent"} size="lg"
+          footer={<><Button variant="outline" onClick={() => setDraft(null)} disabled={saving}>Cancel</Button><Button variant="brand" disabled={saving || !draftAgent || !draft.woreda || !draft.kebele || !draft.mode || !draft.effectiveDate || draft.reason.trim().length < 3} onClick={commit}>{saving ? "Validating…" : <>Validate &amp; commit</>}</Button></>}
         >
+          {saveError && <Banner tone="error" title="Assignment not saved" className="mb-4">{saveError}</Banner>}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {draft.pickAgent && (
               <FormField label="Agent" htmlFor="as-agent" required className="sm:col-span-2" hint={draftAgent?.kebele ? `Currently in ${draftAgent.kebele} — committing supersedes that assignment.` : undefined}>
                 <Select id="as-agent" value={draft.daId} onChange={(e) => setDraft({ ...draft, daId: e.target.value })}>
                   <option value="">Select agent</option>
-                  {rows.map((r) => <option key={r.daId} value={r.daId}>{r.agent} · {r.daId}{r.kebele ? ` (${r.kebele})` : " (unassigned)"}</option>)}
+                  {rows.filter((r) => r.status !== "Separated").map((r) => <option key={r.daId} value={r.daId}>{r.agent} · {r.daId}{r.kebele ? ` (${r.kebele})` : " (unassigned)"}</option>)}
                 </Select>
               </FormField>
             )}
             <FormField label="Woreda" htmlFor="as-woreda" required>
-              <Select id="as-woreda" value={draft.woreda} onChange={(e) => setDraft({ ...draft, woreda: e.target.value, kebele: "" })}><option value="">Select woreda</option>{WOREDAS.map((w) => <option key={w}>{w}</option>)}</Select>
+              <Select id="as-woreda" value={draft.woreda} onChange={(e) => setDraft({ ...draft, woreda: e.target.value, kebele: "" })}>
+                <option value="">Select woreda</option>
+                {woredaAreas.map((w) => <option key={w.code} value={w.code}>{w.name_en}</option>)}
+                {draft.woreda && !woredaAreas.some((w) => w.code === draft.woreda) && <option value={draft.woreda}>{draft.woreda}</option>}
+              </Select>
             </FormField>
-            <FormField label="Kebele" htmlFor="as-kebele" required>
-              <Select id="as-kebele" value={draft.kebele} onChange={(e) => setDraft({ ...draft, kebele: e.target.value })}><option value="">Select kebele</option>{(KEBELES[draft.woreda] ?? []).map((k) => <option key={k}>{k}</option>)}</Select>
+            <FormField label="Kebele" htmlFor="as-kebele" required hint={draftKebeles?.error ?? (draft.woreda && draftKebeles && draftKebeles.items.length === 0 ? "No kebeles in the area master for this Woreda." : undefined)} hintTone={draftKebeles?.error ? "error" : "muted"}>
+              <Select id="as-kebele" value={draft.kebele} disabled={!draft.woreda || !draftKebeles} onChange={(e) => setDraft({ ...draft, kebele: e.target.value })}>
+                <option value="">{draft.woreda && !draftKebeles ? "Loading kebeles…" : "Select kebele"}</option>
+                {draftKebeles?.items.map((k) => <option key={k.code} value={k.code}>{k.name_en}</option>)}
+              </Select>
             </FormField>
             <FormField label="Effective date" htmlFor="as-date" required>
               <Input id="as-date" type="date" value={draft.effectiveDate} onChange={(e) => setDraft({ ...draft, effectiveDate: e.target.value })} />
