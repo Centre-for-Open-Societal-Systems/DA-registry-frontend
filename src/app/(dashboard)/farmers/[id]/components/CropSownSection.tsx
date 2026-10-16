@@ -19,6 +19,7 @@ export function CropSownSection({ tabs }: { tabs: CropSownTab[] }) {
           <SectionCard
             key={section.title}
             title={section.title}
+            collapsible
             className={index === 0 ? "rounded-t-none rounded-b-xl border-t-0" : undefined}
           >
             <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
