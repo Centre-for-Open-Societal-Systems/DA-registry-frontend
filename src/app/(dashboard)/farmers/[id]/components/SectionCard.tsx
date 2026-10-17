@@ -23,13 +23,13 @@ export function SectionCard({
   className,
   headerClassName,
   bodyClassName,
-  collapsible,
+  collapsible = false,
   defaultOpen = true,
 }: SectionCardProps) {
   const isFindFarmer =
     title.trim().toLowerCase() === "find farmer" ||
     title.trim().toLowerCase() === "fund farmer";
-  const shouldCollapse = collapsible !== undefined ? collapsible : !isFindFarmer;
+  const shouldCollapse = Boolean(collapsible && !isFindFarmer);
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
