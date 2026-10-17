@@ -37,15 +37,27 @@ describe("getLivestockPrefill", () => {
 });
 
 describe("getLivestockReportDetails", () => {
-  it("lays the record out stage by stage, with formatted dates and every field present", () => {
+  it("lays the record out with the 5 Livestock Details tabs and their sections", () => {
     const farmer = FARMERS.find((f) => f.livestock === "Cattle")!;
     const tabs = getLivestockReportDetails(farmer);
 
-    expect(tabs.map((t) => t.key)).toEqual(LIVESTOCK_REPORT_FORM.map((t) => t.key));
-    const fields = tabs.flatMap((t) => t.sections.flatMap((s) => s.fields));
-    expect(fields.length).toBe(LIVESTOCK_REPORT_FORM.flatMap((t) => t.sections.flatMap((s) => s.fields)).length);
-    expect(fields.find((f) => f.key === "next_vaccination_due")?.value).toBe("10 Dec 2026");
-    expect(fields.find((f) => f.key === "heads_total")?.value).toBe(String(farmer.livestockHeads));
+    expect(tabs.map((t) => t.key)).toEqual(["farmer", "livestock", "health", "breeding", "imports"]);
+    expect(tabs.map((t) => t.label)).toEqual([
+      "Farmer",
+      "Livestock",
+      "Health & Vaccination",
+      "Breeding & Vital Events",
+      "Imports & Audit",
+    ]);
+
+    expect(tabs[0].sections.map((s) => s.title)).toEqual(["Livestock Record", "Survey Personnel", "Location"]);
+    expect(tabs[1].sections.map((s) => s.title)).toEqual(["Livestock Details", "Ear Tag Replacement"]);
+    expect(tabs[2].sections.map((s) => s.title)).toEqual(["Health Event Details", "Vaccination Details"]);
+    expect(tabs[3].sections.map((s) => s.title)).toEqual(["Vital Event Details", "Breeding Details"]);
+    expect(tabs[4].sections.map((s) => s.title)).toEqual(["Import Batch Details", "Audit Log Details"]);
+
+    const farmerTabFields = tabs[0].sections[0].fields;
+    expect(farmerTabFields.find((f) => f.key === "farmer")?.isFarmerAvatar).toBe(true);
   });
 });
 
