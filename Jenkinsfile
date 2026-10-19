@@ -30,11 +30,13 @@ pipeline {
                     def targets = [
                         develop: [
                             namespace: 'develop',
-                            verifyUrl: 'https://da-registry-development.oanstaging.com/login'
+                            verifyUrl: 'https://da-registry-development.oanstaging.com/login',
+                            apiBaseUrl: 'http://da-backend-development.oanstaging.com'
                         ],
                         staging: [
                             namespace: 'staging',
-                            verifyUrl: 'https://da-registry-staging.oanstaging.com/login'
+                            verifyUrl: 'https://da-registry-staging.oanstaging.com/login',
+                            apiBaseUrl: 'http://da-backend-staging.oanstaging.com'
                         ]
                     ]
                     def target = targets[env.BRANCH_NAME]
@@ -42,6 +44,7 @@ pipeline {
                     def t = target ?: targets.develop
                     env.K8S_NAMESPACE = t.namespace
                     env.VERIFY_URL    = t.verifyUrl
+                    env.API_BASE_URL  = t.apiBaseUrl
 
                     def sha = sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()
                     env.IMAGE_TAG_BUILD = "${env.TARGET_ENV}-${env.BUILD_NUMBER}-${sha}"
@@ -67,8 +70,10 @@ pipeline {
         stage('Build image') {
             when { anyOf { branch 'develop'; branch 'staging' } }
             steps {
+                // API_BASE_URL is baked into the /api/v1 proxy at build time (see Dockerfile).
                 sh '''
                     docker build --pull \
+                        --build-arg API_BASE_URL="$API_BASE_URL" \
                         -t "$FULL_IMAGE" \
                         -t "$IMAGE_REPO:$TARGET_ENV" \
                         .
