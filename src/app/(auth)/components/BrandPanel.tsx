@@ -23,7 +23,7 @@ export function BrandPanel() {
       </div>
 
       {/* Hero copy */}
-      <div className="relative z-10 flex flex-1 flex-col lg:pt-14 lg:short:pt-8 lg:tiny:pt-4">
+      <div className="relative z-10 flex flex-1 flex-col lg:justify-center lg:py-8 lg:short:py-5 lg:tiny:py-3">
         <h1 className="max-w-md text-3xl font-bold leading-[1.05] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[44px] xl:text-[52px] lg:short:text-[40px] lg:tiny:text-[34px]">
           Every plot,
           <br />
