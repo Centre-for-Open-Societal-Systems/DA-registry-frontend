@@ -70,3 +70,58 @@ export async function createRbacAssignment(userId: string, u: NewUser): Promise<
   });
   return res.data;
 }
+
+export interface RbacQuery {
+  user?: string;
+  /** Backend role name, e.g. "Development Agent". */
+  role?: string;
+  active?: boolean;
+  limit?: number;
+  start?: number;
+}
+
+/** GET /rbac-assignments: the Users & Roles table (Admin). The list may arrive as a bare array or wrapped in an object. */
+export async function listRbacAssignments(q: RbacQuery = {}): Promise<{ items: RbacAssignmentRecord[]; total: number }> {
+  const query = new URLSearchParams();
+  if (q.user) query.set("user", q.user);
+  if (q.role) query.set("role", q.role);
+  if (q.active !== undefined) query.set("is_active", q.active ? "1" : "0");
+  query.set("limit", String(q.limit ?? 200));
+  query.set("start", String(q.start ?? 0));
+  const res = await authRequest<{ data: RbacAssignmentRecord[] | { assignments?: RbacAssignmentRecord[]; items?: RbacAssignmentRecord[]; total?: number }; meta?: { total?: number } }>(`/da-services/rbac-assignments?${query}`);
+  const items = Array.isArray(res.data) ? res.data : (res.data.assignments ?? res.data.items ?? []);
+  const total = res.meta?.total ?? (Array.isArray(res.data) ? undefined : res.data.total) ?? items.length;
+  return { items, total };
+}
+
+const assignmentPath = (id: string, part = "") => `/da-services/rbac-assignments/${encodeURIComponent(id)}${part}`;
+
+/** GET /rbac-assignments/{id}: one assignment with its scope and dates. */
+export async function fetchRbacAssignment(id: string): Promise<RbacAssignmentRecord> {
+  return (await authRequest<{ data: RbacAssignmentRecord }>(assignmentPath(id))).data;
+}
+
+export interface RbacAssignmentPatch {
+  region_scope?: string;
+  woreda_scope?: string;
+  /** ISO dates, "2026-10-15". A role change is a new assignment, not a patch. */
+  effective_from?: string;
+  effective_to?: string;
+}
+
+/** PATCH /rbac-assignments/{id}: edits scope or dates. */
+export async function updateRbacAssignment(id: string, patch: RbacAssignmentPatch): Promise<RbacAssignmentRecord> {
+  return (await authRequest<{ data: RbacAssignmentRecord }>(assignmentPath(id), { method: "PATCH", body: patch })).data;
+}
+
+/** POST /rbac-assignments/{id}/revoke: deactivates the assignment; the row stays for audit. */
+export async function revokeRbacAssignment(id: string, reason?: string): Promise<RbacAssignmentRecord> {
+  return (await authRequest<{ data: RbacAssignmentRecord }>(assignmentPath(id, "/revoke"), { method: "POST", body: reason ? { reason } : {} })).data;
+}
+
+/** Backend role name → portal role; null for a role the portal does not know. */
+export function toPortalRoleFromBackend(role: string): Role | null {
+  const assignable = (Object.entries(BACKEND_ROLE) as [AssignableRole, string][]).find(([, name]) => name === role)?.[0];
+  if (assignable) return assignable;
+  return /^(administrator|admin|system manager)$/i.test(role) ? "Admin" : null;
+}

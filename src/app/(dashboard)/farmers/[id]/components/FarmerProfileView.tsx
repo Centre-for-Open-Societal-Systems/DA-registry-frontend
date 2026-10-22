@@ -9,6 +9,7 @@ import {
   apiVisitToVisit,
   fetchFarmerPlots,
   fetchFarmerProfile,
+  fetchFarmerUpdateStatus,
   fetchFarmerVisits,
   getCropSownDetails,
   getLivestockReportDetails,
@@ -30,7 +31,7 @@ import { DocumentsSection } from "./DocumentsSection";
 import { AdvisorySection } from "./AdvisorySection";
 
 type Loaded =
-  | { source: "api"; farmer: Farmer; plots: Plot[]; visits: Visit[]; notes: string[] }
+  | { source: "api"; farmer: Farmer; plots: Plot[]; visits: Visit[]; notes: string[]; pendingUpdates: number }
   | { source: "sample"; farmer: Farmer; reason: string }
   | { source: "error"; reason: string };
 
@@ -47,12 +48,12 @@ export function FarmerProfileView({ id, sample }: { id: string; sample?: Farmer 
       try {
         const profile = await fetchFarmerProfile(id);
         // Plots and visits are tabs; one failing still leaves a usable profile.
-        const [plots, visits] = await Promise.allSettled([fetchFarmerPlots(id), fetchFarmerVisits(id)]);
+        const [plots, visits, updates] = await Promise.allSettled([fetchFarmerPlots(id), fetchFarmerVisits(id), fetchFarmerUpdateStatus(id)]);
         const plotRows = plots.status === "fulfilled" ? plots.value.map(apiPlotToPlot) : [];
         const visitRows = visits.status === "fulfilled" ? visits.value.items.map(apiVisitToVisit) : [];
         const notes = [plots.status === "rejected" && "plots", visits.status === "rejected" && "visit history"].filter((x): x is string => !!x);
         const farmer = profileToFarmer(profile, { plots: plotRows.length, visits: visits.status === "fulfilled" ? visits.value.total : 0 });
-        if (current) setLoaded({ source: "api", farmer, plots: plotRows, visits: visitRows, notes });
+        if (current) setLoaded({ source: "api", farmer, plots: plotRows, visits: visitRows, notes, pendingUpdates: updates.status === "fulfilled" ? updates.value.total : 0 });
       } catch (err) {
         const reason = err instanceof Error ? err.message : "Could not load the farmer.";
         if (current) setLoaded(sample ? { source: "sample", farmer: sample, reason } : { source: "error", reason });
@@ -89,6 +90,10 @@ export function FarmerProfileView({ id, sample }: { id: string; sample?: Farmer 
       )}
       {fromApi && loaded.notes.length > 0 && (
         <Banner tone="warning">Could not load {loaded.notes.join(" and ")} for this farmer; the other tabs are up to date.</Banner>
+      )}
+
+      {fromApi && loaded.pendingUpdates > 0 && (
+        <Banner tone="info">{loaded.pendingUpdates === 1 ? "1 edit is" : `${loaded.pendingUpdates} edits are`} queued for the Farmer Registry and will sync in the background.</Banner>
       )}
 
       <ProfileHeader farmer={farmer} />
