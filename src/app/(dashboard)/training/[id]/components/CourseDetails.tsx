@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { BackLink } from "@/components/ui/BackLink";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
-import { AGRILEARN_URL, COURSE_STATUS_TONE, coursePercent, courseStatusNote, type Course } from "@/features/performance";
+import { AGRILEARN_URL, COURSE_STATUS_TONE, coursePercent, type Course } from "@/features/performance";
 import { cn } from "@/lib/utils";
 import { MandatoryPill } from "../../components/CoursesTable";
 
@@ -16,6 +16,15 @@ function Icon({ d, className = "h-4 w-4" }: { d: string; className?: string }) {
     </svg>
   );
 }
+
+// Sample directory details per course category until the Agrilearn / MoA directory feed is wired.
+const DIRECTORY: Record<Course["category"], { expertise: string; unit: string }> = {
+  "Digital tools": { expertise: "Digital extension", unit: "ICT & Digital Agriculture Directorate" },
+  Agronomy: { expertise: "Crop protection", unit: "Plant Protection Directorate" },
+  "Safety & compliance": { expertise: "Agrochemical safety", unit: "Plant Protection Directorate" },
+  Livestock: { expertise: "Animal health", unit: "Livestock Development Directorate" },
+  "Extension methods": { expertise: "Extension services", unit: "Agricultural Extension Directorate" },
+};
 
 const initials = (title: string) => title.split(/[\s-]+/).filter((w) => w.length > 3).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
 
@@ -50,7 +59,7 @@ export function CourseDetails({ course }: { course: Course }) {
       <BackLink href="/training?tab=courses" />
 
       <Card className="px-5 py-4">
-        <h1 className="text-[20px] font-bold tracking-tight text-ink sm:text-2xl">Course Details</h1>
+        <h1 className="text-[20px] font-bold tracking-tight text-ink sm:text-2xl">Courses Details</h1>
         <p className="mt-1 text-[13.5px] text-ink-soft">Reflected learning information only. All learning activity and completion changes happen in Agrilearn.</p>
       </Card>
 
@@ -69,12 +78,12 @@ export function CourseDetails({ course }: { course: Course }) {
           {statusPill}
         </div>
         <div className="grid grid-cols-1 gap-x-6 gap-y-5 px-6 py-5 sm:grid-cols-2 lg:grid-cols-3">
-          <Field label="Category" value={course.category} />
-          <Field label="Provider" value={course.provider} />
-          <Field label="Course status" value={`${course.status} • ${courseStatusNote(course)}`} />
-          <Field label="Lessons completed" value={`${course.done} of ${course.total}`} />
-          <Field label="Completed on" value={course.completedOn ?? "—"} />
-          <Field label="Last successful sync" value={`${course.lastSync} EAT`} />
+          <Field label="Expertise area" value={DIRECTORY[course.category].expertise} />
+          <Field label="MoA unit / directorate" value={DIRECTORY[course.category].unit} />
+          <Field label="Directory status" value="Active • available in directory" />
+          <Field label="Region" value="Oromia" />
+          <Field label="Woreda" value="Bako Tibe" />
+          <Field label="Directory last updated" value={`${course.lastSync} EAT`} />
         </div>
       </Card>
 

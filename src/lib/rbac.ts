@@ -86,7 +86,8 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "My Performance", href: "/performance", roles: ["DA", "Supervisor"], part: 1 },
       { title: "Surveys", href: "/surveys", roles: ["DA", "Supervisor"], part: 1 },
-      { title: "Training", href: "/training", roles: ["DA"], part: 1 },
+      { title: "Reviews", href: "/reviews", roles: ["Supervisor", "Admin"], part: 1 },
+      { title: "Training", href: "/training", roles: ["DA", "Supervisor"], part: 1 },
     ],
   },
   {
@@ -141,8 +142,10 @@ export const PAGE_TITLES: { prefix: string; title: string }[] = [
   { prefix: "/advisors", title: "Advisors" },
   { prefix: "/performance/kpi-entry", title: "KPI Entry" },
   { prefix: "/performance", title: "My Performance" },
+  { prefix: "/reviews", title: "Reviews" },
   { prefix: "/surveys/", title: "Survey Capture" },
   { prefix: "/surveys", title: "Surveys" },
+  { prefix: "/training/agents", title: "Agent Training" },
   { prefix: "/training", title: "Training" },
   { prefix: "/sync", title: "Sync Queue" },
   { prefix: "/admin/users", title: "Users & Roles" },

@@ -7,10 +7,9 @@ import { readDraft, removeDraft, writeDraft } from "@/lib/drafts";
 import { REGISTRATION_STEPS, TOTAL_STEPS } from "../steps";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Stepper } from "./Stepper";
-import { PersonalDetailsStep } from "./PersonalDetailsStep";
 import { LocationStep } from "./LocationStep";
-import { IdDocumentsStep } from "./IdDocumentsStep";
-import { SpecializationStep } from "./SpecializationStep";
+import { RegistryStep } from "./RegistryStep";
+import { REGISTRY_TABS } from "../registrySpec";
 import { ReviewStep } from "./ReviewStep";
 import { SubmittedHeader, SubmittedStep } from "./SubmittedStep";
 import { WizardFooter } from "./WizardFooter";
@@ -133,20 +132,12 @@ export function RegisterFarmerWizard() {
   }
 
   const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <PersonalDetailsStep />;
-      case 2:
-        return <LocationStep initial={fieldsSnapshot} />;
-      case 3:
-        return <IdDocumentsStep />;
-      case 4:
-        return <SpecializationStep />;
-      case 5:
-        return <ReviewStep confirmed={confirmed} onConfirmedChange={setConfirmed} onEditStep={goToStep} />;
-      default:
-        return null;
+    const tab = REGISTRY_TABS[currentStep - 1];
+    if (!tab) {
+      return <ReviewStep values={fieldsSnapshot} confirmed={confirmed} onConfirmedChange={setConfirmed} onEditStep={goToStep} />;
     }
+    if (tab.key === "location") return <LocationStep initial={fieldsSnapshot} />;
+    return <RegistryStep key={tab.key} tab={tab} initial={fieldsSnapshot} />;
   };
 
   return (

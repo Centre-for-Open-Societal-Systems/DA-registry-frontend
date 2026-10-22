@@ -2,4 +2,5 @@
 export * from "./data";
 export * from "./supervisorData";
 export * from "./training";
+export * from "./teamTraining";
 export * from "./certificatesStore";
