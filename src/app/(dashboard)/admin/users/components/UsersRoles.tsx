@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AdvancedFiltersButton } from "@/components/ui/AdvancedFiltersButton";
@@ -13,7 +13,7 @@ import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { WOREDAS } from "@/features/agents";
-import { createRbacAssignment, generatePassword, isAssignableRole, registerUser } from "@/features/users";
+import { createRbacAssignment, generatePassword, isAssignableRole, listRbacAssignments, registerUser, revokeRbacAssignment, toPortalRoleFromBackend, updateRbacAssignment, type RbacAssignmentRecord } from "@/features/users";
 import { ApiError } from "@/lib/api";
 import { ROLE_LABELS, ROLES, type Role } from "@/lib/rbac";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
@@ -22,6 +22,8 @@ import { UserFormModal, parseDisplayDate, type UserFormValues } from "./UserForm
 
 // §5 RBAC assignment: user_id, role, active, region_scope, woreda_scope, effective_from/to, assigned_by.
 interface RbacAssignment {
+  /** Backend assignment id (e.g. "DA-RBAC-00111"); absent on the sample rows. */
+  assignmentId?: string;
   userId: string;
   name: string;
   faydaId: string;
@@ -63,6 +65,30 @@ const SEARCH_PLACEHOLDER = searchPlaceholder(["User", "Role", "Scope", "Active",
 const optionsOf = (values: string[], order?: readonly string[], label?: (v: string) => string): FilterOption[] =>
   (order ?? [...new Set(values)]).map((value) => ({ value, label: label ? label(value) : value, count: values.filter((v) => v === value).length }));
 
+const formatIso = (iso: string | null) => (iso ? new Date(`${iso.slice(0, 10)}T00:00:00`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—");
+
+/** A backend assignment as a table row. The record carries the user id only (no name, phone or Fayda id), so that id is the name. */
+function toRow(r: RbacAssignmentRecord): RbacAssignment | null {
+  const role = toPortalRoleFromBackend(r.role);
+  if (!role) return null;
+  return {
+    assignmentId: r.name,
+    userId: r.user,
+    name: r.user,
+    faydaId: "",
+    phone: "",
+    email: r.user.includes("@") && !r.user.endsWith(".internal") ? r.user : "",
+    role,
+    daId: r.da_id ?? "",
+    active: !!r.active,
+    regionScope: r.region_scope ?? "—",
+    woredaScope: r.woreda_scope ?? "—",
+    effectiveFrom: formatIso(r.effective_from),
+    effectiveTo: formatIso(r.effective_to),
+    assignedBy: r.assigned_by,
+  };
+}
+
 const activeLabel = (u: RbacAssignment) => (u.active ? "Active" : "Inactive");
 
 interface UserFilters extends FilterSelection {
@@ -84,6 +110,24 @@ export function UsersRoles() {
   // instead of registering the same email twice, which the backend rejects.
   const registered = useRef<{ email: string; userId: string; password: string } | null>(null);
   const hasBackendSession = useAuthStore((s) => !!s.tokens);
+  const [loadNote, setLoadNote] = useState<{ tone: "warning" | "info"; text: string } | null>(null);
+
+  // With a backend sign-in the table is GET /rbac-assignments; without one, or if the call fails, it keeps the sample rows.
+  useEffect(() => {
+    if (!hasBackendSession) return;
+    let current = true;
+    listRbacAssignments()
+      .then(({ items }) => {
+        if (!current) return;
+        const rows = items.map(toRow).filter((r): r is RbacAssignment => !!r);
+        setUsers(rows);
+        setLoadNote(rows.length < items.length ? { tone: "info", text: `${items.length - rows.length} assignment(s) with a role this portal does not use were left out.` } : null);
+      })
+      .catch((err) => current && setLoadNote({ tone: "warning", text: `${err instanceof Error ? err.message : "Could not load users."} Showing sample data.` }));
+    return () => {
+      current = false;
+    };
+  }, [hasBackendSession]);
   const signedInName = `${useAuthStore((s) => s.user?.name) ?? "Admin"} (Admin)`;
   const [filters, setFilters] = useState<UserFilters>(EMPTY);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -124,12 +168,13 @@ export function UsersRoles() {
     };
 
     let account = registered.current?.email === draft.email ? registered.current : null;
+    let assignment: RbacAssignmentRecord | undefined;
     try {
       if (!account) {
         const userId = await registerUser(newUser);
         account = registered.current = { email: draft.email, userId, password: newUser.password };
       }
-      await createRbacAssignment(account.userId, newUser);
+      assignment = await createRbacAssignment(account.userId, newUser);
     } catch (err) {
       const reason = err instanceof ApiError ? err.message : "Something went wrong. Please try again.";
       throw new Error(account ? `The account for ${draft.email} was created, but its role could not be assigned: ${reason} Fix the details and save again; the account will not be created twice.` : reason);
@@ -138,7 +183,7 @@ export function UsersRoles() {
     registered.current = null;
     const { userId, password } = account;
     // Fayda linking happens at first sign-in, so a new account starts without one
-    setUsers((prev) => [{ userId, faydaId: "", ...draft, active: true, woredaScope: newUser.woredaScope ?? draft.woredaScope, assignedBy: signedInName }, ...prev]);
+    setUsers((prev) => [{ assignmentId: assignment?.name, userId, faydaId: "", ...draft, active: true, woredaScope: newUser.woredaScope ?? draft.woredaScope, assignedBy: signedInName }, ...prev]);
     setAdding(false);
     setTab("users");
     setNotice(
@@ -160,9 +205,27 @@ export function UsersRoles() {
       matchesQuery(query, u, ROLE_LABELS[u.role], activeLabel(u)),
   );
 
-  const saveEdit = (values: UserFormValues) => {
+  // A backend row is saved with PATCH (scope, dates) and, when set Inactive, revoke. A sample row only changes locally.
+  const saveEdit = async (values: UserFormValues) => {
     if (!editing) return;
-    setUsers((prev) => prev.map((u) => (u.userId === editing.userId ? { ...u, ...values, assignedBy: "Yonas Haile (Admin)" } : u)));
+    let saved: Partial<RbacAssignment> = {};
+    if (editing.assignmentId) {
+      if (values.role !== editing.role) throw new Error("A role change is a new assignment. Add the user again with the new role, then set this one Inactive.");
+      if (values.active && !editing.active) throw new Error("A revoked assignment cannot be switched back on. Add a new assignment instead.");
+      try {
+        let record = await updateRbacAssignment(editing.assignmentId, {
+          region_scope: values.regionScope,
+          ...(WOREDAS.includes(values.woredaScope) && { woreda_scope: values.woredaScope }),
+          ...(parseDisplayDate(values.effectiveFrom) && { effective_from: parseDisplayDate(values.effectiveFrom) }),
+          ...(parseDisplayDate(values.effectiveTo) && { effective_to: parseDisplayDate(values.effectiveTo) }),
+        });
+        if (!values.active && editing.active) record = await revokeRbacAssignment(editing.assignmentId);
+        saved = toRow(record) ?? {};
+      } catch (err) {
+        throw new Error(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+      }
+    }
+    setUsers((prev) => prev.map((u) => (u.userId === editing.userId && u.assignmentId === editing.assignmentId ? { ...u, ...values, ...saved, name: u.name, assignedBy: saved.assignedBy ?? "Yonas Haile (Admin)" } : u)));
     setNotice(`${values.name} (${editing.userId}) updated — ${ROLE_LABELS[values.role]} · ${values.woredaScope} · ${values.active ? "Active" : "Inactive"}. Recorded in the audit log with your identity and timestamp.`);
     setEditing(null);
   };
@@ -202,6 +265,7 @@ export function UsersRoles() {
         </button>
         }
       />
+      {loadNote && <Banner tone={loadNote.tone} onDismiss={() => setLoadNote(null)}>{loadNote.text}</Banner>}
       {notice && <Banner tone="success" onDismiss={() => setNotice(null)}>{notice}</Banner>}
       <Card className="overflow-hidden p-0 shadow-card">
         {tab === "users" ? (

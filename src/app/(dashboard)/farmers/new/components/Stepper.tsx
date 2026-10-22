@@ -3,8 +3,8 @@ import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 import { REGISTRATION_STEPS } from "../steps";
 
-// From md up every step gets the same 132px column so the circles line up evenly
-// from edge to edge; the connector's -50px margin (half column minus the 16px
+// From md up every step gets the same 100px column so the circles line up evenly
+// from edge to edge; the connector's -34px margin (half column minus the 16px
 // circle radius) lets it run under the label columns right up to the circle edges.
 // Below md the labels are hidden and the columns share the width equally.
 
@@ -20,7 +20,7 @@ export function Stepper({ currentStep }: { currentStep: number }) {
 
           return (
             <Fragment key={step.label}>
-              <li className="flex flex-1 shrink-0 flex-col items-center md:w-[132px] md:flex-none">
+              <li className="flex flex-1 shrink-0 flex-col items-center md:w-[100px] md:flex-none">
                 <div
                   className={cn(
                     "relative z-10 flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-semibold ring-4",
@@ -49,7 +49,7 @@ export function Stepper({ currentStep }: { currentStep: number }) {
               {!isLast && (
                 <li
                   aria-hidden
-                  className="mt-[15px] h-0.5 flex-1 bg-line md:-mx-[50px]"
+                  className="mt-[15px] h-0.5 flex-1 bg-line md:-mx-[34px]"
                 />
               )}
             </Fragment>

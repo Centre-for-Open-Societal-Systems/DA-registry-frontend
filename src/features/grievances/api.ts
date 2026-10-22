@@ -94,6 +94,11 @@ export async function submitGrievance(body: SubmitGrievanceRequest): Promise<Sub
   return (await authRequest<{ data: SubmitGrievanceResult }>("/da-services/grievances", { method: "POST", body })).data;
 }
 
+/** POST /grievances/sync/retry (Admin): replays failed grievance sync events, one by name or all when omitted. */
+export async function retryGrievanceSync(eventName?: string): Promise<{ retried: string[]; count: number }> {
+  return (await authRequest<{ data: { retried: string[]; count: number } }>("/da-services/grievances/sync/retry", { method: "POST", body: eventName ? { event_name: eventName } : {} })).data;
+}
+
 /** Id for one submit (client_op_id). randomUUID needs https or localhost; plain http falls back to time + random. */
 export const newClientOpId = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`);
 

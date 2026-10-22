@@ -100,6 +100,88 @@ export async function fetchFarmerPlots(farmerId: string): Promise<ApiPlot[]> {
   return res.data.plots;
 }
 
+// ---- Edit permission, queued updates and DA links ----
+
+/** GET /farmers/{id}/permissions: whether the caller may act on this farmer. */
+export interface FarmerPermissions {
+  can_edit: boolean;
+  reason: string | null;
+  is_linked: boolean;
+  link_type: "Automatic" | "Manual" | null;
+}
+
+export async function fetchFarmerPermissions(farmerId: string): Promise<FarmerPermissions> {
+  return (await authRequest<{ data: FarmerPermissions }>(farmerPath(farmerId, "permissions"))).data;
+}
+
+/** Fields a DA may edit on a farmer; identity fields are rejected by the backend. */
+export interface FarmerUpdate {
+  phone?: string;
+  email?: string;
+  alternative_contact?: string;
+  household_size?: number;
+  dependents?: number;
+  occupation?: string;
+  income_source?: string;
+  livelihood_type?: string;
+  total_land_hectares?: number;
+  land_tenure?: string;
+  irrigated_land?: number;
+  certifications?: string;
+  training_status?: string;
+}
+
+/** PATCH /farmers/{id}: queued for the registry, so the answer is a queue reference, not the updated farmer. */
+export async function updateFarmer(farmerId: string, updates: FarmerUpdate, clientOpId: string): Promise<{ event_id: string; status: string; updates: FarmerUpdate }> {
+  const res = await authRequest<{ data: { event_id: string; status: string; updates: FarmerUpdate } }>(`/da-services/farmers/${encodeURIComponent(farmerId)}`, { method: "PATCH", body: { ...updates, client_op_id: clientOpId } });
+  return res.data;
+}
+
+export interface PendingFarmerUpdate {
+  event_id: string;
+  status: string;
+  attempts: number;
+  next_retry: string | null;
+  last_error: string | null;
+  queued_at: string;
+}
+
+/** GET /farmers/{id}/update-status: edits that have not reached the registry yet. */
+export async function fetchFarmerUpdateStatus(farmerId: string): Promise<{ pending: PendingFarmerUpdate[]; total: number }> {
+  const res = await authRequest<{ data: { pending_updates: PendingFarmerUpdate[]; total_pending: number } }>(farmerPath(farmerId, "update-status"));
+  return { pending: res.data.pending_updates, total: res.data.total_pending };
+}
+
+/** POST /farmers/updates/{event_id}/retry (Admin): re-queues a Failed or Conflict update. */
+export async function retryFarmerUpdate(eventId: string): Promise<void> {
+  await authRequest(`/da-services/farmers/updates/${encodeURIComponent(eventId)}/retry`, { method: "POST" });
+}
+
+export interface FarmerLink {
+  link_id: string;
+  da_id: string;
+  farmer_id: string;
+  link_type: "Automatic" | "Manual";
+  is_active: boolean;
+  linked_at: string;
+  kebele?: string | null;
+}
+
+/** GET /farmer-links: how each farmer got onto a DA list. */
+export async function listFarmerLinks(q: { daId?: string; farmerId?: string; linkType?: "Automatic" | "Manual"; active?: boolean } = {}): Promise<FarmerLink[]> {
+  const query = new URLSearchParams();
+  if (q.daId) query.set("da_id", q.daId);
+  if (q.farmerId) query.set("farmer_id", q.farmerId);
+  if (q.linkType) query.set("link_type", q.linkType);
+  if (q.active !== undefined) query.set("is_active", q.active ? "1" : "0");
+  return (await authRequest<{ data: FarmerLink[] }>(`/da-services/farmer-links?${query}`)).data;
+}
+
+/** POST /farmer-links (Supervisor): links one farmer to a DA whose assignment is in Manual mode. */
+export async function linkFarmer(daId: string, farmerId: string, clientOpId: string): Promise<FarmerLink> {
+  return (await authRequest<{ data: FarmerLink }>("/da-services/farmer-links", { method: "POST", body: { da_id: daId, farmer_id: farmerId, client_op_id: clientOpId } })).data;
+}
+
 // ---- Mapping onto the portal's shapes ----
 
 /** "CROP_PRODUCTION" → "Crop production". */

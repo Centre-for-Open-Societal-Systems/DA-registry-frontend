@@ -10,6 +10,9 @@ import { AdvancedFiltersButton } from "@/components/ui/AdvancedFiltersButton";
 import { FilterDropdown, type FilterOption } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer, type FilterFieldConfig, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { COURSE_STATUS_TONE, coursePercent, type Course } from "@/features/performance";
+import { ExportButton } from "@/components/ui/ExportButton";
+import { fileDate, type CsvColumn } from "@/lib/download";
+import { downloadTable } from "@/lib/export";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +20,18 @@ const SEARCH_PLACEHOLDER = searchPlaceholder(["Name", "Category", "Provider", "C
 
 const optionsOf = (values: string[]): FilterOption[] =>
   [...new Set(values)].sort().map((value) => ({ value, label: value, count: values.filter((v) => v === value).length }));
+
+const EXPORT_COLUMNS: CsvColumn<Course>[] = [
+  { header: "Course ID", value: (c) => c.id },
+  { header: "Course", value: (c) => c.title },
+  { header: "Category", value: (c) => c.category },
+  { header: "Mandatory", value: (c) => (c.mandatory ? "Mandatory" : "Optional") },
+  { header: "Provider", value: (c) => c.provider },
+  { header: "Progress", value: (c) => `${c.done} of ${c.total} (${coursePercent(c)}%)` },
+  { header: "Status", value: (c) => c.status },
+  { header: "Due date", value: (c) => c.dueDate },
+  { header: "Certificate", value: (c) => c.certificateId ?? "" },
+];
 
 const mandatoryLabel = (c: Course) => (c.mandatory ? "Mandatory" : "Optional");
 
@@ -51,7 +66,7 @@ export function CourseProgress({ course }: { course: Course }) {
 }
 
 // The DA's Agrilearn course list with column filters, the shared Advanced Filters drawer; View opens the course page.
-export function CoursesTable({ courses }: { courses: Course[] }) {
+export function CoursesTable({ courses, exportable = false }: { courses: Course[]; exportable?: boolean }) {
   const [filters, setFilters] = useState<CourseFilters>(EMPTY);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -120,6 +135,9 @@ export function CoursesTable({ courses }: { courses: Course[] }) {
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
           <SearchInput value={query} onChange={setQuery} placeholder={SEARCH_PLACEHOLDER} />
           <AdvancedFiltersButton activeCount={activeFilterCount} onClick={() => setIsFiltersOpen(true)} />
+          {exportable && (
+            <ExportButton label="Export file" disabled={rows.length === 0} onExport={(format) => downloadTable(format, `team-courses-${fileDate()}`, rows, EXPORT_COLUMNS, "Courses")} />
+          )}
         </div>
       </div>
 
