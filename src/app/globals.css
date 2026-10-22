@@ -91,6 +91,7 @@
   --color-red-800: #991b1b;
   --color-orange-50: #fff7ed;
   --color-orange-100: #ffedd5;
+  --color-orange-200: #fed7aa;
   --color-orange-500: #f97316;
   --color-orange-600: #ea580c;
   --color-orange-700: #c2410c;
@@ -111,7 +112,9 @@
   --color-emerald-600: #059669;
   --color-emerald-800: #065f46;
   --color-cyan-50: #ecfeff;
+  --color-cyan-200: #a5f3fc;
   --color-cyan-600: #0891b2;
+  --color-cyan-700: #0e7490;
   --color-blue-50: #eff6ff;
   --color-blue-100: #dbeafe;
   --color-blue-200: #bfdbfe;
@@ -218,4 +221,24 @@ body {
 .sidebar-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--color-sidebar-scrollbar) transparent;
+}
+
+/* Browser autofill paints inputs pale blue; keep them white with the normal text colour, like every other field. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px white inset;
+  -webkit-text-fill-color: var(--color-zinc-900);
+  caret-color: var(--color-zinc-900);
+  transition: background-color 9999s ease-out;
+}
+
+/* Date Input Calendar Icon */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+input[type="date"]:hover::-webkit-calendar-picker-indicator {
+  opacity: 1;
 }

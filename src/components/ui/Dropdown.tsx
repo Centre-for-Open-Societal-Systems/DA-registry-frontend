@@ -198,8 +198,10 @@ export function Dropdown({
             aria-controls={listId}
             autoComplete="off"
             className={cn(
-              "h-11 w-full truncate rounded-lg border bg-white pl-3 pr-10 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:bg-zinc-50",
-              isOpen ? "border-emerald-600 ring-1 ring-emerald-600" : "border-zinc-300 hover:border-zinc-400",
+              "h-11 w-full truncate rounded-lg border bg-white pl-3 pr-10 text-sm text-zinc-900 outline-none transition-all duration-150 placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:hover:border-gray-200 disabled:hover:ring-0",
+              isOpen
+                ? "border-brand-green ring-2 ring-brand-green/20"
+                : "border-gray-200 hover:border-brand-green hover:ring-1 hover:ring-brand-green/20 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20",
               triggerClassName,
             )}
           />
@@ -218,8 +220,10 @@ export function Dropdown({
         aria-expanded={isOpen}
         aria-controls={listId}
         className={cn(
-          "flex h-11 w-full items-center justify-between gap-3 rounded-lg border bg-white px-3 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:bg-zinc-50",
-          isOpen ? "border-emerald-600 ring-1 ring-emerald-600" : "border-zinc-300 hover:border-zinc-400",
+          "flex h-11 w-full items-center justify-between gap-3 rounded-lg border bg-white px-3 text-left text-sm transition-all duration-150 outline-none cursor-pointer disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:hover:border-gray-200 disabled:hover:ring-0",
+          isOpen
+            ? "border-brand-green ring-2 ring-brand-green/20"
+            : "border-gray-200 hover:border-brand-green hover:ring-1 hover:ring-brand-green/20 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20",
           selected && !selected.disabled ? "text-zinc-900" : "text-zinc-400",
           triggerClassName,
         )}

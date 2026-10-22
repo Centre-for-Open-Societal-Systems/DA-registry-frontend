@@ -1,12 +1,17 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { getFarmer } from "@/features/farmers";
+import { canAddEvidence, fetchVisit, formatVisitTime, type ApiVisitDetail } from "../api";
 import { VISIT_TIMELINE } from "../data";
-import type { VisitRecord } from "../types";
+import type { VisitRecord, VisitTimelineEntry } from "../types";
 import { VisitFarmerCard } from "./VisitFarmerCard";
 import { VisitStatusPill } from "./VisitStatusPill";
+import { VisitEvidence } from "./VisitEvidence";
 
 interface VisitDetailsModalProps {
   visit: VisitRecord | null;
@@ -16,12 +21,37 @@ interface VisitDetailsModalProps {
 
 export function VisitDetailsModal({ visit, onClose, onReschedule }: VisitDetailsModalProps) {
   if (!visit) return null;
+  return <VisitDetails visit={visit} onClose={onClose} onReschedule={onReschedule} />;
+}
+
+const toTimeline = (detail: ApiVisitDetail): VisitTimelineEntry[] =>
+  detail.timeline.map((e) => ({ label: e.label, by: e.by ?? undefined, when: formatVisitTime(e.when), done: e.done }));
+
+function VisitDetails({ visit, onClose, onReschedule }: VisitDetailsModalProps & { visit: VisitRecord }) {
   const farmer = getFarmer(visit.farmerId);
+  // Backend visits carry a physical status; their timeline and stored evidence come from GET /visits/{id}.
+  const isApiVisit = visit.physicalStatus !== undefined;
+  const [detail, setDetail] = useState<ApiVisitDetail | null>(null);
+
+  useEffect(() => {
+    if (!isApiVisit) return;
+    let current = true;
+    fetchVisit(visit.id)
+      .then((d) => current && setDetail(d))
+      .catch(() => {
+        // The table row is enough to show the modal; the timeline stays empty.
+      });
+    return () => {
+      current = false;
+    };
+  }, [isApiVisit, visit.id]);
+
+  const timeline = isApiVisit ? (detail ? toTimeline(detail) : []) : VISIT_TIMELINE;
 
   const info: { label: string; value: string; highlight?: boolean; small?: boolean }[] = [
     { label: "Agent", value: visit.agent },
     { label: "Purpose", value: visit.purpose },
-    { label: "Date & time", value: `Today - ${visit.time}`, highlight: true },
+    { label: "Date & time", value: isApiVisit ? `${visit.date}, ${visit.time}` : `Today - ${visit.time}`, highlight: true },
     { label: "Plot reference", value: visit.plotRef, small: true },
     { label: "Kebele", value: visit.kebele, small: true },
     { label: "Estimated duration", value: `${visit.durationMin} min`, highlight: true },
@@ -76,8 +106,8 @@ export function VisitDetailsModal({ visit, onClose, onReschedule }: VisitDetails
               Status timeline
             </h3>
             <ol className="px-4 py-4">
-              {VISIT_TIMELINE.map((entry, index) => {
-                const isLast = index === VISIT_TIMELINE.length - 1;
+              {timeline.map((entry, index) => {
+                const isLast = index === timeline.length - 1;
                 return (
                   <li key={entry.label} className={cn("relative pl-6", !isLast && "pb-5")}>
                     <span
@@ -100,6 +130,9 @@ export function VisitDetailsModal({ visit, onClose, onReschedule }: VisitDetails
             </ol>
           </section>
         </div>
+
+        {/* Visits from the API only: sample records have no backend id to attach evidence to. */}
+        {canAddEvidence(visit) && <VisitEvidence visitId={visit.id} existing={detail?.attachments} />}
       </div>
     </Modal>
   );

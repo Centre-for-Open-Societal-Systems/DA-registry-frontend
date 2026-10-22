@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { caseFromApi, fetchGrievance, fetchGrievanceTimeline } from "../api";
 import { buildCase } from "../data";
 import type { Grievance, ThreadMessage } from "../types";
 import { GrievancePriorityPill, GrievanceStatusPill } from "./GrievancePills";
@@ -25,8 +26,10 @@ interface GrievanceDetailModalProps {
 }
 
 export function GrievanceDetailModal({ grievance, onClose }: GrievanceDetailModalProps) {
-  const [data] = useState(() => buildCase(grievance));
+  // API tickets start from the table row and fill in from GET /grievances/{id} and its timeline; sample rows use the sample case.
+  const [data, setData] = useState(() => (grievance.fromApi ? caseFromApi(grievance) : buildCase(grievance)));
   const [thread, setThread] = useState<ThreadMessage[]>(data.thread);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [status, setStatus] = useState(grievance.status);
   const [mounted, setMounted] = useState(false);
   const [isDeferOpen, setIsDeferOpen] = useState(false);
@@ -36,6 +39,22 @@ export function GrievanceDetailModal({ grievance, onClose }: GrievanceDetailModa
     const t = setTimeout(() => setMounted(true), 0);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (!grievance.fromApi) return;
+    let current = true;
+    Promise.all([fetchGrievance(grievance.ticketId), fetchGrievanceTimeline(grievance.ticketId).catch(() => [])])
+      .then(([detail, timeline]) => {
+        if (!current) return;
+        const next = caseFromApi(grievance, detail, timeline);
+        setData(next);
+        setThread(next.thread);
+      })
+      .catch((err: unknown) => current && setLoadError(err instanceof Error ? err.message : "Could not load this grievance."));
+    return () => {
+      current = false;
+    };
+  }, [grievance]);
 
   useEffect(() => {
     // Esc closes the nested Defer SLA dialog first, not the whole case
@@ -134,6 +153,7 @@ export function GrievanceDetailModal({ grievance, onClose }: GrievanceDetailModa
               <GrievancePriorityPill priority={grievance.priority} className="px-2.5 py-0.5" />
             </div>
             <h2 id="grievance-title" className="mt-2 text-[17px] font-semibold text-ink">{grievance.title}</h2>
+            {loadError && <p className="mt-1 text-[13px] text-danger">{loadError}</p>}
           </div>
           <button
             type="button"

@@ -2,6 +2,7 @@
 
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { Banner } from "@/components/ui/Banner";
 import type { Farmer } from "../types";
 import { FarmerPicker } from "./FarmerPicker";
 import { FarmerSearch } from "./FarmerSearch";
@@ -56,14 +57,14 @@ export function PlanVisitModal({ farmer, isOpen, onClose, mode = "plan", preset 
           <Button type="button" variant="outline" className="mr-auto" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="button" variant="outline" onClick={() => v.finish("draft")}>
+          <Button type="button" variant="outline" onClick={() => v.finish("draft")} disabled={v.submitting}>
             Save as draft
           </Button>
-          <Button type="submit" form={FORM_ID} variant="brand" className="gap-2">
+          <Button type="submit" form={FORM_ID} variant="brand" className="gap-2" disabled={v.submitting}>
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M5 13l4 4L19 7" />
             </svg>
-            {primaryLabel}
+            {v.submitting ? "Saving…" : primaryLabel}
           </Button>
         </>
         )
@@ -80,6 +81,7 @@ export function PlanVisitModal({ farmer, isOpen, onClose, mode = "plan", preset 
           v.finish("planned");
         }}
       >
+        {v.error && <Banner tone="error" title="Visit not saved">{v.error}</Banner>}
         <FarmerSearch query={v.query} onQueryChange={v.changeQuery} onSearch={v.runSearch} />
         <FarmerPicker
           selected={v.selected}

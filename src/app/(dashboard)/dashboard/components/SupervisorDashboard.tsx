@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { SegmentTabs } from "@/components/ui/SegmentTabs";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatCard } from "@/components/ui/StatCard";
 import { Pill } from "@/components/ui/Pill";
@@ -14,7 +13,7 @@ import { AdvancedFiltersDrawer, type FilterFieldConfig } from "@/components/ui/A
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { TablePagination, usePagination } from "@/components/ui/TablePagination";
 import { cn } from "@/lib/utils";
-import { STATUS_TONE, WOREDA_HEALTH, type KebeleStatus } from "@/features/dashboard";
+import { STATUS_TONE, SUPERVISOR_WOREDA as w, type KebeleStatus } from "@/features/dashboard";
 import { DateRangeDropdown } from "./DateRangeDropdown";
 
 const STATUSES: KebeleStatus[] = ["On track", "Watch", "At risk"];
@@ -31,15 +30,13 @@ const icon = (d: string) => (
 const TH = "whitespace-nowrap px-4 py-3 font-semibold";
 const SEARCH_PLACEHOLDER = searchPlaceholder(["Kebele", "Farmers", "Agents", "Visit %", "Last sync", "Status"]);
 
-// Supervisor home: woreda programme health with kebele breakdown (role home varies — FSD §2.4 / §3.9).
+// Supervisor home: programme health of their own woreda with kebele breakdown (role home varies — FSD §2.4 / §3.9).
 export function SupervisorDashboard() {
-  const [woredaIdx, setWoredaIdx] = useState(0);
   const [kebeleFilter, setKebeleFilter] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<Set<string>>(new Set());
   const [agentsFilter, setAgentsFilter] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const w = WOREDA_HEALTH[woredaIdx];
 
   const kebeleOptions: FilterOption[] = w.kebeles.map((k) => ({ value: k.kebele, label: k.kebele, count: 1 }));
   const statusOptions: FilterOption[] = STATUSES.map((s) => ({ value: s, label: s, count: w.kebeles.filter((k) => k.status === s).length }));
@@ -63,24 +60,15 @@ export function SupervisorDashboard() {
           (agentsFilter.size === 0 || agentsFilter.has(String(k.agents))) &&
           matchesQuery(query, k, `${k.visitPct}%`),
       ),
-    [w, kebeleFilter, statusFilter, agentsFilter, query],
+    [kebeleFilter, statusFilter, agentsFilter, query],
   );
 
   const { pageRows, paginationProps } = usePagination(rows);
   const firstIndex = (paginationProps.page - 1) * paginationProps.pageSize;
 
-  const selectWoreda = (i: number) => {
-    setWoredaIdx(i);
-    setKebeleFilter(new Set());
-    setStatusFilter(new Set());
-    setAgentsFilter(new Set());
-    setQuery("");
-  };
-
   return (
     <div className="flex w-full flex-col gap-4">
       <PageHeader
-        tabBar={<SegmentTabs label="Woreda" tabs={WOREDA_HEALTH.map((item, i) => ({ key: String(i), label: item.woreda }))} active={String(woredaIdx)} onChange={(k) => selectWoreda(Number(k))} />}
         title={`${w.woreda} - Programme Health`}
         description={`Kebele-level performance across ${w.kebeles.length} kebeles · update ${w.updatedAt}`}
         actions={<DateRangeDropdown />}

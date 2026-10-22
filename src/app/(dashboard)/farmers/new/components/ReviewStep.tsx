@@ -5,8 +5,11 @@ import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { RowAction } from "@/components/ui/RowAction";
 import { cn } from "@/lib/utils";
+import { isFieldVisible, LOCATION_HIERARCHY_FIELDS, REGISTRY_TABS } from "../registrySpec";
 
 interface ReviewStepProps {
+  /** Everything entered so far, keyed by registry field name */
+  values: Record<string, string>;
   confirmed: boolean;
   onConfirmedChange: (value: boolean) => void;
   /** Jump back to a step so the agent can edit it */
@@ -20,53 +23,70 @@ const FolderIcon = (
   </svg>
 );
 
-const UserIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <circle cx="12" cy="8" r="4" />
-    <path d="M4 20a8 8 0 0 1 16 0Z" />
-  </svg>
-);
+interface ReviewRow {
+  label: string;
+  value: string;
+  required?: boolean;
+}
 
-const SECTIONS = [
-  { step: 1, title: "Personal Details", description: "Review the profile information", icon: FolderIcon },
-  { step: 2, title: "Location and kebele", description: "Review the Location and kebele", icon: FolderIcon },
-  { step: 3, title: "ID and documents", description: "Review the ID and documents", icon: FolderIcon },
-  { step: 4, title: "Specialisation & qualifications", description: "Review the Specialisation & qualifications", icon: UserIcon },
-];
+function rowsFor(tabKey: string, values: Record<string, string>): ReviewRow[] {
+  const tab = REGISTRY_TABS.find((item) => item.key === tabKey)!;
+  const rows: ReviewRow[] = [];
+  if (tabKey === "location") {
+    // Kebele is the leaf of the hierarchy, so it is the one the registry needs
+    for (const field of LOCATION_HIERARCHY_FIELDS) {
+      rows.push({ label: field.label, value: values[field.name] ?? "", required: field.name === "kebele" });
+    }
+  }
+  for (const section of tab.sections) {
+    for (const field of section.fields) {
+      if (isFieldVisible(field, values)) rows.push({ label: field.label, value: values[field.name] ?? "", required: field.required });
+    }
+  }
+  return rows;
+}
 
-export function ReviewStep({ confirmed, onConfirmedChange, onEditStep }: ReviewStepProps) {
+export function ReviewStep({ values, confirmed, onConfirmedChange, onEditStep }: ReviewStepProps) {
   const [openStep, setOpenStep] = useState<number | null>(null);
 
   return (
-    <Card className="min-h-[480px] p-0 shadow-card">
+    <Card className="p-0 shadow-card">
       <div className="border-b border-line px-5 py-3.5">
         <h2 className="text-[15px] font-semibold text-ink">Review and submit</h2>
       </div>
 
       <div className="flex flex-col gap-3 px-5 py-4">
-        {SECTIONS.map((section) => {
-          const isOpen = openStep === section.step;
+        {REGISTRY_TABS.map((tab, index) => {
+          const step = index + 1;
+          const isOpen = openStep === step;
+          const rows = rowsFor(tab.key, values);
+          const filled = rows.filter((row) => row.value).length;
+          const missing = rows.filter((row) => row.required && !row.value).length;
           return (
-            <div key={section.step} className="overflow-hidden rounded-lg border border-line bg-surface-alt">
+            <div key={tab.key} className="overflow-hidden rounded-lg border border-line bg-surface-alt">
               <button
                 type="button"
-                onClick={() => setOpenStep(isOpen ? null : section.step)}
+                onClick={() => setOpenStep(isOpen ? null : step)}
                 aria-expanded={isOpen}
                 className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-gray-100"
               >
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-tint text-brand-green">
-                  {section.icon}
+                  {FolderIcon}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[16px] font-semibold text-ink">{section.title}</p>
-                  <p className="mt-0.5 text-[12.5px] text-ink-soft">{section.description}</p>
+                  <p className="text-[16px] font-semibold text-ink">{tab.label}</p>
+                  <p className="mt-0.5 text-[12.5px] text-ink-soft">{filled} of {rows.length} fields filled</p>
                 </div>
-                <Pill tone="green" className="shrink-0">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                  Complete
-                </Pill>
+                {missing > 0 ? (
+                  <Pill tone="amber" className="shrink-0">{missing} required missing</Pill>
+                ) : (
+                  <Pill tone="green" className="shrink-0">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    Complete
+                  </Pill>
+                )}
                 <svg
                   className={cn("h-5 w-5 shrink-0 text-gray-400 transition-transform", isOpen && "rotate-180")}
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
@@ -76,11 +96,20 @@ export function ReviewStep({ confirmed, onConfirmedChange, onEditStep }: ReviewS
               </button>
 
               {isOpen && (
-                <div className="flex items-center justify-between border-t border-line bg-white px-5 py-3">
-                  <p className="text-[13px] text-ink-soft">All required fields for this section are filled in.</p>
-                  <RowAction tone="brand" icon="edit" onClick={() => onEditStep(section.step)}>
-                    Edit this step
-                  </RowAction>
+                <div className="border-t border-line bg-white px-5 py-4">
+                  <dl className="grid grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2 xl:grid-cols-3">
+                    {rows.map((row) => (
+                      <div key={row.label}>
+                        <dt className="text-[12.5px] text-ink-soft">{row.label}</dt>
+                        <dd className={cn("text-[14px]", row.value ? "font-medium text-ink" : "text-gray-400")}>{row.value || "Not provided"}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <div className="mt-4 flex justify-end">
+                    <RowAction tone="brand" icon="edit" onClick={() => onEditStep(step)}>
+                      Edit this step
+                    </RowAction>
+                  </div>
                 </div>
               )}
             </div>

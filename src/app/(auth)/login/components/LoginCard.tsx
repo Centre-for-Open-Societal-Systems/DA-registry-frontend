@@ -1,22 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
-import { findAccount, useRegisteredAccountsStore, type DemoAccount } from "@/features/auth";
+import { login } from "@/features/auth";
+import { ApiError } from "@/lib/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { AUTH_INPUT, AUTH_LABEL, AuthCard, PasswordInput } from "../../components/AuthCard";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
 import { ContactAdminModal } from "./ContactAdminModal";
 
+function loginErrorMessage(err: unknown): string {
+  if (!(err instanceof ApiError)) return "Something went wrong while signing in. Please try again.";
+  if (err.status === 401) return "Email or password is incorrect. Check your credentials and try again.";
+  if (err.status === 0 || err.status >= 500) return "Could not reach the server. Please try again in a moment.";
+  return err.message;
+}
+
 export function LoginCard() {
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const registeredAccounts = useRegisteredAccountsStore((s) => s.accounts);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const signIn = useAuthStore((s) => s.signIn);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -27,24 +34,21 @@ export function LoginCard() {
     if (hasHydrated && isAuthenticated) router.replace("/dashboard");
   }, [hasHydrated, isAuthenticated, router]);
 
-  // No auth backend yet: the account list decides both identity and role (see features/auth/accounts).
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  // The backend checks the credentials; identity, role and the token pair all come from its response.
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting) return;
     const form = new FormData(e.currentTarget);
-    const account = findAccount(String(form.get("email") ?? ""), String(form.get("password") ?? ""), registeredAccounts);
-
-    if (!account) {
-      setError("Email or password is incorrect. Check your credentials and try again.");
-      return;
-    }
-
-    completeSignIn(account);
-  };
-
-  const completeSignIn = (account: DemoAccount) => {
     setError(null);
-    signIn({ id: account.email, name: account.name, email: account.email }, account.role);
-    router.push("/dashboard");
+    setIsSubmitting(true);
+    try {
+      const { user, role, tokens, profile } = await login(String(form.get("email") ?? ""), String(form.get("password") ?? ""));
+      signIn(user, role, tokens, profile);
+      router.push("/dashboard");
+    } catch (err) {
+      setError(loginErrorMessage(err));
+      setIsSubmitting(false);
+    }
   };
 
   // Automatically clear URL query parameters if they exist
@@ -61,13 +65,27 @@ export function LoginCard() {
           {error && <ErrorAlert message={error} />}
 
           <div className="flex flex-col gap-1.5">
-            <label className={AUTH_LABEL} htmlFor="email">Email address</label>
-            <Input id="email" name="email" type="email" placeholder="Enter your email address" required className={AUTH_INPUT} />
+            <label className={AUTH_LABEL} htmlFor="email">Email or username</label>
+            <Input
+              id="email"
+              name="email"
+              type="text"
+              autoComplete="username"
+              placeholder="Enter your email or username"
+              required
+              autoFocus
+              className={AUTH_INPUT}
+              startAdornment={
+                <svg className="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" />
+                </svg>
+              }
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label className={AUTH_LABEL} htmlFor="password">Password</label>
-            <PasswordInput id="password" name="password" />
+            <PasswordInput id="password" name="password" autoComplete="current-password" />
           </div>
 
           <div className="mt-1 flex items-center justify-between text-sm">
@@ -102,32 +120,35 @@ export function LoginCard() {
             </button>
           </div>
 
-          <Button type="submit" variant="brand" size="lg" className="mt-2 short:mt-1 h-11 short:h-10 w-full rounded-md transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98]">
-            <span className='font-semibold'>Sign in</span>
+          <Button type="submit" variant="brand" size="lg" disabled={isSubmitting} className="group/submit mt-2 short:mt-1 h-11 short:h-10 w-full gap-2 rounded-md shadow-[0_8px_20px_-8px_rgba(22,163,74,0.6)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_12px_24px_-8px_rgba(22,163,74,0.7)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-80 disabled:hover:scale-100">
+            {isSubmitting ? (
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
+                <path d="M21 12a9 9 0 00-9-9" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
+              </svg>
+            ) : null}
+            <span className="font-semibold">{isSubmitting ? "Signing in…" : "Sign in"}</span>
+            {!isSubmitting && (
+              <svg className="h-4 w-4 transition-transform duration-300 group-hover/submit:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            )}
           </Button>
 
-          <div className="flex items-center gap-3 text-sm text-zinc-400">
-            <span className="h-px flex-1 bg-zinc-200" />
-            or
-            <span className="h-px flex-1 bg-zinc-200" />
-          </div>
-
-          <Link
-            href="/register"
-            className="inline-flex h-11 short:h-10 w-full items-center justify-center rounded-md border border-brand-green bg-white text-brand-green transition-all duration-300 hover:bg-emerald-50 hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <span className="font-semibold">Register</span>
-          </Link>
-
-          <p className="mt-1 text-center text-sm text-zinc-500">
+          <p className="text-center text-sm text-zinc-500">
             Need help?{" "}
             <button type="button" onClick={() => setIsContactOpen(true)} className="font-semibold text-brand-green transition-colors hover:text-brand-green-dark hover:underline">
               Contact your administrator.
             </button>
           </p>
-          <p className="m-0 text-center text-xs text-slate-400">
-            Ministry of Agriculture — Ethiopia
-          </p>
+
+          <div className="-mx-5 -mb-5 flex items-center justify-center gap-1.5 rounded-b-[20px] border-t border-zinc-200 bg-white/70 px-5 py-3 text-xs text-zinc-500 sm:-mx-6 sm:-mb-6 md:-mx-8 md:-mb-8 md:short:-mx-6 md:short:-mb-6 tiny:-mx-4 tiny:-mb-4 md:tiny:-mx-5 md:tiny:-mb-5">
+            <svg className="h-3.5 w-3.5 text-brand-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+            Secure sign-in · Ministry of Agriculture — Ethiopia
+          </div>
         </form>
       </AuthCard>
 

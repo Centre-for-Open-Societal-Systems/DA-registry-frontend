@@ -73,3 +73,6 @@ export const WOREDA_HEALTH: WoredaHealth[] = [
     ],
   },
 ];
+
+/** A Supervisor oversees a single woreda, so their dashboard shows only this one (the rest feed the Executive roll-up). */
+export const SUPERVISOR_WOREDA: WoredaHealth = WOREDA_HEALTH[0];

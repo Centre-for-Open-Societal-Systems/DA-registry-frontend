@@ -11,7 +11,7 @@ import type {
 } from "./types";
 
 // Sample records until the Grievance Service API is wired through src/proxy.ts.
-type GrievanceRecord = Omit<Grievance, "ticketId">;
+type GrievanceRecord = Omit<Grievance, "ticketId"> & { category: GrievanceCategory };
 
 const RECORDS: GrievanceRecord[] = [
   { title: "Fertiliser allocation delivered 6 weeks late, crop season missed", submitter: "Jijiga Woreda Agriculture Office", region: "Somali", woreda: "Jijiga", type: "Fertilizer non-delivery or shortage", category: "Inputs", status: "Assigned", priority: "High", submittedAt: "May 28, 2026, 10:42 AM", attachments: 2, responses: 1, raisedBy: "OnBehalf" },
@@ -197,4 +197,20 @@ export function buildCase(grievance: Grievance): GrievanceCase {
     },
     sla: { consumedPct: 100, submittedOn: "10 Jul 2026", dueOn: "14 Jul 2026" },
   };
+}
+
+/** Table filter options with counts from a set of records (the live list from GET /grievances). */
+export function grievanceFilterOptions(list: Grievance[]) {
+  const stats = grievanceStatsFor(list);
+  const category = toOptions(list.map((g) => g.category));
+  const status: FilterOption[] = GRIEVANCE_BUCKETS.map((b) => ({ value: b, label: b, count: stats[b] }));
+  const priority: FilterOption[] = (["Critical", "High", "Medium", "Low"] as GrievancePriority[]).map((p) => ({ value: p, label: p, count: list.filter((g) => g.priority === p).length }));
+  const region = toOptions(list.map((g) => g.region).filter(Boolean));
+  const fields: FilterFieldConfig[] = [
+    { key: "category", label: "Category", allLabel: "All categories", placeholder: "All Categories", options: category },
+    { key: "status", label: "Status", allLabel: "All statuses", placeholder: "All Statuses", options: status },
+    { key: "priority", label: "Priority", allLabel: "All priorities", placeholder: "All Priorities", options: priority },
+    ...(region.length > 0 ? [{ key: "region", label: "Region", allLabel: "All regions", placeholder: "All Regions", options: region }] : []),
+  ];
+  return { category, status, priority, region, fields };
 }

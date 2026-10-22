@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -13,20 +13,17 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ExportButton } from "@/components/ui/ExportButton";
 import { cn } from "@/lib/utils";
-import { FARMERS } from "@/features/farmers";
+import { apiFarmerToFarmer, FARMERS, listFarmers } from "@/features/farmers";
 import { FarmerAvatar } from "@/features/farmers";
 import { StatusPill } from "@/features/farmers";
 import {
   applyFilters,
   countActiveFilters,
-  CROP_OPTIONS,
-  LIVESTOCK_OPTIONS,
   EMPTY_FILTERS,
-  FARMER_FILTER_FIELDS,
-  KEBELE_OPTIONS,
-  STATUS_OPTIONS,
   type FarmerFilters,
+  type FilterOption,
 } from "@/features/farmers";
+import type { FilterFieldConfig } from "@/components/ui/AdvancedFiltersDrawer";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
 import { AdvancedFiltersDrawer } from "@/components/ui/AdvancedFiltersDrawer";
@@ -37,6 +34,15 @@ import { Banner } from "@/components/ui/Banner";
 import { fileDate, type CsvColumn } from "@/lib/download";
 import { downloadTable, formatLabel } from "@/lib/export";
 import type { Farmer } from "@/features/farmers";
+
+// Every farmer the caller may see in one request (the API maximum); search, filters and paging run here.
+const PAGE_LIMIT = 500;
+
+const STATUS_ORDER = ["Verified", "Pending", "Flagged"];
+
+/** Filter options with counts from the loaded rows; `order` fixes the list, otherwise first-seen order. */
+const optionsOf = (values: string[], order?: string[]): FilterOption[] =>
+  (order ?? [...new Set(values)]).map((value) => ({ value, label: value, count: values.filter((v) => v === value).length }));
 
 const SEARCH_PLACEHOLDER = searchPlaceholder(["Farmer Details", "Kebele", "Crop", "Livestock", "Registered date", "Status"]);
 
@@ -66,8 +72,36 @@ export function FarmersTable() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [segmentId, setSegmentId] = useState(SEGMENTS[0].id);
   const linkBeneficiaries = useBeneficiariesStore((s) => s.link);
+  // GET /farmers is scoped by the backend: a DA gets linked farmers, officers those in their scope.
+  const [loaded, setLoaded] = useState<{ rows: Farmer[]; total: number; error: string | null } | null>(null);
 
-  const selectedFarmers = FARMERS.filter((f) => selected.has(f.id));
+  useEffect(() => {
+    let current = true;
+    listFarmers({ limit: PAGE_LIMIT })
+      .then(({ items, total }) => current && setLoaded({ rows: items.map(apiFarmerToFarmer), total, error: null }))
+      .catch((err: unknown) => current && setLoaded({ rows: [], total: 0, error: err instanceof Error ? err.message : "Could not load farmers." }));
+    return () => {
+      current = false;
+    };
+  }, []);
+
+  const loading = loaded === null;
+  // While the farmers API is unavailable the sample farmers keep the page usable; a banner says so.
+  const usingSample = !!loaded?.error;
+  const source = loading ? [] : usingSample ? FARMERS : loaded.rows;
+
+  const kebeleOptions = optionsOf(source.map((f) => f.kebele));
+  const cropOptions = optionsOf(source.map((f) => f.crop));
+  const livestockOptions = optionsOf(source.map((f) => f.livestock));
+  const statusOptions = optionsOf(source.map((f) => f.status), STATUS_ORDER);
+  const filterFields: FilterFieldConfig[] = [
+    { key: "kebele", label: "Kebele", allLabel: "All kebeles", placeholder: "All", options: kebeleOptions },
+    { key: "crop", label: "Crop", allLabel: "All crops", placeholder: "All", options: cropOptions },
+    { key: "livestock", label: "Livestock", allLabel: "All livestock", placeholder: "All", options: livestockOptions },
+    { key: "status", label: "Status", allLabel: "All Status", placeholder: "All Status", options: statusOptions },
+  ];
+
+  const selectedFarmers = source.filter((f) => selected.has(f.id));
 
   const addToBeneficiaries = () => {
     const { added, skipped } = linkBeneficiaries([...selected], segmentId);
@@ -85,7 +119,7 @@ export function FarmersTable() {
     setIsAddOpen(false);
   };
 
-  const rows = applyFilters(FARMERS, filters).filter((farmer) => matchesQuery(query, farmer));
+  const rows = applyFilters(source, filters).filter((farmer) => matchesQuery(query, farmer));
   const activeFilterCount = countActiveFilters(filters);
   const { pageRows, paginationProps } = usePagination(rows);
   const allSelected = rows.length > 0 && rows.every((f) => selected.has(f.id));
@@ -110,6 +144,7 @@ export function FarmersTable() {
       <div className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2.5">
           <h2 className="text-[15px] font-semibold text-ink">My Farmers</h2>
+          {loaded && !usingSample && <span className="text-[13px] text-muted">{loaded.total.toLocaleString()} total</span>}
           <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-green px-1.5 text-[12px] font-semibold text-white">
             {selected.size}
           </span>
@@ -136,6 +171,11 @@ export function FarmersTable() {
         </div>
       </div>
 
+      {usingSample && (
+        <Banner tone="warning" title="Farmers could not be loaded" className="mx-4 mb-3">
+          {loaded?.error} Showing sample farmers until the farmers service is available.
+        </Banner>
+      )}
       {notice && <Banner tone="success" className="mx-4 mb-3" onDismiss={() => setNotice(null)}>{notice}</Banner>}
 
       {/* Table */}
@@ -148,25 +188,36 @@ export function FarmersTable() {
               </th>
               <th className="px-4 py-3 font-semibold">Farmer Details</th>
               <th className="px-4 py-3 font-semibold">
-                <FilterDropdown label="Kebele" allLabel="All kebeles" options={KEBELE_OPTIONS} selected={filters.kebele} onApply={setColumnFilter("kebele")} />
+                <FilterDropdown label="Kebele" allLabel="All kebeles" options={kebeleOptions} selected={filters.kebele} onApply={setColumnFilter("kebele")} />
               </th>
               <th className="px-4 py-3 font-semibold">
-                <FilterDropdown label="Crop" allLabel="All crops" options={CROP_OPTIONS} selected={filters.crop} onApply={setColumnFilter("crop")} />
+                <FilterDropdown label="Crop" allLabel="All crops" options={cropOptions} selected={filters.crop} onApply={setColumnFilter("crop")} />
               </th>
               <th className="px-4 py-3 font-semibold">
-                <FilterDropdown label="Livestock" allLabel="All livestock" options={LIVESTOCK_OPTIONS} selected={filters.livestock} onApply={setColumnFilter("livestock")} />
+                <FilterDropdown label="Livestock" allLabel="All livestock" options={livestockOptions} selected={filters.livestock} onApply={setColumnFilter("livestock")} />
               </th>
               <th className="px-4 py-3 text-center font-semibold">Registered date</th>
               <th className="px-4 py-3 text-center font-semibold">
-                <FilterDropdown label="Status" allLabel="All Status" options={STATUS_OPTIONS} selected={filters.status} onApply={setColumnFilter("status")} />
+                <FilterDropdown label="Status" allLabel="All Status" options={statusOptions} selected={filters.status} onApply={setColumnFilter("status")} />
               </th>
               <th className="px-4 py-3 text-center font-semibold">Action</th>
             </tr>
           </thead>
           <tbody className="text-[14px] text-slate-700">
-            {rows.length === 0 && (
+            {loading && (
               <tr>
-                <td colSpan={8} className="px-4 py-6"><EmptyState title="No farmers match the selected filters" hint="Clear a filter or try a different search." /></td>
+                <td colSpan={8} className="px-4 py-8 text-center text-[13.5px] text-muted">Loading farmers…</td>
+              </tr>
+            )}
+            {!loading && rows.length === 0 && (
+              <tr>
+                <td colSpan={8} className="px-4 py-6">
+                  {source.length === 0 ? (
+                    <EmptyState title="No farmers linked to you yet" hint="Farmers appear here once they are linked to your DA-ID." />
+                  ) : (
+                    <EmptyState title="No farmers match the selected filters" hint="Clear a filter or try a different search." />
+                  )}
+                </td>
               </tr>
             )}
             {pageRows.map((farmer) => {
@@ -191,21 +242,21 @@ export function FarmersTable() {
                       <FarmerAvatar name={farmer.name} avatar={farmer.avatar} />
                       <div className="leading-tight">
                         <p className="font-medium text-ink">{farmer.name}</p>
-                        <p className="mt-0.5 text-[13px] text-muted">{farmer.phone}</p>
+                        {farmer.phone && <p className="mt-0.5 text-[13px] text-muted">{farmer.phone}</p>}
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3.5">{farmer.kebele}</td>
                   <td className="px-4 py-3.5">
-                    {farmer.crop} {farmer.landHa} ha
+                    {farmer.crop === "—" ? `${farmer.landHa} ha` : `${farmer.crop} ${farmer.landHa} ha`}
                   </td>
                   <td className="px-4 py-3.5">
-                    {farmer.livestock} {farmer.livestockHeads} heads
+                    {farmer.livestock === "—" ? "—" : `${farmer.livestock} ${farmer.livestockHeads} heads`}
                   </td>
                   <td className="px-4 py-3.5 text-center leading-tight">
                     {farmer.registeredAt}
                     <br />
-                    <span className="text-slate-600">- {farmer.registeredTime}</span>
+                    {farmer.registeredTime && <span className="text-slate-600">- {farmer.registeredTime}</span>}
                   </td>
                   <td className="px-4 py-3.5 text-center">
                     <StatusPill status={farmer.status} reason={farmer.statusReason} />
@@ -225,7 +276,7 @@ export function FarmersTable() {
       <AdvancedFiltersDrawer
         isOpen={isFiltersOpen}
         onClose={() => setIsFiltersOpen(false)}
-        fields={FARMER_FILTER_FIELDS}
+        fields={filterFields}
         filters={filters}
         onApply={(next) =>
           setFilters({

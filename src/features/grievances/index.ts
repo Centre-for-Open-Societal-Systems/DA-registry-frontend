@@ -8,3 +8,4 @@ export * from "./components/GrievancePills";
 export * from "./components/GrievanceResponsePanel";
 export * from "./components/GrievanceThread";
 export * from "./components/RaiseGrievanceModal";
+export * from "./api";

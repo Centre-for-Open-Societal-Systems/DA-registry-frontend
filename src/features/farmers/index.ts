@@ -1,6 +1,7 @@
 // Public API of the farmers feature. Import from "@/features/farmers", never from files inside it.
 export * from "./agentProfile";
 export * from "./advisoryStore";
+export * from "./cropSown";
 export * from "./data";
 export * from "./filters";
 export * from "./qualifications";
@@ -13,3 +14,5 @@ export * from "./components/PlanVisitButton";
 export * from "./components/PlanVisitModal";
 export * from "./components/ProfilePhotoUpload";
 export * from "./components/StatusPill";
+export * from "./farmersApi";
+export * from "./livestockReport";

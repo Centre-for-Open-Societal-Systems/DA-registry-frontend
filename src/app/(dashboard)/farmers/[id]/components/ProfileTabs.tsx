@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 
 // Advisory shows the Q&A captured on Advisory visits; AdvisoryNotesSection (Part 2 notes) stays unused for now.
-const TABS = ["Overview", "Holdings", "Crop history", "Livestock", "Livestock history", "Visit history", "Documents", "Advisory"] as const;
+const TABS = ["Overview", "Holdings", "Crop Sown Details", "Livestock Details", "Livestock history", "Visit history", "Documents", "Advisory"] as const;
 export type ProfileTab = (typeof TABS)[number];
 
 // Only the tab switch runs on the client; each panel is rendered by the page and passed in.
@@ -13,25 +13,28 @@ export function ProfileTabs({ panels }: { panels: Record<ProfileTab, ReactNode> 
   const [active, setActive] = useState<ProfileTab>("Overview");
 
   return (
-    <Card className="overflow-hidden p-0 shadow-card">
-      <div className="flex flex-wrap border-b border-line" role="tablist">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            role="tab"
-            aria-selected={active === tab}
-            onClick={() => setActive(tab)}
-            className={cn(
-              "whitespace-nowrap px-4 py-3.5 text-[14px] transition-colors",
-              active === tab
-                ? "-mb-px border-b-2 border-brand-green bg-brand-wash font-medium text-brand-green"
-                : "text-ink-soft hover:text-ink",
-            )}
-          >
-            {tab}
-          </button>
-        ))}
+    <Card className="overflow-hidden border border-line p-0 shadow-card">
+      <div className="flex w-full items-center overflow-x-auto border-b border-line bg-white no-scrollbar" role="tablist">
+        {TABS.map((tab) => {
+          const isActive = active === tab;
+          return (
+            <button
+              key={tab}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setActive(tab)}
+              className={cn(
+                "shrink-0 whitespace-nowrap border-r border-line px-5 py-3.5 text-[14px] transition-colors first:rounded-tl-xl",
+                isActive
+                  ? "-mb-px border-b-[3px] border-b-brand-green bg-brand-wash font-semibold text-brand-green"
+                  : "font-medium text-ink-soft hover:bg-surface hover:text-ink",
+              )}
+            >
+              {tab}
+            </button>
+          );
+        })}
       </div>
 
       <div key={active} className="animate-fade-in p-4">

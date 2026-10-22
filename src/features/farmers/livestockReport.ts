@@ -1,0 +1,603 @@
+import { HERDS } from "./data";
+import { registryCode } from "./components/planVisit";
+import type { Farmer } from "./types";
+
+// Livestock Report: the tab → section → field list for the Submit Livestock Report form and the profile's
+// "Livestock Details" tab. Kept separate from the Crop Sown Registry (cropSown.ts) so either form can change on
+// its own. `key` is the field name the Livestock API will use. Values are sample data until that API exists.
+
+export type LivestockFieldType = "text" | "number" | "date" | "select" | "multiselect" | "radio" | "geo";
+
+export interface LivestockFieldDef {
+  key: string;
+  label: string;
+  type: LivestockFieldType;
+  options?: readonly string[];
+  /** The DA must fill it before submitting. */
+  required?: boolean;
+}
+
+export interface LivestockSectionDef {
+  id: string;
+  title: string;
+  fields: LivestockFieldDef[];
+}
+
+export interface LivestockTabDef {
+  key: string;
+  label: string;
+  sections: LivestockSectionDef[];
+}
+
+/** Form values keyed by `livestockValueKey(section, field)`. */
+export type LivestockValues = Record<string, string>;
+
+export const livestockValueKey = (sectionId: string, fieldKey: string) => `${sectionId}.${fieldKey}`;
+
+// ── Option lists ────────────────────────────────────────────────────────────────────────────────────────
+
+const YES_NO = ["Yes", "No"];
+const SEASONS = ["Meher", "Belg", "Bega"];
+const SPECIES = ["Cattle", "Sheep", "Goats", "Poultry", "Camel", "Equine", "Bee colonies"];
+const BREED_TYPES = ["Local", "Crossbred", "Exotic"];
+const BREEDS = ["Boran (local)", "Horro", "Arsi-Bale", "Sasso (improved)", "Holstein-Friesian cross", "Jersey cross", "Fogera", "Begait"];
+const SYSTEMS = ["Mixed crop-livestock", "Agro-pastoral", "Pastoral", "Commercial / intensive"];
+const PURPOSES = ["Dairy", "Meat", "Draught", "Eggs", "Breeding", "Wool / hides", "Honey"];
+const HOUSING = ["Zero-grazing shed", "Communal grazing", "Backyard coop", "Night enclosure (boma)", "Free range"];
+const VACCINES = ["FMD", "Lumpy skin disease", "Anthrax", "Blackleg", "PPR", "Sheep & goat pox", "Pasteurellosis", "Newcastle disease"];
+const VACCINATION_STATUS = ["Up to date", "Due", "Overdue"];
+const DISEASES = ["FMD", "Lumpy skin disease", "Trypanosomosis", "Internal parasites", "External parasites", "Mastitis", "Newcastle disease", "PPR"];
+const TREATMENTS = ["Treated by vet", "Treated by CAHW", "Self-treated", "Not treated"];
+const VET_PROVIDERS = ["Government vet clinic", "Private vet", "Community animal health worker", "None"];
+const FEED_SOURCES = ["Natural pasture", "Crop residue", "Improved forage", "Hay", "Concentrate", "Agro-industrial by-product"];
+const FORAGES = ["Desho grass", "Napier / elephant grass", "Rhodes grass", "Oats-vetch", "Lablab", "Sesbania"];
+const WATER_SOURCES = ["River", "Well", "Pond", "Spring", "Piped water", "Dam"];
+const FREQUENCIES = ["Twice a day", "Daily", "Every other day", "Twice a week"];
+const MARKETS = ["Local market", "Cooperative", "Trader at farm gate", "Abattoir", "Not sold"];
+const LOSS_REASONS = ["Disease", "Feed shortage", "Drought", "Predator", "Theft", "Accident", "None"];
+
+// ── Field list ──────────────────────────────────────────────────────────────────────────────────────────
+
+type Def = [key: string, label: string, type: LivestockFieldType, options?: readonly string[]];
+
+// Fields the DA must fill before submitting.
+const REQUIRED_KEYS = new Set(["report_year", "report_season"]);
+
+const section = (id: string, title: string, defs: Def[]): LivestockSectionDef => ({
+  id,
+  title,
+  fields: defs.map(([key, label, type, options]) => ({ key, label, type, options, ...(REQUIRED_KEYS.has(key) && { required: true }) })),
+});
+
+export const LIVESTOCK_REPORT_FORM: LivestockTabDef[] = [
+  {
+    key: "holding",
+    label: "Livestock Holding",
+    sections: [
+      section("identity", "Farmer Identity", [
+        ["farmer_id", "Farmer ID", "text"],
+        ["farmer_name", "Farmer Name", "text"],
+        ["fayda_fan_id", "Fayda ID (FAN)", "text"],
+        ["report_year", "Report Year", "text"],
+        ["report_season", "Season", "select", SEASONS],
+      ]),
+      section("address", "Address / Location", [
+        ["geo_code_hierarchy_json", "Location Hierarchy", "geo"],
+        ["latitude", "Geo Latitude", "text"],
+        ["longitude", "Geo Longitude", "text"],
+      ]),
+      section("holding", "Holding", [
+        ["production_system", "Production System", "select", SYSTEMS],
+        ["primary_species", "Primary Species", "select", SPECIES],
+        ["total_heads", "Total Heads (all species)", "number"],
+        ["grazing_land_ha", "Grazing Land (ha)", "number"],
+        ["housing", "Housing", "select", HOUSING],
+      ]),
+    ],
+  },
+  {
+    key: "herd",
+    label: "Herd Composition",
+    sections: [
+      section("herd", "Herd / Flock", [
+        ["herd_code", "Herd Code", "text"],
+        ["species", "Species", "select", SPECIES],
+        ["breed", "Breed", "select", BREEDS],
+        ["breed_type", "Breed Type", "radio", BREED_TYPES],
+        ["purpose", "Purpose", "multiselect", PURPOSES],
+      ]),
+      section("structure", "Herd Structure", [
+        ["adult_males", "Adult Males", "number"],
+        ["adult_females", "Adult Females", "number"],
+        ["young_stock", "Young Stock", "number"],
+        ["heads_total", "Total Heads", "number"],
+        ["pregnant_females", "Pregnant Females", "number"],
+        ["new_additions", "Bought / Received This Season", "number"],
+      ]),
+    ],
+  },
+  {
+    key: "health",
+    label: "Health & Vaccination",
+    sections: [
+      section("vaccination", "Vaccination", [
+        ["vaccines_given", "Vaccines Given", "multiselect", VACCINES],
+        ["last_vaccination_date", "Last Vaccination Date", "date"],
+        ["next_vaccination_due", "Next Vaccination Due", "date"],
+        ["vaccination_status", "Vaccination Status", "select", VACCINATION_STATUS],
+        ["animals_vaccinated", "Animals Vaccinated", "number"],
+      ]),
+      section("disease", "Disease & Treatment", [
+        ["disease_observed", "Disease Observed", "radio", YES_NO],
+        ["disease_type", "Disease Type", "multiselect", DISEASES],
+        ["animals_affected", "Animals Affected", "number"],
+        ["deaths", "Deaths", "number"],
+        ["treatment", "Treatment", "select", TREATMENTS],
+        ["vet_service_provider", "Vet Service Provider", "select", VET_PROVIDERS],
+        ["last_deworming_date", "Last Deworming Date", "date"],
+      ]),
+    ],
+  },
+  {
+    key: "feeding",
+    label: "Feeding & Water",
+    sections: [
+      section("feed", "Feed", [
+        ["feed_sources", "Feed Sources", "multiselect", FEED_SOURCES],
+        ["improved_forage", "Improved Forage Grown", "select", FORAGES],
+        ["forage_area_ha", "Forage Area (ha)", "number"],
+        ["supplement_given", "Supplement / Concentrate Given", "radio", YES_NO],
+        ["feed_shortage", "Feed Shortage This Season", "radio", YES_NO],
+        ["feed_shortage_months", "Months of Feed Shortage", "number"],
+      ]),
+      section("water", "Water", [
+        ["water_source", "Water Source", "select", WATER_SOURCES],
+        ["watering_frequency", "Watering Frequency", "select", FREQUENCIES],
+        ["water_distance_km", "Distance to Water (km)", "number"],
+      ]),
+    ],
+  },
+  {
+    key: "production",
+    label: "Production & Sales",
+    sections: [
+      section("output", "Production", [
+        ["milking_cows", "Milking Cows", "number"],
+        ["milk_litres_per_day", "Milk (L/day, whole herd)", "number"],
+        ["eggs_per_month", "Eggs per Month", "number"],
+        ["births", "Births This Season", "number"],
+        ["ai_service_used", "AI Service Used", "radio", YES_NO],
+        ["ai_inseminations", "Inseminations", "number"],
+      ]),
+      section("sales", "Sales & Losses", [
+        ["animals_sold", "Animals Sold", "number"],
+        ["sale_income_etb", "Sale Income (ETB)", "number"],
+        ["market", "Main Market", "select", MARKETS],
+        ["loss_reason", "Main Loss Reason", "select", LOSS_REASONS],
+        ["animals_lost", "Animals Lost", "number"],
+      ]),
+    ],
+  },
+];
+
+// ── Sample record ───────────────────────────────────────────────────────────────────────────────────────
+
+/** "12 Jun 2026" → "2026-06-12". */
+const toIso = (display: string) => {
+  const d = new Date(display);
+  return Number.isNaN(d.getTime()) ? "" : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+/**
+ * What the Farmer Registry and the last livestock census already hold for a farmer: the form fills these as soon
+ * as the farmer is found and shows them read-only; the DA enters what they count and observe this season.
+ */
+export function getLivestockPrefill(farmer: Farmer): LivestockValues {
+  const herd = HERDS.find((h) => h.animal === farmer.livestock) ?? HERDS[0];
+  const woreda = farmer.woreda.replace(/ woreda$/i, "");
+  const values: Record<string, string> = {
+    [livestockValueKey("identity", "farmer_id")]: registryCode(farmer),
+    [livestockValueKey("identity", "farmer_name")]: farmer.name,
+    [livestockValueKey("identity", "fayda_fan_id")]: `FAN-${registryCode(farmer).replace(/\D/g, "").padStart(6, "0")}`,
+    [livestockValueKey("address", "geo_code_hierarchy_json")]: `${farmer.region} › ${woreda} › ${farmer.kebele}`,
+    [livestockValueKey("address", "latitude")]: "8.9806",
+    [livestockValueKey("address", "longitude")]: "37.0522",
+    [livestockValueKey("holding", "primary_species")]: farmer.livestock,
+    [livestockValueKey("holding", "housing")]: herd.housing,
+    [livestockValueKey("herd", "herd_code")]: herd.code,
+    [livestockValueKey("herd", "species")]: herd.animal,
+    [livestockValueKey("herd", "breed")]: herd.breed,
+    [livestockValueKey("vaccination", "last_vaccination_date")]: toIso(herd.lastVaccinated),
+  };
+  return Object.fromEntries(Object.entries(values).filter(([, v]) => v));
+}
+
+const PURPOSE_BY_SPECIES: Record<string, string> = { Cattle: "Dairy, Draught", Sheep: "Meat, Wool / hides", Goats: "Meat, Dairy", Poultry: "Eggs, Meat" };
+const VACCINES_BY_SPECIES: Record<string, string> = { Cattle: "FMD, Lumpy skin disease, Anthrax", Sheep: "PPR, Sheep & goat pox", Goats: "PPR, Sheep & goat pox", Poultry: "Newcastle disease" };
+
+/**
+ * The farmer's last submitted livestock report (2026 Meher), for the profile's "Livestock Details" tab. Sample data
+ * derived from the farmer's record and herd until the Livestock API exists. Dates are ISO yyyy-mm-dd.
+ */
+export function getLivestockReportRecord(farmer: Farmer): LivestockValues {
+  const herd = HERDS.find((h) => h.animal === farmer.livestock) ?? HERDS[0];
+  const heads = farmer.livestockHeads;
+  const isPoultry = herd.animal === "Poultry";
+  const isCattle = herd.animal === "Cattle";
+  const females = Math.max(1, Math.round(heads * 0.6));
+  const males = Math.max(0, Math.round(heads * 0.15));
+  const young = Math.max(0, heads - females - males);
+  const sold = isPoultry ? Math.round(heads * 0.2) : Math.min(2, Math.floor(heads / 4));
+  const v = (sectionId: string, key: string, value: string | number) => [livestockValueKey(sectionId, key), String(value)] as const;
+
+  return {
+    ...getLivestockPrefill(farmer),
+    ...Object.fromEntries([
+      v("identity", "report_year", "2026"),
+      v("identity", "report_season", "Meher"),
+      v("holding", "production_system", "Mixed crop-livestock"),
+      v("holding", "total_heads", heads),
+      v("holding", "grazing_land_ha", (farmer.landHa * 0.3).toFixed(1)),
+      v("herd", "breed_type", herd.breed.includes("improved") || herd.breed.includes("cross") ? "Crossbred" : "Local"),
+      v("herd", "purpose", PURPOSE_BY_SPECIES[herd.animal] ?? herd.purpose),
+      v("structure", "adult_males", males),
+      v("structure", "adult_females", females),
+      v("structure", "young_stock", young),
+      v("structure", "heads_total", heads),
+      v("structure", "pregnant_females", isPoultry ? 0 : Math.floor(females / 3)),
+      v("structure", "new_additions", 0),
+      v("vaccination", "vaccines_given", VACCINES_BY_SPECIES[herd.animal] ?? "FMD"),
+      v("vaccination", "next_vaccination_due", "2026-12-10"),
+      v("vaccination", "vaccination_status", herd.vaccination),
+      v("vaccination", "animals_vaccinated", herd.vaccination === "Overdue" ? 0 : heads),
+      v("disease", "disease_observed", "Yes"),
+      v("disease", "disease_type", isPoultry ? "Newcastle disease" : "Internal parasites"),
+      v("disease", "animals_affected", Math.max(1, Math.round(heads * 0.2))),
+      v("disease", "deaths", isPoultry ? 2 : 0),
+      v("disease", "treatment", "Treated by CAHW"),
+      v("disease", "vet_service_provider", "Community animal health worker"),
+      v("disease", "last_deworming_date", "2026-08-20"),
+      v("feed", "feed_sources", isPoultry ? "Concentrate, Crop residue" : "Natural pasture, Crop residue, Improved forage"),
+      v("feed", "improved_forage", isPoultry ? "" : "Desho grass"),
+      v("feed", "forage_area_ha", isPoultry ? 0 : 0.1),
+      v("feed", "supplement_given", isCattle || isPoultry ? "Yes" : "No"),
+      v("feed", "feed_shortage", "Yes"),
+      v("feed", "feed_shortage_months", 2),
+      v("water", "water_source", "River"),
+      v("water", "watering_frequency", "Daily"),
+      v("water", "water_distance_km", 1.5),
+      v("output", "milking_cows", isCattle ? Math.max(1, Math.floor(females / 2)) : 0),
+      v("output", "milk_litres_per_day", isCattle ? Math.max(1, Math.floor(females / 2)) * 4 : 0),
+      v("output", "eggs_per_month", isPoultry ? heads * 12 : 0),
+      v("output", "births", isPoultry ? 0 : Math.floor(females / 2)),
+      v("output", "ai_service_used", isCattle ? "Yes" : "No"),
+      v("output", "ai_inseminations", isCattle ? 1 : 0),
+      v("sales", "animals_sold", sold),
+      v("sales", "sale_income_etb", sold * (isPoultry ? 450 : isCattle ? 28000 : 6500)),
+      v("sales", "market", sold > 0 ? "Local market" : "Not sold"),
+      v("sales", "loss_reason", isPoultry ? "Disease" : "None"),
+      v("sales", "animals_lost", isPoultry ? 2 : 0),
+    ].filter(([, value]) => value !== "")),
+  };
+}
+
+// ── Display ─────────────────────────────────────────────────────────────────────────────────────────────
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** A stored value as shown on screen: dates as "10 Dec 2026", empty as "—". */
+export function formatLivestockValue(field: LivestockFieldDef, raw: string | undefined): string {
+  if (!raw) return "—";
+  const date = field.type === "date" && /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  return date ? `${date[3]} ${MONTHS[Number(date[2]) - 1] ?? date[2]} ${date[1]}` : raw;
+}
+
+export interface LivestockDetailsField {
+  key: string;
+  label: string;
+  value: string;
+  isFarmerAvatar?: boolean;
+  initials?: string;
+}
+
+export interface LivestockDetailsSectionDef {
+  title: string;
+  fields: LivestockDetailsField[];
+}
+
+export interface LivestockDetailsTab {
+  key: string;
+  label: string;
+  sections: LivestockDetailsSectionDef[];
+}
+
+/**
+ * The 5 tabs for the farmer profile's "Livestock Details" tab:
+ * Farmer, Livestock, Health & Vaccination, Breeding & Vital Events, and Imports & Audit.
+ */
+export function getLivestockReportDetails(farmer: Farmer): LivestockDetailsTab[] {
+  const isLelise = farmer.id === "lelise-gudeta";
+  const initials =
+    farmer.name
+      .split(" ")
+      .map((p) => p[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "LG";
+
+  const farmerId = isLelise
+    ? "FR-88466"
+    : farmer.id === "abebe-kebede"
+    ? "FRM-000101"
+    : registryCode(farmer) || "FR-88466";
+
+  const faydaId = isLelise
+    ? "4821 7735 1000"
+    : farmer.id === "abebe-kebede"
+    ? "FAN-000101"
+    : "4821 7735 1000";
+
+  const woredaName = isLelise ? "Bako Tibe" : farmer.woreda.replace(/ woreda$/i, "") || "Bako Tibe";
+  const kebeleName = isLelise ? "Bako Tibe" : farmer.kebele || "Bako Tibe";
+  const regionName = isLelise ? "Oromia" : farmer.region || "Oromia";
+
+  return [
+    {
+      key: "farmer",
+      label: "Farmer",
+      sections: [
+        {
+          title: "Livestock Record",
+          fields: [
+            {
+              key: "farmer",
+              label: "Farmer",
+              value: farmer.name,
+              isFarmerAvatar: true,
+              initials,
+            },
+            {
+              key: "farmer_id",
+              label: "Farmer ID",
+              value: farmerId,
+            },
+            {
+              key: "fayda_fan",
+              label: "Fayda ID (FAN)",
+              value: faydaId,
+            },
+            {
+              key: "farmer_name",
+              label: "Farmer Name",
+              value: farmer.name,
+            },
+          ],
+        },
+        {
+          title: "Survey Personnel",
+          fields: [
+            {
+              key: "da_name",
+              label: "DA Name",
+              value: "Tadesse Alemu",
+            },
+            {
+              key: "da_mobile",
+              label: "DA Mobile Number",
+              value: "+251 91 430 7782",
+            },
+            {
+              key: "supervisor_name",
+              label: "Supervisor Name",
+              value: "Almaz Tesfaye",
+            },
+            {
+              key: "supervisor_mobile",
+              label: "Supervisor Mobile Number",
+              value: "+251 91 662 0418",
+            },
+          ],
+        },
+        {
+          title: "Location",
+          fields: [
+            {
+              key: "location",
+              label: "Location",
+              value: regionName,
+            },
+            {
+              key: "zone",
+              label: "Zone",
+              value: "West Shewa",
+            },
+            {
+              key: "woreda",
+              label: "Woreda",
+              value: woredaName,
+            },
+            {
+              key: "kebele",
+              label: "Kebele",
+              value: kebeleName,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      key: "livestock",
+      label: "Livestock",
+      sections: [
+        {
+          title: "Livestock Details",
+          fields: [
+            { key: "ear_tag", label: "Livestock Ear Tag", value: "ET-2026-00342" },
+            { key: "secondary_id", label: "Secondary Identifier", value: "LVS-SEC-0098" },
+            { key: "species", label: "Species", value: "Cattle" },
+            { key: "breed", label: "Breed", value: "Boran" },
+            { key: "quantity", label: "Quantity", value: "1" },
+            { key: "weight", label: "Weight", value: "320" },
+            { key: "dob", label: "Date of Birth", value: "14 Mar 2001" },
+            { key: "age", label: "Age", value: "25 yrs 7 mo" },
+            { key: "sex", label: "Sex", value: "Female" },
+            { key: "health_status", label: "Health Status", value: "Healthy" },
+            { key: "vaccination_status", label: "Vaccination Status", value: "Up to date" },
+            { key: "registration_date", label: "Registration Date", value: "02 Jun 2024" },
+          ],
+        },
+        {
+          title: "Ear Tag Replacement",
+          fields: [
+            { key: "old_ear_tag", label: "Old Ear Tag", value: "ET-2024-00117" },
+            { key: "species", label: "Species", value: "Cattle" },
+            { key: "new_ear_tag", label: "New Ear Tag", value: "ET-2026-00342" },
+            { key: "reason", label: "Reason for Replacement", value: "Tag lost" },
+            { key: "date_retagging", label: "Date of Retagging", value: "02 Jun 2024" },
+            { key: "approving_officer", label: "Approving Officer", value: "Dr. Tewodros M." },
+            {
+              key: "justification",
+              label: "Justification Notes",
+              value: "Original tag lost during grazing; animal re-identified via photo and herd records.",
+            },
+            { key: "applied_on", label: "Applied On", value: "02 Jun 2024" },
+          ],
+        },
+      ],
+    },
+    {
+      key: "health",
+      label: "Health & Vaccination",
+      sections: [
+        {
+          title: "Health Event Details",
+          fields: [
+            { key: "ear_tag_sec", label: "Ear Tag / Secondary Identifier", value: "ET3116787911" },
+            { key: "species", label: "Species", value: "Cattle" },
+            { key: "age", label: "Age", value: "0 years, 4 months" },
+            { key: "event_type", label: "Event Type", value: "DISEASE" },
+            { key: "disease", label: "Disease", value: "Fowl Pox" },
+            { key: "date_onset", label: "Date of Onset", value: "08/09/2026" },
+            { key: "date_resolution", label: "Date of Resolution", value: "22/09/2026" },
+            { key: "notifiable", label: "Notifiable Disease", value: "True" },
+            { key: "treatment", label: "Treatment Administered", value: "Testing" },
+            { key: "vet_officer", label: "Veterinarian / Officer", value: "-" },
+            { key: "location", label: "Location", value: "Home" },
+            { key: "location_details", label: "Location Details", value: "-" },
+            { key: "notes", label: "Notes", value: "Testin" },
+          ],
+        },
+        {
+          title: "Vaccination Details",
+          fields: [
+            { key: "ear_tag_sec", label: "Ear Tag / Secondary Identifier", value: "ET7156765622" },
+            { key: "species", label: "Species", value: "Sheep" },
+            { key: "age", label: "Age", value: "0 years, 4 months" },
+            { key: "vaccine", label: "Vaccine", value: "Peste des Petits Ruminants" },
+            { key: "vacc_date", label: "Vaccination Date", value: "02 Sep 2026" },
+            { key: "next_due_date", label: "Next Due Date", value: "29 Sep 2026" },
+            { key: "batch_number", label: "Batch / Lot Number", value: "35/3535" },
+            { key: "administered_by", label: "Administered By", value: "-" },
+            { key: "notes", label: "Notes", value: "-" },
+          ],
+        },
+      ],
+    },
+    {
+      key: "breeding",
+      label: "Breeding & Vital Events",
+      sections: [
+        {
+          title: "Vital Event Details",
+          fields: [
+            { key: "ear_tag_sec", label: "Ear Tag / Secondary Identifier", value: "ET7656735625" },
+            { key: "species", label: "Species", value: "Cattle" },
+            { key: "age", label: "Age", value: "0 years, 5 months" },
+            { key: "event_type", label: "Event Type", value: "Birth" },
+            { key: "event_date", label: "Event Date", value: "22/09/2026" },
+            { key: "cause", label: "Cause", value: "-" },
+            { key: "location", label: "Location", value: "-" },
+            { key: "location_details", label: "Location Details", value: "-" },
+            { key: "diagnosis", label: "Disease / Diagnosis", value: "-" },
+            { key: "date_onset", label: "Date of Onset", value: "-" },
+            { key: "date_resolution", label: "Date of Resolution", value: "-" },
+            { key: "treatment", label: "Treatment Administered", value: "-" },
+            { key: "vet", label: "Attending Veterinarian", value: "-" },
+            { key: "notifiable", label: "Notifiable Disease", value: "-" },
+            { key: "offspring_count", label: "Number of Offspring", value: "15" },
+            { key: "offspring_sex", label: "Sex of Offspring", value: "Male" },
+            { key: "reporting_officer", label: "Reporting Officer", value: "-" },
+            { key: "notes", label: "Notes", value: "-" },
+          ],
+        },
+        {
+          title: "Breeding Details",
+          fields: [
+            { key: "ear_tag_sec", label: "Ear Tag / Secondary Identifier", value: "ET3116787911" },
+            { key: "species", label: "Species", value: "Cattle" },
+            { key: "age", label: "Age", value: "0 years, 4 months" },
+            { key: "breeding_type", label: "Breeding Type", value: "NATURAL" },
+            { key: "breeding_date", label: "Breeding Date", value: "-" },
+            { key: "sire_source", label: "Sire / Semen Source", value: "-" },
+            { key: "location", label: "Location", value: "-" },
+            { key: "location_details", label: "Location Details", value: "-" },
+            { key: "ai_tech", label: "AI Technician", value: "-" },
+            { key: "technique", label: "Technique Used", value: "-" },
+            { key: "semen_batch", label: "Semen Batch Number", value: "-" },
+            { key: "expected_calving", label: "Expected Calving Date", value: "-" },
+            { key: "pregnancy_confirmed", label: "Pregnancy Confirmed", value: "false" },
+            { key: "pregnancy_date", label: "Pregnancy Confirmation Date", value: "-" },
+            { key: "outcome", label: "Outcome", value: "Successful" },
+            { key: "notes", label: "Notes", value: "-" },
+          ],
+        },
+      ],
+    },
+    {
+      key: "imports",
+      label: "Imports & Audit",
+      sections: [
+        {
+          title: "Import Batch Details",
+          fields: [
+            { key: "batch_id", label: "Batch ID", value: "IMP-BATCH-00245" },
+            { key: "source_system", label: "Source System", value: "Mobile App" },
+            { key: "status", label: "Status", value: "Completed" },
+            { key: "file_name", label: "File Name", value: "livestock_import_oct2026.csv" },
+            { key: "file_document", label: "File Document", value: "DOC-78213" },
+            { key: "total_rows", label: "Total Rows", value: "500" },
+            { key: "succeeded", label: "Succeeded", value: "482" },
+            { key: "failed", label: "Failed", value: "12" },
+            { key: "conflicts", label: "Conflicts", value: "6" },
+            {
+              key: "error_conflict_log",
+              label: "Error / Conflict Log",
+              value: "Row 34: Duplicate Tag ID; Row 112: Missing DOB",
+            },
+            { key: "processed_by", label: "Processed By", value: "Almaz Wolde" },
+            { key: "processed_on", label: "Processed On", value: "24 Oct 2026" },
+          ],
+        },
+        {
+          title: "Audit Log Details",
+          fields: [
+            { key: "related_model", label: "Related Model", value: "livestock.animal" },
+            { key: "related_record", label: "Related Record", value: "4821" },
+            { key: "action", label: "Action", value: "Update" },
+            { key: "user", label: "User", value: "Tadesse Alemu" },
+            { key: "user_role", label: "User Role", value: "Development Agent" },
+            {
+              key: "changes",
+              label: "Changes",
+              value: "Updated health_status from 'Sick' to 'Recovered'",
+            },
+            { key: "timestamp", label: "Timestamp", value: "24 Oct 2026, 10:42 AM" },
+            { key: "ip_address", label: "IP Address", value: "10.24.56.112" },
+            { key: "session_id", label: "Session ID", value: "SESS-9F3D21AC" },
+          ],
+        },
+      ],
+    },
+  ];
+}
