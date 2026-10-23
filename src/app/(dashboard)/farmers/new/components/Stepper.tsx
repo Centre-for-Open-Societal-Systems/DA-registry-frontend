@@ -49,7 +49,7 @@ export function Stepper({ currentStep }: { currentStep: number }) {
               {!isLast && (
                 <li
                   aria-hidden
-                  className="mt-[15px] h-0.5 flex-1 bg-line md:-mx-[34px]"
+                  className={cn("mt-[15px] h-0.5 flex-1 md:-mx-[34px]", isDone ? "bg-brand-green" : "bg-line")}
                 />
               )}
             </Fragment>

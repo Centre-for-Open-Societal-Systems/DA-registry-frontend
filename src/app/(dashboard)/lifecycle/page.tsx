@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LifecycleWorkspace } from "./components/LifecycleWorkspace";
+import { LifecycleHome } from "./components/LifecycleHome";
 
 export const metadata: Metadata = {
   title: "Lifecycle Management | OpenAgriNet",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function LifecyclePage() {
-  return <LifecycleWorkspace />;
+  return <LifecycleHome />;
 }
