@@ -108,7 +108,7 @@ export interface LifecycleEvent {
   effective: string;
   approver: string;
   recordedAt: string;
-  status: "Approved" | "Pending approval" | "Withdrawn";
+  status: "Approved" | "Pending approval" | "Withdrawn" | "Rejected";
   /** Set for requests raised from a full-page form; links the entry to /lifecycle/requests/<id>. */
   requestId?: string;
 }
@@ -124,6 +124,14 @@ export const LIFECYCLE_HISTORY: LifecycleEvent[] = [
 
 /** DAs in the same woreda who can take over the farmers during a handover. */
 export const SUCCESSOR_OPTIONS = ["Kedir Hussen — Bako Tibe kebele", "Meseret Bekele — Kebele 05", "Tolosa Gemechu — Gedo kebele", "Hirut Abebe — Lume kebele"];
+
+/** Where a request sits on the DA → Supervisor → Admin route. */
+export type ReviewStage = "Awaiting Supervisor" | "Awaiting Admin" | "Approved" | "Rejected" | "Withdrawn";
+
+export function reviewStage(r: Pick<LifecycleRequest, "status" | "supervisorDecision">): ReviewStage {
+  if (r.status !== "Pending approval") return r.status;
+  return r.supervisorDecision ? "Awaiting Admin" : "Awaiting Supervisor";
+}
 
 /** "09 Oct 2026" from an ISO date or timestamp. */
 export const formatDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
@@ -158,9 +166,13 @@ export interface LifecycleRequest extends RequestFields {
   code: string;
   document: { name: string; size: number } | null;
   submittedAt: string;
-  status: "Pending approval" | "Approved" | "Withdrawn";
+  status: "Pending approval" | "Approved" | "Withdrawn" | "Rejected";
   decidedAt?: string;
   comment?: string;
+  /** Supervisor's review: the request reaches the Admin only after this. */
+  supervisorDecision?: { at: string; comment: string };
+  /** Set when the Supervisor or the Admin turns the request down; `comment` carries the reason. */
+  rejectedBy?: "Supervisor" | "Admin";
   /** First sign-off on a transition that needs two approvals; the request stays pending until the second. */
   firstDecision?: { at: string; comment: string };
 }

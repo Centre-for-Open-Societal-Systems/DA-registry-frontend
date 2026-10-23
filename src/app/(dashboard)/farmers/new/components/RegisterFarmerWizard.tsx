@@ -7,18 +7,18 @@ import { readDraft, removeDraft, writeDraft } from "@/lib/drafts";
 import { REGISTRATION_STEPS, TOTAL_STEPS } from "../steps";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Stepper } from "./Stepper";
+import { EnumeratorStep } from "./EnumeratorStep";
 import { LocationStep } from "./LocationStep";
 import { RegistryStep } from "./RegistryStep";
 import { REGISTRY_TABS } from "../registrySpec";
-import { ReviewStep } from "./ReviewStep";
-import { SubmittedHeader, SubmittedStep } from "./SubmittedStep";
+import { farmerFullName, ReviewStep, tabCompletion } from "./ReviewStep";
+import { SubmitConfirmModal } from "./SubmitConfirmModal";
+import { SubmittedHeader, SubmittedStep, type Submission } from "./SubmittedStep";
 import { WizardFooter } from "./WizardFooter";
 
-// Placeholder until the backend returns a real ticket number
-function generateTicketNumber() {
-  const month = new Date().toLocaleString("en", { month: "short" }).toUpperCase();
-  const serial = Math.floor(10000 + Math.random() * 90000);
-  return `AMHA-SD-${month}-${serial}`;
+// Placeholder until the registry returns the real farmer ID
+function generateFarmerId() {
+  return `FRM-${String(Math.floor(Math.random() * 1_000_000)).padStart(6, "0")}`;
 }
 
 // Draft kept for this browser session only (see lib/drafts). Every step's named fields are captured.
@@ -26,7 +26,6 @@ const DRAFT_KEY = "farmer-registration";
 
 interface WizardDraft {
   step: number;
-  confirmed: boolean;
   fields: Record<string, string>;
   savedAt: string;
 }
@@ -42,8 +41,8 @@ const clearDraft = () => removeDraft(DRAFT_KEY);
 
 export function RegisterFarmerWizard() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [confirmed, setConfirmed] = useState(false);
-  const [ticketNumber, setTicketNumber] = useState<string | null>(null);
+  const [submission, setSubmission] = useState<Submission | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ tone: "success" | "info" | "error"; text: string; restored?: boolean } | null>(null);
   // Restored/captured values keyed by field name; bumping `restoreKey` remounts the step so it re-reads them.
@@ -70,6 +69,31 @@ export function RegisterFarmerWizard() {
     }
   }, [currentStep, restoreKey]);
 
+  // Autosave: every few seconds, write the draft if the form changed since the last write. The first pass only records
+  // the untouched form, so opening the page does not create a draft by itself.
+  const lastSnapshot = useRef<string | null>(null);
+  useEffect(() => {
+    const save = () => {
+      const fields = { ...fieldsRef.current };
+      for (const el of fieldsIn(stepRef.current)) fields[el.name] = el.value;
+      const snapshot = JSON.stringify([currentStep, fields]);
+      if (snapshot === lastSnapshot.current) return;
+      const baseline = lastSnapshot.current === null;
+      lastSnapshot.current = snapshot;
+      if (baseline) return;
+      const draft: WizardDraft = { step: currentStep, fields, savedAt: new Date().toISOString() };
+      try {
+        writeDraft(DRAFT_KEY, draft);
+        setSavedAt(draft.savedAt);
+      } catch {
+        // Storage unavailable: the Save Draft button reports it when the agent asks.
+      }
+    };
+    save();
+    const timer = setInterval(save, 4000);
+    return () => clearInterval(timer);
+  }, [currentStep]);
+
   // Restore a saved draft on load (deferred a tick so the server render and first client render match).
   useEffect(() => {
     const t = setTimeout(() => {
@@ -78,7 +102,6 @@ export function RegisterFarmerWizard() {
       fieldsRef.current = draft.fields ?? {};
       setFieldsSnapshot({ ...fieldsRef.current });
       setCurrentStep(Math.min(Math.max(draft.step, 1), TOTAL_STEPS));
-      setConfirmed(Boolean(draft.confirmed));
       setSavedAt(draft.savedAt);
       setRestoreKey((k) => k + 1);
       setNotice({ tone: "info", text: `Draft restored from ${formatTime(draft.savedAt)} — you're back on step ${draft.step}.`, restored: true });
@@ -92,7 +115,7 @@ export function RegisterFarmerWizard() {
 
   const handleSaveDraft = () => {
     captureStep();
-    const draft: WizardDraft = { step: currentStep, confirmed, fields: fieldsRef.current, savedAt: new Date().toISOString() };
+    const draft: WizardDraft = { step: currentStep, fields: fieldsRef.current, savedAt: new Date().toISOString() };
     try {
       writeDraft(DRAFT_KEY, draft);
       setSavedAt(draft.savedAt);
@@ -107,26 +130,44 @@ export function RegisterFarmerWizard() {
     fieldsRef.current = {};
     setFieldsSnapshot({});
     setSavedAt(null);
-    setConfirmed(false);
     setCurrentStep(1);
     setRestoreKey((k) => k + 1);
     setNotice({ tone: "success", text: "Draft discarded — starting a new registration." });
   };
 
-  const handleSubmit = () => {
-    if (!confirmed) return;
+  // The submit button asks first; confirming in the popup sends the registration.
+  const handleSubmit = () => setConfirming(true);
+
+  const confirmSubmit = () => {
     clearDraft();
-    setTicketNumber(generateTicketNumber());
+    setConfirming(false);
+    setSubmission({ farmerId: generateFarmerId(), submittedAt: new Date().toISOString() });
+  };
+
+  const registerAnother = () => {
+    fieldsRef.current = {};
+    lastSnapshot.current = null;
+    setFieldsSnapshot({});
+    setSavedAt(null);
+    setNotice(null);
+    setCurrentStep(1);
+    setRestoreKey((k) => k + 1);
+    setSubmission(null);
   };
 
   // Submitted state: header swaps to the confirmation banner, stepper is fully
   // complete, and there's no footer / back link to navigate away with.
-  if (ticketNumber) {
+  if (submission) {
     return (
       <div className="flex w-full flex-col gap-4">
         <SubmittedHeader />
         <Stepper currentStep={TOTAL_STEPS + 1} />
-        <SubmittedStep ticketNumber={ticketNumber} />
+        <SubmittedStep
+          submission={submission}
+          farmerName={farmerFullName(fieldsSnapshot)}
+          location={[fieldsSnapshot.region, fieldsSnapshot.zone, fieldsSnapshot.woreda, fieldsSnapshot.kebele].filter(Boolean).join(" › ")}
+          onRegisterAnother={registerAnother}
+        />
       </div>
     );
   }
@@ -134,9 +175,10 @@ export function RegisterFarmerWizard() {
   const renderStep = () => {
     const tab = REGISTRY_TABS[currentStep - 1];
     if (!tab) {
-      return <ReviewStep values={fieldsSnapshot} confirmed={confirmed} onConfirmedChange={setConfirmed} onEditStep={goToStep} />;
+      return <ReviewStep values={fieldsSnapshot} onEditStep={goToStep} />;
     }
     if (tab.key === "location") return <LocationStep initial={fieldsSnapshot} />;
+    if (tab.key === "enumerator") return <EnumeratorStep initial={fieldsSnapshot} />;
     return <RegistryStep key={tab.key} tab={tab} initial={fieldsSnapshot} />;
   };
 
@@ -167,8 +209,19 @@ export function RegisterFarmerWizard() {
         onBack={goBack}
         onNext={isLastStep ? handleSubmit : goNext}
         nextLabel={isLastStep ? "Submit registration" : "Next Step"}
-        nextDisabled={isLastStep && !confirmed}
+        nextIcon={isLastStep ? "check" : "arrow"}
       />
+
+      {confirming && (
+        <SubmitConfirmModal
+          farmerName={farmerFullName(fieldsSnapshot)}
+          place={[fieldsSnapshot.woreda, fieldsSnapshot.kebele].filter(Boolean).join(", ")}
+          completeTabs={tabCompletion(fieldsSnapshot).complete}
+          totalTabs={tabCompletion(fieldsSnapshot).total}
+          onCancel={() => setConfirming(false)}
+          onConfirm={confirmSubmit}
+        />
+      )}
     </div>
   );
 }

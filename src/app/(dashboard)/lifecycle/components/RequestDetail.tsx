@@ -9,11 +9,15 @@ import { Card } from "@/components/ui/Card";
 import { FormField } from "@/components/ui/FormField";
 import { Textarea } from "@/components/ui/Textarea";
 import { downloadCsv } from "@/lib/download";
+import { Pill } from "@/components/ui/Pill";
 import { cn } from "@/lib/utils";
+import { ROLE_LABELS } from "@/lib/rbac";
 import { useAuthStore } from "@/store/useAuthStore";
 import { transitionCopyFor } from "./transitionCopy";
 import { SECOND_APPROVER } from "./separation";
-import { LIFECYCLE_DA, gradeAndRole, transitionFor, type LifecycleRequest, type LifecycleTransition } from "./lifecycle";
+import { LIFECYCLE_DA, gradeAndRole, reviewStage, transitionFor, type LifecycleRequest, type LifecycleTransition } from "./lifecycle";
+import { DecisionResultModal, type DecisionResult } from "./DecisionResultModal";
+import { STAGE_TONE } from "./ReviewWorkspace";
 import {
   APPROVER_LINE,
   BELL_ICON,
@@ -44,6 +48,13 @@ const TWO_STEP_DECISION_DAYS = 5;
 /** "zone / regional HR" mid-sentence. */
 const lowerFirst = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
 
+const SUPERVISOR = { initials: "SV", name: "Supervisor", label: ROLE_LABELS.Supervisor };
+/** Shortest reason a reject needs, so the DA is told why. */
+const MIN_REASON = 5;
+
+/** "You" for the DA who raised the request, their name for everyone reviewing it. */
+const requesterName = (role: string) => (role === "DA" ? "You" : LIFECYCLE_DA.name);
+
 const WHILE_YOU_WAIT = [
   "You can withdraw the request while it is pending.",
   "To change details, withdraw it and submit a new request.",
@@ -54,6 +65,7 @@ const STATUS_PILL: Record<LifecycleRequest["status"], string> = {
   "Pending approval": "border-warning-border bg-warning-wash text-orange-700",
   Approved: "border-brand-border bg-brand-mint text-brand-green",
   Withdrawn: "border-slate-200 bg-surface text-slate-600",
+  Rejected: "border-danger-border bg-danger-wash text-danger",
 };
 
 function StatusBadge({ status }: { status: LifecycleRequest["status"] }) {
@@ -79,10 +91,11 @@ const countdown = (iso: string) => {
 
 function OutcomeCard({ title, line, note, status }: { title: string; line: string; note?: ReactNode; status: LifecycleRequest["status"] }) {
   const withdrawn = status === "Withdrawn";
+  const rejected = status === "Rejected";
   return (
     <Card className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center">
-      <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-full border", withdrawn ? "border-slate-200 bg-surface text-slate-600" : "border-brand-border bg-brand-mint text-brand-green")}>
-        <Icon d={withdrawn ? ICONS.close : ICONS.check} className="h-6 w-6" />
+      <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-full border", rejected ? "border-danger-border bg-danger-wash text-danger" : withdrawn ? "border-slate-200 bg-surface text-slate-600" : "border-brand-border bg-brand-mint text-brand-green")}>
+        <Icon d={withdrawn || rejected ? ICONS.close : ICONS.check} className="h-6 w-6" />
       </span>
       <div className="min-w-0 flex-1">
         <h2 className="text-[18px] font-semibold text-ink">{title}</h2>
@@ -103,65 +116,100 @@ const LEAVE_HISTORY = "/lifecycle/leave";
 
 const linkButton = "inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-5 text-[14px] font-semibold transition-colors";
 
-// Approver's panel on a pending request. The Woreda approval queue is Admin's in this portal, so Admin decides here.
-function DecisionCard({ subtitle, actionLabel, onApprove }: { subtitle: string; actionLabel: string; onApprove: (comment: string) => void }) {
+// Reviewer's panel on a pending request: the Supervisor forwards it to the Admin, the Admin gives the final approval.
+// Either can turn it down, with a reason the DA sees.
+function DecisionCard({ subtitle, actionLabel, onApprove, onReject }: { subtitle: string; actionLabel: string; onApprove: (comment: string) => void; onReject: (comment: string) => void }) {
   const [comment, setComment] = useState("");
+  const [rejectError, setRejectError] = useState(false);
+  const reject = () => {
+    if (comment.trim().length < MIN_REASON) return setRejectError(true);
+    onReject(comment.trim());
+  };
   return (
     <Card className="p-0">
       <div className="border-b border-line-soft px-5 py-4">
         <SectionTitle title="Your decision" subtitle={subtitle} />
       </div>
       <div className="flex flex-col gap-3 px-5 py-4">
-        <FormField label="Comment for the requester" htmlFor="lc-comment">
-          <Textarea id="lc-comment" rows={2} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="e.g. Approved. Please finish the handover before the effective date." />
+        <FormField label="Comment for the requester" htmlFor="lc-comment" hint={rejectError ? "Add a reason of at least 5 characters to reject." : undefined} hintTone="error">
+          <Textarea id="lc-comment" rows={2} value={comment} onChange={(e) => { setComment(e.target.value); setRejectError(false); }} placeholder="e.g. Approved. Please finish the handover before the effective date." />
         </FormField>
-        <Button variant="brand" className="w-fit gap-2" onClick={() => onApprove(comment.trim() || "Approved.")}>
-          <Icon d={ICONS.check} /> {actionLabel}
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="brand" className="w-fit gap-2" onClick={() => onApprove(comment.trim() || "Approved.")}>
+            <Icon d={ICONS.check} /> {actionLabel}
+          </Button>
+          <button type="button" onClick={reject} className={cn(linkButton, "border border-red-200 bg-white text-red-700 hover:bg-red-50")}>
+            <Icon d={ICONS.close} /> Reject request
+          </button>
+        </div>
       </div>
     </Card>
   );
 }
 
-function SubmittedView({ request, transition, onWithdraw, onApprove, canApprove }: { request: LifecycleRequest; transition: LifecycleTransition; onWithdraw: () => void; onApprove: (comment: string) => void; canApprove: boolean }) {
+function SubmittedView({ request, transition, role, onWithdraw, onRecommend, onApprove, onReject }: { request: LifecycleRequest; transition: LifecycleTransition; role: string; onWithdraw: () => void; onRecommend: (comment: string) => void; onApprove: (comment: string) => void; onReject: (by: "Supervisor" | "Admin", comment: string) => void }) {
   const form = transitionCopyFor(request.code);
   const submitted = formatDateTime(request.submittedAt);
   const withdrawn = request.status === "Withdrawn";
+  const rejected = request.status === "Rejected";
+  const closed = withdrawn || rejected;
+  const isDA = role === "DA";
+  const you = requesterName(role);
+  const supervisor = request.supervisorDecision;
+  // Supervisor first; the Admin can decide only once the Supervisor has forwarded the request.
+  const supervisorTurn = role === "Supervisor" && !closed && !supervisor;
+  const adminTurn = role === "Admin" && !closed && !!supervisor;
+  const adminWaiting = role === "Admin" && !closed && !supervisor;
   // Two-step transitions (separation) go to the Woreda approver first, then to the second approver.
   const second = transition.secondApprover;
   const first = request.firstDecision;
-  const waitingOn = !second
-    ? `${LIFECYCLE_DA.approver} · usually decided within ${DECISION_DAYS} working days`
-    : first
+  const waitingOn = !supervisor
+    ? "Supervisor review · then the Admin"
+    : !second
+      ? `Admin approval · usually decided within ${DECISION_DAYS} working days`
+      : first
       ? `Second approval: ${lowerFirst(second)}`
       : `First approval: ${APPROVER} · then ${lowerFirst(second)}`;
-  const activity = withdrawn
+  const supervisorStep = supervisor ? [{ title: "Forwarded to Admin", detail: `${SUPERVISOR.label} · ${formatDateTime(supervisor.at)}`, state: "done" as const }] : [];
+  const activity = closed
     ? [
-        { title: "Request withdrawn", detail: `You · ${formatDateTime(request.decidedAt!)}`, state: "done" as const },
+        withdrawn
+          ? { title: "Request withdrawn", detail: `${you} · ${formatDateTime(request.decidedAt!)}`, state: "done" as const }
+          : { title: `Rejected by ${request.rejectedBy}`, detail: `${request.comment} · ${formatDateTime(request.decidedAt!)}`, state: "done" as const },
+        ...supervisorStep,
         { title: "Approver notified", detail: `In-app and email · ${submitted}`, state: "done" as const },
-        { title: "Request submitted", detail: `You · ${submitted}`, state: "done" as const },
+        { title: "Request submitted", detail: `${you} · ${submitted}`, state: "done" as const },
       ]
     : [
         { title: "Waiting for a decision", detail: waitingOn, state: "current" as const },
         ...(first ? [{ title: "First approval", detail: `${APPROVER} · ${formatDateTime(first.at)}`, state: "done" as const }] : []),
+        ...supervisorStep,
         { title: "Approver notified", detail: `In-app and email · ${submitted}`, state: "done" as const },
-        { title: "Request submitted", detail: `You · ${submitted}`, state: "done" as const },
+        { title: "Request submitted", detail: `${you} · ${submitted}`, state: "done" as const },
       ];
 
   return (
     <>
       <TransitionHeader
         transition={transition}
-        eyebrow={withdrawn ? "Request withdrawn" : "Request submitted"}
-        text={withdrawn ? "You withdrew this request before a decision was made." : "Your request is with the approver. You will be notified as soon as it is decided."}
+        eyebrow={rejected ? "Request rejected" : withdrawn ? "Request withdrawn" : "Request submitted"}
+        text={
+          rejected
+            ? `The ${request.rejectedBy} turned this request down.`
+            : withdrawn
+              ? `${isDA ? "You withdrew" : `${you} withdrew`} this request before a decision was made.`
+              : isDA
+                ? "Your request is with the approver. You will be notified as soon as it is decided."
+                : `${you}'s request is waiting for ${supervisor ? "the Admin" : "the Supervisor"}.`
+        }
         step={2}
       />
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1fr_350px]">
         <div className="flex flex-col gap-4">
           <OutcomeCard
-            title={withdrawn ? "Request withdrawn" : "Request submitted for approval"}
-            line={`Request ${request.id} · Submitted ${submitted}`}
-            note={!withdrawn && (<><Icon d={BELL_ICON} className="h-3.5 w-3.5" /> {second ? `${first ? SECOND_APPROVER.name : APPROVER} has been notified.` : `${APPROVER} has been notified by email and in-app.`}</>)}
+            title={rejected ? "Request rejected" : withdrawn ? "Request withdrawn" : "Request submitted for approval"}
+            line={rejected ? `Request ${request.id} · Rejected by ${request.rejectedBy} · ${formatDateTime(request.decidedAt!)}` : `Request ${request.id} · Submitted ${submitted}`}
+            note={!closed && (<><Icon d={BELL_ICON} className="h-3.5 w-3.5" /> {!supervisor ? "The Supervisor has been notified by email and in-app." : second ? `${first ? SECOND_APPROVER.name : APPROVER} has been notified.` : "The Admin has been notified by email and in-app."}</>)}
             status={request.status}
           />
           <SideCard title="Request details" subtitle="What you submitted">
@@ -169,13 +217,37 @@ function SubmittedView({ request, transition, onWithdraw, onApprove, canApprove 
               <DetailRows rows={summaryRows(transition, request, request.document)} />
             </div>
           </SideCard>
-          {canApprove && !withdrawn && (
+          {rejected && (
+            <SideCard title="Reason for rejection" subtitle={`Left by the ${request.rejectedBy}`}>
+              <p className="px-5 py-4 text-[14px] text-ink-soft">{request.comment}</p>
+            </SideCard>
+          )}
+          {supervisor && !isDA && (
+            <SideCard title="Supervisor's note" subtitle={`Forwarded ${formatDateTime(supervisor.at)}`}>
+              <p className="px-5 py-4 text-[14px] text-ink-soft">{supervisor.comment}</p>
+            </SideCard>
+          )}
+          {supervisorTurn && (
+            <DecisionCard
+              onApprove={onRecommend}
+              onReject={(comment) => onReject("Supervisor", comment)}
+              subtitle="You are signed in as the Supervisor. Forwarding sends the request to the Admin for the final approval."
+              actionLabel="Forward to Admin"
+            />
+          )}
+          {adminWaiting && (
+            <SideCard title="Awaiting Supervisor review" subtitle="The Admin decides after the Supervisor has forwarded the request">
+              <p className="px-5 py-4 text-[14px] text-ink-soft">This request is still with the Supervisor. It will appear in your approval queue as soon as it is forwarded.</p>
+            </SideCard>
+          )}
+          {adminTurn && (
             <DecisionCard
               key={first ? "second" : "first"}
               onApprove={onApprove}
+              onReject={(comment) => onReject("Admin", comment)}
               subtitle={
                 !second
-                  ? "You are signed in as the approver for this request"
+                  ? "You are signed in as the Admin. The Supervisor has forwarded this request for your final approval."
                   : first
                     ? `You are signed in as the second approver (${lowerFirst(second)})`
                     : `You are signed in as the first approver. Approving forwards the request to ${lowerFirst(second)}.`
@@ -187,7 +259,7 @@ function SubmittedView({ request, transition, onWithdraw, onApprove, canApprove 
             <RouteList steps={activity} tone={transition.tone} />
           </SideCard>
           <ActionBar>
-            {!withdrawn && (
+            {isDA && !closed && (
               <button type="button" onClick={onWithdraw} className={cn(linkButton, "border border-red-200 bg-white text-red-700 hover:bg-red-50")}>
                 Withdraw request
               </button>
@@ -199,9 +271,11 @@ function SubmittedView({ request, transition, onWithdraw, onApprove, canApprove 
                   View leave history <Icon d={ICONS.arrow} />
                 </Link>
               ) : (
-                <Link href="/approvals" className={cn(linkButton, "bg-brand-green text-white hover:bg-brand-green-dark")}>
-                  View in Approvals <Icon d={ICONS.arrow} />
-                </Link>
+                isDA && (
+                  <Link href="/approvals" className={cn(linkButton, "bg-brand-green text-white hover:bg-brand-green-dark")}>
+                    View in Approvals <Icon d={ICONS.arrow} />
+                  </Link>
+                )
               )}
             </div>
           </ActionBar>
@@ -213,26 +287,32 @@ function SubmittedView({ request, transition, onWithdraw, onApprove, canApprove 
               <MetaItem label="Request ID">{request.id}</MetaItem>
               <MetaItem label="Status"><StatusBadge status={request.status} /></MetaItem>
               <MetaItem label="Submitted">{submitted}</MetaItem>
-              <MetaItem label={second ? "Approvers" : "Approver"}>{second ? `${APPROVER} → ${lowerFirst(second)}` : APPROVER_LINE}</MetaItem>
-              <MetaItem label={withdrawn ? "Withdrawn" : "Expected decision"}>{withdrawn ? formatDateTime(request.decidedAt!) : `Within ${second ? TWO_STEP_DECISION_DAYS : DECISION_DAYS} working days`}</MetaItem>
+              <MetaItem label={second ? "Approvers" : "Approver"}>{second ? `${SUPERVISOR.name} → ${APPROVER} → ${lowerFirst(second)}` : `${SUPERVISOR.name} → Admin`}</MetaItem>
+              <MetaItem label="Stage"><Pill tone={STAGE_TONE[reviewStage(request)]}>{reviewStage(request)}</Pill></MetaItem>
+              <MetaItem label={rejected ? "Rejected" : withdrawn ? "Withdrawn" : "Expected decision"}>{closed ? formatDateTime(request.decidedAt!) : `Within ${second ? TWO_STEP_DECISION_DAYS : DECISION_DAYS} working days`}</MetaItem>
             </dl>
           </SideCard>
           <SideCard title="Approval route" subtitle="Who signs off and when">
             <RouteList
               tone={transition.tone}
               steps={[
-                { title: "Initiate", detail: `You · ${formatDate(request.submittedAt)}`, state: "done" },
+                { title: "Initiate", detail: `${you} · ${formatDate(request.submittedAt)}`, state: "done" },
+                {
+                  title: "Supervisor review",
+                  detail: supervisor ? `${SUPERVISOR.label} · ${formatDateTime(supervisor.at)}` : rejected && request.rejectedBy === "Supervisor" ? "Rejected" : SUPERVISOR.label,
+                  state: supervisor || (rejected && request.rejectedBy === "Supervisor") ? "done" : closed ? "next" : "current",
+                },
                 ...(second
                   ? [
-                      { title: "First approval", detail: first ? `${APPROVER} · ${formatDateTime(first.at)}` : APPROVER_LINE, state: first ? "done" : withdrawn ? "next" : "current" } as const,
-                      { title: "Second approval", detail: second.replace(" / ", " or "), state: first && !withdrawn ? "current" : "next" } as const,
+                      { title: "First approval", detail: first ? `${APPROVER} · ${formatDateTime(first.at)}` : APPROVER_LINE, state: first ? "done" : closed || !supervisor ? "next" : "current" } as const,
+                      { title: "Second approval", detail: second.replace(" / ", " or "), state: first && !closed ? "current" : "next" } as const,
                     ]
-                  : [{ title: "Review & approve", detail: APPROVER_LINE, state: withdrawn ? "next" : "current" } as const]),
+                  : [{ title: "Admin approval", detail: rejected && request.rejectedBy === "Admin" ? "Rejected" : APPROVER_LINE, state: rejected && request.rejectedBy === "Admin" ? "done" : closed || !supervisor ? "next" : "current" } as const]),
                 { title: "Effective", detail: (form?.requestNote ?? form?.effectiveNote)?.(formatDate(request.effective), request) ?? `Takes effect on ${formatDate(request.effective)}.`, state: "next" },
               ]}
             />
           </SideCard>
-          {!withdrawn && (
+          {isDA && !closed && (
             <SideCard title="While you wait">
               <CheckList items={WHILE_YOU_WAIT} />
             </SideCard>
@@ -243,8 +323,10 @@ function SubmittedView({ request, transition, onWithdraw, onApprove, canApprove 
   );
 }
 
-function ApprovedView({ request, transition }: { request: LifecycleRequest; transition: LifecycleTransition }) {
+function ApprovedView({ request, transition, role }: { request: LifecycleRequest; transition: LifecycleTransition; role: string }) {
   const form = transitionCopyFor(request.code);
+  const you = requesterName(role);
+  const supervisor = request.supervisorDecision;
   const tone = TONES[transition.tone];
   const submitted = formatDateTime(request.submittedAt);
   const decided = formatDateTime(request.decidedAt!);
@@ -253,6 +335,7 @@ function ApprovedView({ request, transition }: { request: LifecycleRequest; tran
   const first = request.firstDecision;
   const approvedBy = second ? `${APPROVER} → ${SECOND_APPROVER.name}` : `${APPROVER} · ${decided}`;
   const decisions = [
+    ...(supervisor ? [{ initials: SUPERVISOR.initials, name: SUPERVISOR.name, role: SUPERVISOR.label, at: formatDateTime(supervisor.at), comment: supervisor.comment }] : []),
     ...(first ? [{ initials: APPROVER_INITIALS, name: APPROVER, role: LIFECYCLE_DA.approver, at: formatDateTime(first.at), comment: first.comment }] : []),
     second && first
       ? { initials: SECOND_APPROVER.initials, name: SECOND_APPROVER.name, role: SECOND_APPROVER.label, at: decided, comment: request.comment }
@@ -322,7 +405,7 @@ function ApprovedView({ request, transition }: { request: LifecycleRequest; tran
                 rows={[
                   { label: "Audit ID", value: request.auditId },
                   { label: "Action", value: `${transition.title} · approved` },
-                  { label: "Initiated by", value: `You · ${submitted}` },
+                  { label: "Initiated by", value: `${you} · ${submitted}` },
                   { label: "Approved by", value: approvedBy },
                   { label: "Effective date", value: effective },
                 ]}
@@ -368,7 +451,8 @@ function ApprovedView({ request, transition }: { request: LifecycleRequest; tran
             <RouteList
               tone={transition.tone}
               steps={[
-                { title: "Initiate", detail: `You · ${submitted}`, state: "done" },
+                { title: "Initiate", detail: `${you} · ${submitted}`, state: "done" },
+                ...(supervisor ? [{ title: "Supervisor review", detail: `${SUPERVISOR.label} · ${formatDateTime(supervisor.at)}`, state: "done" } as const] : []),
                 ...(second && first
                   ? [
                       { title: "First approval", detail: `${APPROVER} · ${formatDateTime(first.at)}`, state: "done" } as const,
@@ -394,7 +478,9 @@ function ApprovedView({ request, transition }: { request: LifecycleRequest; tran
 export function RequestDetail({ id }: { id: string }) {
   const router = useRouter();
   const request = useLifecycleHistory((s) => s.requests[id]);
-  const { approve, withdraw } = useLifecycleHistory();
+  const { recommend, approve, reject, withdraw } = useLifecycleHistory();
+  // Shown once a decision is recorded; kept here because the decision card is gone as soon as the status changes.
+  const [result, setResult] = useState<DecisionResult | null>(null);
   const role = useAuthStore((s) => s.role);
   const transition = request && transitionFor(request.code);
 
@@ -404,7 +490,7 @@ export function RequestDetail({ id }: { id: string }) {
         <BackLink href="/lifecycle" />
         <Card className="flex flex-col items-center gap-2 px-5 py-12 text-center">
           <h1 className="text-[18px] font-semibold text-ink">Request {id} not found</h1>
-          <p className="max-w-md text-[14px] text-ink-soft">Requests are kept for this browser session only until the lifecycle service is connected. Start a new one from the lifecycle page.</p>
+          <p className="max-w-md text-[14px] text-ink-soft">Requests are kept in this browser only until the lifecycle service is connected. Start a new one from the lifecycle page.</p>
           <Link href="/lifecycle" className={cn(linkButton, "mt-2 bg-brand-green text-white hover:bg-brand-green-dark")}>Back to lifecycle</Link>
         </Card>
       </div>
@@ -417,19 +503,32 @@ export function RequestDetail({ id }: { id: string }) {
       <ProfileCard />
       <StatusCard title="Current status" transitionTone={transition.tone} />
       {request.status === "Approved" ? (
-        <ApprovedView request={request} transition={transition} />
+        <ApprovedView request={request} transition={transition} role={role} />
       ) : (
         <SubmittedView
           request={request}
           transition={transition}
-          canApprove={role === "Admin"}
-          onApprove={(comment) => approve(id, comment)}
+          role={role}
+          onRecommend={(comment) => {
+            recommend(id, comment);
+            setResult("forwarded");
+          }}
+          onApprove={(comment) => {
+            approve(id, comment);
+            // A separation needs a second sign-off after the Admin's first.
+            setResult(transition.secondApprover && !request.firstDecision ? "first-approved" : "approved");
+          }}
+          onReject={(by, comment) => {
+            reject(id, by, comment);
+            setResult("rejected");
+          }}
           onWithdraw={() => {
             withdraw(id);
             router.push(request.code === "LV" ? LEAVE_HISTORY : "/lifecycle");
           }}
         />
       )}
+      {result && <DecisionResultModal result={result} transition={transition} request={request} onClose={() => setResult(null)} />}
     </div>
   );
 }

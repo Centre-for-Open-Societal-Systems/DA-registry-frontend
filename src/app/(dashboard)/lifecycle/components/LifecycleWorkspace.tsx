@@ -85,7 +85,7 @@ function TransitionsCard({ onInitiate }: { onInitiate: (t: LifecycleTransition) 
 
 const FILTERS: ("All" | LifecycleCategory)[] = ["All", "Assignment", "Availability", "Service"];
 
-function HistoryCard({ events }: { events: LifecycleEvent[] }) {
+export function HistoryCard({ events }: { events: LifecycleEvent[] }) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
   const shown = filter === "All" ? events : events.filter((e) => e.category === filter);
 
@@ -140,6 +140,8 @@ function HistoryCard({ events }: { events: LifecycleEvent[] }) {
                 </div>
                 {e.status === "Approved" ? (
                   <span className="rounded-full border border-brand-border bg-brand-mint px-2.5 py-0.5 text-[12.5px] font-semibold text-brand-green">Approved</span>
+                ) : e.status === "Rejected" ? (
+                  <span className="rounded-full border border-danger-border bg-danger-wash px-2.5 py-0.5 text-[12.5px] font-semibold text-danger">Rejected</span>
                 ) : e.status === "Withdrawn" ? (
                   <span className="rounded-full border border-slate-200 bg-surface px-2.5 py-0.5 text-[12.5px] font-semibold text-slate-600">Withdrawn</span>
                 ) : (
@@ -167,7 +169,7 @@ function HistoryCard({ events }: { events: LifecycleEvent[] }) {
   );
 }
 
-function SnapshotCard({ transitionCount }: { transitionCount: number }) {
+export function SnapshotCard({ transitionCount }: { transitionCount: number }) {
   const rows = [...SERVICE_SNAPSHOT, { label: "Transitions on record", value: String(transitionCount) }];
   return (
     <Card className="p-0">
@@ -186,7 +188,7 @@ function SnapshotCard({ transitionCount }: { transitionCount: number }) {
   );
 }
 
-function StepsCard() {
+export function StepsCard() {
   return (
     <Card className="p-0">
       <div className="border-b border-line-soft px-5 py-4">

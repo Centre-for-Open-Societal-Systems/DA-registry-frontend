@@ -8,6 +8,8 @@ interface WizardFooterProps {
   onNext: () => void;
   nextLabel?: string;
   nextDisabled?: boolean;
+  /** Icon after the next button's label: an arrow to go on, a check to submit. */
+  nextIcon?: "arrow" | "check";
   onSaveDraft?: () => void;
   /** Time of the last saved draft, shown next to the save button. */
   savedAt?: string | null;
@@ -19,6 +21,7 @@ export function WizardFooter({
   onNext,
   nextLabel = "Next Step",
   nextDisabled = false,
+  nextIcon = "arrow",
   onSaveDraft,
   savedAt,
 }: WizardFooterProps) {
@@ -36,7 +39,7 @@ export function WizardFooter({
               <path d="M20 6L9 17l-5-5" />
             </svg>
           )}
-          {savedAt ? `Draft saved · ${savedAt}` : "Not saved yet"}
+          <span title={savedAt ? `Last saved ${savedAt}` : undefined}>{savedAt ? "Auto-saved" : "Changes save automatically"}</span>
         </span>
       </div>
 
@@ -52,7 +55,7 @@ export function WizardFooter({
         <Button variant="brand" size="md" onClick={onNext} disabled={nextDisabled} className="flex-1 gap-2 whitespace-nowrap sm:flex-none">
           {nextLabel}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14M12 5l7 7-7 7" />
+            <path d={nextIcon === "check" ? "M20 6L9 17l-5-5" : "M5 12h14M12 5l7 7-7 7"} />
           </svg>
         </Button>
       </div>

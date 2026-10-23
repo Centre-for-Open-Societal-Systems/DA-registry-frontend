@@ -35,7 +35,8 @@ function NavItem({ item, active, expanded, onNavigate, onHover }: NavItemProps) 
     active ? "bg-brand-green-bright text-white font-semibold shadow-sm" : "text-sidebar-text",
     !active && !disabled && "hover:bg-sidebar-hover hover:text-white",
     disabled && "cursor-not-allowed opacity-45",
-    expanded ? "px-4" : "px-4 lg:px-[14px]"
+    // Collapsed rail: the icon is centred in the link and the (hidden) label leaves no gap behind it.
+    expanded ? "px-4" : "px-4 lg:justify-center lg:gap-0 lg:px-0"
   );
   const content = (
     <>
@@ -222,7 +223,11 @@ export function Sidebar() {
         </div>
 
         {/* Navigation — 6 collapsible groups (§2.4), filtered by role */}
-        <nav onScroll={() => setTooltip(null)} className="flex flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden px-3 py-3 sidebar-scrollbar">
+        {/* On the collapsed rail the scrollbar is hidden: its 6px would narrow the links from the right and push the icons off-centre. */}
+        <nav
+          onScroll={() => setTooltip(null)}
+          className={cn("flex flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden px-3 py-3 sidebar-scrollbar", !isOpen && "lg:[scrollbar-width:none]! lg:[&::-webkit-scrollbar]:hidden")}
+        >
           {groups.map((group) => {
             const open = !closedGroups.has(group.title);
             return (
