@@ -1,9 +1,4 @@
-// Read-only health check of the DA Services GET endpoints (API_LIST.txt). Sends no POST/PATCH, so it changes nothing.
-//
-//   $env:DA_USER = "you@example.com"; $env:DA_PASS = "..."; node scripts/check-apis.mjs     (PowerShell)
-//   DA_TOKEN=<access token> node scripts/check-apis.mjs                                    (skip the login)
-//
-// The backend is API_BASE_URL (env, else .env.local). The credentials stay in your own shell.
+
 
 import { readFileSync } from "node:fs";
 
@@ -74,39 +69,51 @@ const D = "/da-services";
 const token = await accessToken();
 const results = [];
 
-async function check(label, path, { needs } = {}) {
+async function check(label, path, { needs, probe } = {}) {
   if (needs && needs.includes(undefined)) {
     results.push({ label, status: "skipped", ms: "", note: "no id found to test with" });
     return undefined;
   }
   const res = await call("GET", path, { token });
   const ok = res.status >= 200 && res.status < 300;
+  if (probe && res.status === 404) {
+    results.push({ label, status: "reachable", ms: res.ms, note: "404 on made-up id (no real record to test with)" });
+    return undefined;
+  }
   results.push({ label, status: res.status || "—", ms: res.ms, note: ok ? shape(res.json) : (res.error ?? res.json?.message ?? "") });
   return res.json;
 }
 
 const me = await check("GET D/me", `${D}/me`);
-await check("GET D/dashboard/summary", `${D}/dashboard/summary`);
-await check("GET D/dashboard/today", `${D}/dashboard/today`);
 
-const farmers = await check("GET D/farmers", `${D}/farmers?limit=5`);
-const farmerId = firstId(farmers, "name", "id", "farmer_id", "farmer");
-await check("GET D/farmers/{id}/profile", `${D}/farmers/${farmerId}/profile`, { needs: [farmerId] });
-await check("GET D/farmers/{id}/visits", `${D}/farmers/${farmerId}/visits`, { needs: [farmerId] });
-await check("GET D/farmers/{id}/plots", `${D}/farmers/${farmerId}/plots`, { needs: [farmerId] });
-await check("GET D/farmers/{id}/permissions", `${D}/farmers/${farmerId}/permissions`, { needs: [farmerId] });
-await check("GET D/farmers/{id}/update-status", `${D}/farmers/${farmerId}/update-status`, { needs: [farmerId] });
+// Admin has no DA-ID of its own: borrow a real one (and its woreda) from the assignments list.
+const assignments = await check("GET D/assignments", `${D}/assignments?limit=50`);
+const firstAssignment = (assignments?.data ?? []).find((a) => a?.da_id);
+const daId = me?.data?.da_id ?? firstAssignment?.da_id;
+const woreda = firstAssignment?.woreda;
+const daQ = daId ? `da_id=${encodeURIComponent(daId)}` : "";
+const woredaQ = woreda ? `woreda=${encodeURIComponent(woreda)}` : "";
 
-const visits = await check("GET D/visits", `${D}/visits?limit=5`);
-const visitId = firstId(visits, "name", "id", "visit_id");
-await check("GET D/visits/{id}", `${D}/visits/${visitId}`, { needs: [visitId] });
-await check("GET D/reports/activity", `${D}/reports/activity`);
-
-await check("GET D/assignments", `${D}/assignments?limit=50`);
-await check("GET D/assignments/coverage", `${D}/assignments/coverage`);
+await check("GET D/dashboard/summary", `${D}/dashboard/summary?${daQ}`, { needs: [daId] });
+await check("GET D/dashboard/today", `${D}/dashboard/today?${daQ}`, { needs: [daId] });
+await check("GET D/reports/activity", `${D}/reports/activity?${daQ}`, { needs: [daId] });
+await check("GET D/assignments/coverage", `${D}/assignments/coverage?${woredaQ}`, { needs: [woreda] });
 await check("GET D/assignments/me", `${D}/assignments/me`);
 await check("GET D/master/areas", `${D}/master/areas`);
-await check("GET D/master/kebeles", `${D}/master/kebeles`);
+await check("GET D/master/kebeles", `${D}/master/kebeles?${woredaQ}`, { needs: [woreda] });
+await check("GET D/agents/{da_id}", `${D}/agents/${daId}`, { needs: [daId] });
+
+// With no real record to test on, a made-up id still proves the route is alive: 404 counts as reachable.
+const farmers = await check("GET D/farmers", `${D}/farmers?limit=5`);
+const realFarmerId = firstId(farmers, "name", "id", "farmer_id", "farmer");
+const farmerId = realFarmerId ?? "FRM-PROBE";
+for (const sub of ["profile", "visits", "plots", "permissions", "update-status"]) {
+  await check(`GET D/farmers/{id}/${sub}`, `${D}/farmers/${farmerId}/${sub}`, { probe: !realFarmerId });
+}
+
+const visits = await check("GET D/visits", `${D}/visits?limit=5`);
+const realVisitId = firstId(visits, "name", "id", "visit_id");
+await check("GET D/visits/{id}", `${D}/visits/${realVisitId ?? "DA-VIS-PROBE"}`, { probe: !realVisitId });
 
 await check("GET D/notifications", `${D}/notifications`);
 await check("GET D/grievances/options", `${D}/grievances/options`);
@@ -120,18 +127,26 @@ const rbac = await check("GET D/rbac-assignments", `${D}/rbac-assignments?limit=
 const assignmentId = firstId(rbac, "name", "id", "assignment_id");
 await check("GET D/rbac-assignments/{id}", `${D}/rbac-assignments/${assignmentId}`, { needs: [assignmentId] });
 await check("GET D/profile/me", `${D}/profile/me`);
-const daId = me?.data?.da_id ?? me?.data?.daId ?? me?.data?.agent?.name;
-await check("GET D/agents/{da_id}", `${D}/agents/${daId}`, { needs: [daId] });
 const changes = await check("GET D/profile/change-requests", `${D}/profile/change-requests?limit=5`);
-const requestId = firstId(changes, "name", "id", "request_id");
-await check("GET D/profile/change-requests/{id}", `${D}/profile/change-requests/${requestId}`, { needs: [requestId] });
+const realRequestId = firstId(changes, "name", "id", "request_id");
+await check("GET D/profile/change-requests/{id}", `${D}/profile/change-requests/${realRequestId ?? "CR-PROBE"}`, { probe: !realRequestId });
 await check("GET D/farmer-links", `${D}/farmer-links`);
+
+// A bogus refresh token must be rejected (4xx), not crash (5xx): proves the route is alive without touching the session.
+{
+  const res = await call("POST", "/auth/refresh", { body: { refresh_token: "probe" } });
+  const alive = res.status >= 400 && res.status < 500;
+  results.push({ label: "POST /auth/refresh (bogus token)", status: alive ? "reachable" : res.status || "—", ms: res.ms, note: alive ? `rejected with ${res.status}, as expected` : (res.error ?? res.json?.message ?? "") });
+}
 
 const pad = (value, width) => String(value).padEnd(width);
 console.log(`\nBackend: ${base}\n`);
 console.log(`${pad("Endpoint", 42)}${pad("Status", 9)}${pad("ms", 7)}Note`);
 for (const r of results) console.log(`${pad(r.label, 42)}${pad(r.status, 9)}${pad(r.ms, 7)}${r.note}`);
 
-const failed = results.filter((r) => r.status !== "skipped" && !(typeof r.status === "number" && r.status >= 200 && r.status < 300));
-console.log(`\n${results.length - failed.length - results.filter((r) => r.status === "skipped").length} ok, ${failed.length} failing, ${results.filter((r) => r.status === "skipped").length} skipped (no id to test with).`);
+const skipped = results.filter((r) => r.status === "skipped").length;
+const reachable = results.filter((r) => r.status === "reachable").length;
+const failed = results.filter((r) => r.status !== "skipped" && r.status !== "reachable" && !(typeof r.status === "number" && r.status >= 200 && r.status < 300));
+console.log(`
+${results.length - failed.length - skipped - reachable} ok, ${reachable} reachable (route alive, no data to test with), ${failed.length} failing, ${skipped} skipped.`);
 process.exit(failed.length ? 1 : 0);

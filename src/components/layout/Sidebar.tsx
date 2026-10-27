@@ -21,23 +21,31 @@ interface NavItemProps {
   expanded: boolean;
   onNavigate: () => void;
   onHover: (tooltip: TooltipState | null) => void;
+  /** Full-width rows with dividers instead of rounded pills (the Super Admin rail). */
+  flat?: boolean;
 }
 
 // One rail link. On desktop the label collapses with the rail; the mobile drawer is always full width.
 // When collapsed, hovering reports the label + position so the parent can float a tooltip beside the rail
 // (the rail itself clips overflow, so the tooltip can't live inside the link).
 // Part 2 items are rendered disabled so the §2.4 nav shape is complete without dead routes.
-function NavItem({ item, active, expanded, onNavigate, onHover }: NavItemProps) {
+function NavItem({ item, active, expanded, onNavigate, onHover, flat }: NavItemProps) {
   const disabled = item.part === 2;
   const label = disabled ? `${item.title} · Part 2 preview` : item.title;
-  const className = cn(
-    "flex items-center gap-3.5 h-11 rounded-lg text-[14.5px] transition-all duration-200",
-    active ? "bg-brand-green-bright text-white font-semibold shadow-sm" : "text-sidebar-text",
-    !active && !disabled && "hover:bg-sidebar-hover hover:text-white",
-    disabled && "cursor-not-allowed opacity-45",
-    // Collapsed rail: the icon is centred in the link and the (hidden) label leaves no gap behind it.
-    expanded ? "px-4" : "px-4 lg:justify-center lg:gap-0 lg:px-0"
-  );
+  const className = flat
+    ? cn(
+        "flex items-center gap-3.5 h-12 border-b border-white/10 text-[14.5px] transition-colors duration-200",
+        active ? "bg-white/15 text-white font-semibold" : "text-white/90 hover:bg-white/10 hover:text-white",
+        expanded ? "px-5" : "px-5 lg:justify-center lg:gap-0 lg:px-0"
+      )
+    : cn(
+        "flex items-center gap-3.5 h-11 rounded-lg text-[14.5px] transition-all duration-200",
+        active ? "bg-brand-green-bright text-white font-semibold shadow-sm" : "text-sidebar-text",
+        !active && !disabled && "hover:bg-sidebar-hover hover:text-white",
+        disabled && "cursor-not-allowed opacity-45",
+        // Collapsed rail: the icon is centred in the link and the (hidden) label leaves no gap behind it.
+        expanded ? "px-4" : "px-4 lg:justify-center lg:gap-0 lg:px-0"
+      );
   const content = (
     <>
       <div className="shrink-0"><NavIcon href={item.href} /></div>
@@ -161,7 +169,9 @@ export function Sidebar() {
   const tabParent = Object.entries(TAB_PARENTS).find(([p]) => pathname === p || pathname.startsWith(p + "/"))?.[1];
   const activeHref = (tabParent && bestMatch(tabParent)) || bestMatch(pathname) || (ownerPath ? bestMatch(ownerPath) : undefined);
 
-  const navItemProps = { expanded: isOpen, onNavigate: closeMobile, onHover: setTooltip };
+  // Super Admin gets its own look: green gradient rail, flat full-width rows, no identity footer.
+  const flat = role === "SuperAdmin";
+  const navItemProps = { expanded: isOpen, onNavigate: closeMobile, onHover: setTooltip, flat };
 
   return (
     <>
@@ -191,7 +201,8 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-[80] flex h-full w-[260px] shrink-0 flex-col bg-brand-green-deep text-white shadow-xl transition-[transform,width] duration-300 ease-in-out",
+          "fixed inset-y-0 left-0 z-[80] flex h-full w-[260px] shrink-0 flex-col text-white shadow-xl transition-[transform,width] duration-300 ease-in-out",
+          flat ? "bg-gradient-to-b from-[#07894a] to-[#04552c]" : "bg-brand-green-deep",
           "lg:static lg:translate-x-0",
           isMobileOpen ? "translate-x-0" : "-translate-x-full",
           isOpen ? "lg:w-[260px]" : "lg:w-[72px]"
@@ -205,8 +216,17 @@ export function Sidebar() {
             </svg>
           </div>
           <div className={cn("flex min-w-0 flex-col whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out", isOpen ? "max-w-[170px] opacity-100 translate-x-0" : "max-w-[170px] opacity-100 translate-x-0 lg:max-w-0 lg:opacity-0 lg:-translate-x-2")}>
-            <span className="text-[16px] font-semibold leading-tight tracking-wide">Development Agent</span>
-            <span className="mt-1 text-[12px] tracking-wide text-sidebar-subtext">Ethiopia OpenAgriNet</span>
+            {flat ? (
+              <>
+                <span className="text-[10.5px] font-semibold uppercase leading-tight tracking-wide text-brand-gold">Ethiopia Agent Portal</span>
+                <span className="text-[21px] font-bold leading-tight tracking-tight">OpenAgriNet</span>
+              </>
+            ) : (
+              <>
+                <span className="text-[16px] font-semibold leading-tight tracking-wide">Development Agent</span>
+                <span className="mt-1 text-[12px] tracking-wide text-sidebar-subtext">Ethiopia OpenAgriNet</span>
+              </>
+            )}
           </div>
 
           {/* Close (mobile drawer only) */}
@@ -226,7 +246,7 @@ export function Sidebar() {
         {/* On the collapsed rail the scrollbar is hidden: its 6px would narrow the links from the right and push the icons off-centre. */}
         <nav
           onScroll={() => setTooltip(null)}
-          className={cn("flex flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden px-3 py-3 sidebar-scrollbar", !isOpen && "lg:[scrollbar-width:none]! lg:[&::-webkit-scrollbar]:hidden")}
+          className={cn("flex flex-1 flex-col overflow-y-auto overflow-x-hidden sidebar-scrollbar", flat ? "gap-0 px-0 py-0" : "gap-1 px-3 py-3", !isOpen && "lg:[scrollbar-width:none]! lg:[&::-webkit-scrollbar]:hidden")}
         >
           {groups.map((group) => {
             const open = !closedGroups.has(group.title);
@@ -234,7 +254,7 @@ export function Sidebar() {
               <div key={group.title || "top"} className="flex flex-col">
                 {group.title && <SectionHeader title={group.title} open={open} expanded={isOpen} onToggle={() => toggleGroup(group.title)} />}
                 {(open || !isOpen) && (
-                  <div className="flex flex-col gap-1">
+                  <div className={cn("flex flex-col", !flat && "gap-1")}>
                     {group.items.map((item) => (
                       <NavItem key={item.href} item={item} active={item.href === activeHref} {...navItemProps} />
                     ))}
@@ -245,7 +265,7 @@ export function Sidebar() {
           })}
         </nav>
 
-        <IdentityFooter expanded={isOpen} />
+        {!flat && <IdentityFooter expanded={isOpen} />}
       </aside>
     </>
   );

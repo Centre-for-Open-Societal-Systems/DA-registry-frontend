@@ -1,7 +1,7 @@
 // Role model and role-scoped navigation (FSD D3 §2.2, §2.4, §3.1.1, Appendix B/D).
 // Navigation is deny-by-default: an item is visible only to the roles listed on it.
 
-export const ROLES = ["DA", "Supervisor", "Executive", "Admin", "CommsOfficer"] as const;
+export const ROLES = ["DA", "Supervisor", "Executive", "Admin", "CommsOfficer", "SuperAdmin"] as const;
 export type Role = (typeof ROLES)[number];
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -10,6 +10,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   Executive: "Executive (Regional)",
   Admin: "OAN / ATI Administrator",
   CommsOfficer: "Communications Officer",
+  SuperAdmin: "Super Admin",
 };
 
 /** Scope line shown under the role in the sidebar footer (Appendix D: identity shown in the sidebar footer). */
@@ -19,6 +20,7 @@ export const ROLE_SCOPES: Record<Role, string> = {
   Executive: "Region · Oromia (read)",
   Admin: "All regions",
   CommsOfficer: "Broadcast domain",
+  SuperAdmin: "All regions · all departments",
 };
 
 export type Part = 1 | 2 | "shared";
@@ -37,14 +39,18 @@ export interface NavGroup {
   items: NavItem[];
 }
 
-const ALL: readonly Role[] = ROLES;
+// Super Admin has its own four-item rail (Dashboard · Department · Users · Roles) and none of the field modules.
+const ALL: readonly Role[] = ROLES.filter((r) => r !== "SuperAdmin");
 const OFFICERS: readonly Role[] = ["Supervisor", "Executive", "Admin"];
 
 export const NAV_GROUPS: NavGroup[] = [
   {
     title: "",
     items: [
-      { title: "Dashboard", href: "/dashboard", roles: ALL, part: "shared" },
+      { title: "Dashboard", href: "/dashboard", roles: [...ALL, "SuperAdmin"], part: "shared" },
+      { title: "Department", href: "/department", roles: ["SuperAdmin"], part: "shared" },
+      { title: "Users", href: "/users", roles: ["SuperAdmin"], part: "shared" },
+      { title: "Roles", href: "/roles", roles: ["SuperAdmin"], part: "shared" },
     ],
   },
   {
@@ -148,6 +154,9 @@ export const PAGE_TITLES: { prefix: string; title: string }[] = [
   { prefix: "/training/agents", title: "Agent Training" },
   { prefix: "/training", title: "Training" },
   { prefix: "/sync", title: "Sync Queue" },
+  { prefix: "/department", title: "Department" },
+  { prefix: "/users", title: "Users" },
+  { prefix: "/roles", title: "Roles" },
   { prefix: "/admin/users", title: "Users & Roles" },
   { prefix: "/admin/reports", title: "Reports" },
   { prefix: "/admin/settings", title: "Settings" },

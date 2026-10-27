@@ -4,7 +4,7 @@ import { ROLES } from "@/lib/rbac";
 import { DEMO_ACCOUNTS, type DemoAccount } from "./accounts";
 
 /** Roles a person may pick when registering — all five portal roles. */
-export const SELF_REGISTER_ROLES = ROLES;
+export const SELF_REGISTER_ROLES = ROLES.filter((r) => r !== "SuperAdmin");
 
 interface RegisteredAccountsState {
   accounts: DemoAccount[];
