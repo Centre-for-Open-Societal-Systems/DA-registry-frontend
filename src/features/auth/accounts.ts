@@ -16,4 +16,8 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
   { email: "executive@gmail.com", password: "executive@123", role: "Executive", name: "Dawit Haile" },
   { email: "admin@gmail.com", password: "admin@123", role: "Admin", name: "Selam Bekele" },
   { email: "communications@gmail.com", password: "communications@123", role: "CommsOfficer", name: "Hana Girma" },
+  { email: "superadmin@gmail.com", password: "superadmin@123", role: "SuperAdmin", name: "Tadesse Alemu" },
 ];
+
+// Accounts that still sign in locally, with no backend call (the Super Admin screens run on mock data).
+export const MOCK_LOGIN_ROLES: readonly Role[] = ["SuperAdmin"];

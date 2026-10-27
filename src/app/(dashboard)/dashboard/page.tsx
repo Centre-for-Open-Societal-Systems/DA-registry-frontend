@@ -7,6 +7,7 @@ import { SupervisorDashboard } from "./components/SupervisorDashboard";
 import { ExecutiveDashboard } from "./components/ExecutiveDashboard";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { CommsDashboard } from "./components/CommsDashboard";
+import { SuperAdminDashboard } from "./components/SuperAdminDashboard";
 
 export const metadata: Metadata = {
   title: "Dashboard | OpenAgriNet",
@@ -20,6 +21,7 @@ export default function DashboardPage() {
       executive={<ExecutiveDashboard />}
       admin={<AdminDashboard />}
       comms={<CommsDashboard />}
+      superAdmin={<SuperAdminDashboard />}
       agent={
         <div className="flex w-full flex-col gap-4">
           <AgentOverview />

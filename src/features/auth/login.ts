@@ -1,6 +1,7 @@
 import { ApiError, apiPost } from "@/lib/api";
 import { revokeRefreshToken } from "@/lib/authApi";
-import type { Role } from "@/lib/rbac";
+import { ROLE_LABELS, ROLE_SCOPES, type Role } from "@/lib/rbac";
+import { DEMO_ACCOUNTS, MOCK_LOGIN_ROLES } from "./accounts";
 import type { AuthProfile, AuthTokens, AuthUser } from "@/store/useAuthStore";
 import { fetchMe, toMeSession } from "./me";
 import { toTokens, type TokenResponse } from "./session";
@@ -37,6 +38,31 @@ export async function login(usr: string, pwd: string): Promise<LoginResult> {
     // /me unreachable: sign in on the login response alone; AuthHydration reads /me again on the next load.
     return result;
   }
+}
+
+export type MockLoginResult = Omit<LoginResult, "tokens"> & { profile: AuthProfile };
+
+/**
+ * Local sign-in for the mock-data roles (Super Admin): no backend call and no token pair, so nothing in the
+ * session ever reaches the API. Null when the credentials are not one of those accounts.
+ */
+export function mockLogin(usr: string, pwd: string): MockLoginResult | null {
+  const email = usr.trim().toLowerCase();
+  const account = DEMO_ACCOUNTS.find((a) => MOCK_LOGIN_ROLES.includes(a.role) && a.email === email && a.password === pwd);
+  if (!account) return null;
+  return {
+    user: { id: account.email, name: account.name, email: account.email },
+    role: account.role,
+    profile: {
+      roleLabel: ROLE_LABELS[account.role],
+      scopeLabel: ROLE_SCOPES[account.role],
+      scope: { regions: [], woredas: [], zones: [] },
+      unrestricted: true,
+      menu: [],
+      daId: null,
+      agent: null,
+    },
+  };
 }
 
 export function toLoginResult(res: TokenResponse, now: number): LoginResult {

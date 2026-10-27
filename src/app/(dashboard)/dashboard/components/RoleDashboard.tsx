@@ -8,13 +8,14 @@ interface RoleDashboardProps {
   executive: ReactNode;
   admin: ReactNode;
   comms: ReactNode;
+  superAdmin: ReactNode;
   /** DA — the field-agent home, and the fallback for any other role. */
   agent: ReactNode;
 }
 
 // Role home varies (FSD §2.4): every role lands on the view built for its own job.
 // The role lives in the client-side auth store, so only this switch runs on the client; the page renders each view.
-export function RoleDashboard({ supervisor, executive, admin, comms, agent }: RoleDashboardProps) {
+export function RoleDashboard({ supervisor, executive, admin, comms, superAdmin, agent }: RoleDashboardProps) {
   const role = useAuthStore((s) => s.role);
 
   switch (role) {
@@ -26,6 +27,8 @@ export function RoleDashboard({ supervisor, executive, admin, comms, agent }: Ro
       return admin;
     case "CommsOfficer":
       return comms;
+    case "SuperAdmin":
+      return superAdmin;
     default:
       return agent;
   }

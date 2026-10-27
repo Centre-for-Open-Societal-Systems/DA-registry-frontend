@@ -30,7 +30,7 @@ export interface UserFormValues {
 const REGIONS = ["Oromia", "Amhara", "Sidama", "SNNP", "Tigray", "All regions"];
 
 // Region-wide roles are not tied to a single Woreda.
-const WIDE_SCOPE: Record<Role, string | null> = { DA: null, Supervisor: null, Executive: "All (read)", Admin: "All", CommsOfficer: null };
+const WIDE_SCOPE: Record<Role, string | null> = { DA: null, Supervisor: null, Executive: "All (read)", Admin: "All", CommsOfficer: null, SuperAdmin: "All" };
 
 const toIso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const today = () => toIso(new Date());
@@ -87,7 +87,7 @@ export function UserFormModal({ mode, initial, subtitle, onClose, onSave }: User
   const isEdit = mode === "edit";
   const wideScope = WIDE_SCOPE[role];
   // A new account is created on the backend, which signs in by email and hands out four roles (not Admin).
-  const roleOptions: readonly Role[] = isEdit ? ROLES : ASSIGNABLE_ROLES;
+  const roleOptions: readonly Role[] = isEdit ? ROLES.filter((r) => r !== "SuperAdmin") : ASSIGNABLE_ROLES;
 
   const submit = async () => {
     if (saving) return;

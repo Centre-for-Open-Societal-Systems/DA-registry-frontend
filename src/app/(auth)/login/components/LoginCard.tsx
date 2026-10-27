@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
-import { login } from "@/features/auth";
+import { login, mockLogin } from "@/features/auth";
 import { ApiError } from "@/lib/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { AUTH_INPUT, AUTH_LABEL, AuthCard, PasswordInput } from "../../components/AuthCard";
@@ -42,6 +42,13 @@ export function LoginCard() {
     setError(null);
     setIsSubmitting(true);
     try {
+      // Mock-data roles (Super Admin) sign in locally; everyone else goes to the backend.
+      const mock = mockLogin(String(form.get("email") ?? ""), String(form.get("password") ?? ""));
+      if (mock) {
+        signIn(mock.user, mock.role, undefined, mock.profile);
+        router.push("/dashboard");
+        return;
+      }
       const { user, role, tokens, profile } = await login(String(form.get("email") ?? ""), String(form.get("password") ?? ""));
       signIn(user, role, tokens, profile);
       router.push("/dashboard");

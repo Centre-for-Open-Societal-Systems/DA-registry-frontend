@@ -48,7 +48,7 @@ const USERS: RbacAssignment[] = [
   { userId: "U-1006", name: "Dawit Assefa", faydaId: "3512 2299 7710", phone: "+251 91 780 2231", email: "dawit.assefa@gmail.com", role: "DA", daId: "", active: false, regionScope: "Oromia", woredaScope: "Cheliya", effectiveFrom: "02 May 2016", effectiveTo: "30 Jun 2026", assignedBy: "System (separation)" },
 ];
 
-const ROLE_TONE: Record<Role, PillTone> = { DA: "green", Supervisor: "blue", Executive: "purple", Admin: "red", CommsOfficer: "amber" };
+const ROLE_TONE: Record<Role, PillTone> = { DA: "green", Supervisor: "blue", Executive: "purple", Admin: "red", CommsOfficer: "amber", SuperAdmin: "red" };
 
 const PERMISSIONS: { role: Role; can: string; cannot: string }[] = [
   { role: "DA", can: "Own profile; self-service (approval-gated); field capture; linked farmers; raise/track grievances; report issues; complete surveys", cannot: "Approve onboarding/lifecycle; assign agents; edit segment rules; KPI entry; executive dashboards; triage grievances; resolve issues" },
