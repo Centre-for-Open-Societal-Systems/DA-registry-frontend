@@ -97,8 +97,8 @@ function SectionHeader({ title, open, expanded, onToggle }: { title: string; ope
   return (
     <div
       className={cn(
-        "mt-2 flex items-center justify-between rounded-lg px-4 cursor-pointer select-none overflow-hidden whitespace-nowrap hover:bg-sidebar-hover transition-all duration-300 ease-in-out",
-        expanded ? "h-8 opacity-100" : "h-8 opacity-100 lg:mt-0 lg:h-0 lg:opacity-0 lg:pointer-events-none"
+        "flex items-center justify-between px-5 cursor-pointer select-none overflow-hidden whitespace-nowrap border-b border-white/10 hover:bg-white/10 transition-all duration-300 ease-in-out",
+        expanded ? "h-11 opacity-100" : "h-11 opacity-100 lg:h-0 lg:border-0 lg:opacity-0 lg:pointer-events-none"
       )}
       onClick={onToggle}
     >
@@ -169,8 +169,9 @@ export function Sidebar() {
   const tabParent = Object.entries(TAB_PARENTS).find(([p]) => pathname === p || pathname.startsWith(p + "/"))?.[1];
   const activeHref = (tabParent && bestMatch(tabParent)) || bestMatch(pathname) || (ownerPath ? bestMatch(ownerPath) : undefined);
 
-  // Super Admin gets its own look: green gradient rail, flat full-width rows, no identity footer.
-  const flat = role === "SuperAdmin";
+  // Every role gets the green gradient rail with flat full-width rows; Super Admin alone has no identity footer.
+  const flat = true;
+  const showFooter = role !== "SuperAdmin";
   const navItemProps = { expanded: isOpen, onNavigate: closeMobile, onHover: setTooltip, flat };
 
   return (
@@ -216,17 +217,8 @@ export function Sidebar() {
             </svg>
           </div>
           <div className={cn("flex min-w-0 flex-col whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out", isOpen ? "max-w-[170px] opacity-100 translate-x-0" : "max-w-[170px] opacity-100 translate-x-0 lg:max-w-0 lg:opacity-0 lg:-translate-x-2")}>
-            {flat ? (
-              <>
-                <span className="text-[10.5px] font-semibold uppercase leading-tight tracking-wide text-brand-gold">Ethiopia Agent Portal</span>
-                <span className="text-[21px] font-bold leading-tight tracking-tight">OpenAgriNet</span>
-              </>
-            ) : (
-              <>
-                <span className="text-[16px] font-semibold leading-tight tracking-wide">Development Agent</span>
-                <span className="mt-1 text-[12px] tracking-wide text-sidebar-subtext">Ethiopia OpenAgriNet</span>
-              </>
-            )}
+            <span className="text-[10.5px] font-semibold uppercase leading-tight tracking-wide text-brand-gold">Ethiopia Agent Portal</span>
+            <span className="text-[21px] font-bold leading-tight tracking-tight">OpenAgriNet</span>
           </div>
 
           {/* Close (mobile drawer only) */}
@@ -265,7 +257,7 @@ export function Sidebar() {
           })}
         </nav>
 
-        {!flat && <IdentityFooter expanded={isOpen} />}
+        {showFooter && <IdentityFooter expanded={isOpen} />}
       </aside>
     </>
   );

@@ -78,6 +78,13 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    title: "Leave",
+    items: [
+      { title: "My Leave", href: "/lifecycle/leave", roles: ALL, part: 1 },
+      { title: "Team Leave", href: "/team-leave", roles: ALL, part: 1 },
+    ],
+  },
+  {
     title: "Communication",
     items: [
       { title: "Knowledge Base", href: "/knowledge", roles: ALL, part: 1 },
@@ -128,6 +135,8 @@ export const PAGE_TITLES: { prefix: string; title: string }[] = [
   { prefix: "/agents", title: "Agents" },
   { prefix: "/my-teams", title: "My Teams" },
   { prefix: "/approvals", title: "Approvals" },
+  { prefix: "/lifecycle/leave", title: "My Leave" },
+  { prefix: "/team-leave", title: "Team Leave" },
   { prefix: "/lifecycle", title: "Lifecycle Management" },
   { prefix: "/registry-sync", title: "Agents" },
   { prefix: "/feedback", title: "Internal Feedback" },
