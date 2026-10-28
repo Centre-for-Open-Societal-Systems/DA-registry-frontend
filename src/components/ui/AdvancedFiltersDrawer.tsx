@@ -23,7 +23,8 @@ interface AdvancedFiltersDrawerProps {
   onClose: () => void;
   fields: FilterFieldConfig[];
   filters: FilterSelection;
-  onApply: (next: FilterSelection) => void;
+  /** `range` is the Date Range (yyyy-mm-dd, empty = open ended); pages without date data ignore it. */
+  onApply: (next: FilterSelection, range: { from: string; to: string }) => void;
 }
 
 type QuickRange = "today" | "yesterday" | "7d" | "30d";
@@ -108,13 +109,13 @@ export function AdvancedFiltersDrawer({ isOpen, onClose, fields, filters, onAppl
     fields.filter((f) => (draft.selections[f.key]?.size ?? 0) > 0).length + (draft.from || draft.to ? 1 : 0);
 
   const apply = () => {
-    onApply(cloneSelection(fields, draft.selections));
+    onApply(cloneSelection(fields, draft.selections), { from: draft.from, to: draft.to });
     onClose();
   };
 
   const reset = () => {
     setDraft({ selections: emptySelection(fields), from: "", to: "", quickRange: null });
-    onApply(emptySelection(fields));
+    onApply(emptySelection(fields), { from: "", to: "" });
   };
 
   return createPortal(

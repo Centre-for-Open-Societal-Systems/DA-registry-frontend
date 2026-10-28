@@ -10,6 +10,8 @@ export interface DropdownOption {
   label: string;
   /** Optional secondary line rendered under the label. */
   description?: string;
+  /** Short badge at the right end of the row (e.g. "17 days left"); on the selected row it turns into green text with a check. */
+  trailing?: string;
   /** Shown but not selectable, e.g. a "Select …" placeholder row. */
   disabled?: boolean;
 }
@@ -262,8 +264,26 @@ export function Dropdown({
                     option.disabled && "cursor-default bg-surface font-semibold text-slate-600"
                   )}
                 >
-                  <span className={cn("block", searchable ? "truncate" : "whitespace-nowrap")}>{option.label}</span>
-                  {option.description && <span className={cn("mt-0.5 block text-[12.5px] text-muted", searchable ? "truncate" : "whitespace-nowrap")}>{option.description}</span>}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <span className={cn("block", searchable ? "truncate" : "whitespace-nowrap")}>{option.label}</span>
+                      {option.description && <span className={cn("mt-0.5 block text-[12.5px] text-muted", searchable ? "truncate" : "whitespace-nowrap")}>{option.description}</span>}
+                    </div>
+                    {option.trailing && (
+                      <span className="flex shrink-0 items-center gap-2">
+                        {isSelected ? (
+                          <>
+                            <span className="whitespace-nowrap text-[13px] font-semibold text-brand-green">{option.trailing}</span>
+                            <svg className="h-5 w-5 text-brand-green" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                              <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.2 14.2l-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4-6 6z" />
+                            </svg>
+                          </>
+                        ) : (
+                          <span className="whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[12.5px] font-semibold text-ink">{option.trailing}</span>
+                        )}
+                      </span>
+                    )}
+                  </div>
                 </li>
               );
             })}
