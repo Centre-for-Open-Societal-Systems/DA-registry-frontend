@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { RowAction } from "@/components/ui/RowAction";
 import { AdvancedFiltersDrawer, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
-import { DUMMY_GRIEVANCE, GRIEVANCE_BUCKETS, GRIEVANCE_PAGE_MAX, grievanceFilterOptions, grievanceStatsFor, listGrievances, toGrievance } from "@/features/grievances";
+import { GRIEVANCE_BUCKETS, GRIEVANCE_PAGE_MAX, grievanceFilterOptions, grievanceStatsFor, listGrievances, toGrievance } from "@/features/grievances";
 import { GrievanceStatusPill } from "@/features/grievances";
 import { GrievanceDetailModal } from "@/features/grievances";
 import type { Grievance } from "@/features/grievances";
@@ -68,7 +68,7 @@ export function GrievancesTable() {
   const loading = loaded?.reload !== reload;
   const fetched = loaded?.rows ?? [];
   // The table only lists the statuses that have a card / filter option; anything else the service returns stays out.
-  const all = [DUMMY_GRIEVANCE, ...fetched].filter((g) => (GRIEVANCE_BUCKETS as string[]).includes(g.status));
+  const all = fetched.filter((g) => (GRIEVANCE_BUCKETS as string[]).includes(g.status));
   const options = grievanceFilterOptions(all);
   const refresh = () => setReload((r) => r + 1);
 
