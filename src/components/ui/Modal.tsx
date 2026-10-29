@@ -9,7 +9,7 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   /** Small line under the title. */
-  subtitle?: string;
+  subtitle?: ReactNode;
   /** Leading tile next to the title (e.g. initials). */
   icon?: ReactNode;
   /** Inline element after the title, e.g. a status pill. */

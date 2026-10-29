@@ -10,8 +10,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { RowAction } from "@/components/ui/RowAction";
 import { AdvancedFiltersDrawer, type FilterSelection } from "@/components/ui/AdvancedFiltersDrawer";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
-import { bucketOf, GRIEVANCE_PAGE_MAX, grievanceFilterOptions, grievanceStatsFor, listGrievances, toGrievance } from "@/features/grievances";
-import { GrievanceBucketPill, GrievancePriorityPill } from "@/features/grievances";
+import { DUMMY_GRIEVANCE, GRIEVANCE_BUCKETS, GRIEVANCE_PAGE_MAX, grievanceFilterOptions, grievanceStatsFor, listGrievances, toGrievance } from "@/features/grievances";
+import { GrievanceStatusPill } from "@/features/grievances";
 import { GrievanceDetailModal } from "@/features/grievances";
 import type { Grievance } from "@/features/grievances";
 import { GrievanceStats, type StatKey } from "./GrievanceStats";
@@ -20,7 +20,7 @@ import { ServiceStatusBanner } from "./ServiceStatusBanner";
 import { matchesQuery, searchPlaceholder } from "@/lib/search";
 import { TablePagination } from "@/components/ui/TablePagination";
 
-const SEARCH_PLACEHOLDER = searchPlaceholder(["Ticket ID", "Details", "Category", "Status", "Priority", "Submitted"]);
+const SEARCH_PLACEHOLDER = searchPlaceholder(["Ticket ID", "Details", "Category", "Status", "Submitted"]);
 
 type RaisedBy = "All" | Grievance["raisedBy"];
 
@@ -42,11 +42,10 @@ const RAISED_BY_HEADINGS: Record<RaisedBy, { title: string; description: string 
 interface Filters extends FilterSelection {
   category: Set<string>;
   status: Set<string>;
-  priority: Set<string>;
   region: Set<string>;
 }
 
-const EMPTY: Filters = { category: new Set(), status: new Set(), priority: new Set(), region: new Set() };
+const EMPTY: Filters = { category: new Set(), status: new Set(), region: new Set() };
 
 type Loaded = { reload: number; rows: Grievance[]; total: number; error: string | null; at: Date };
 
@@ -67,7 +66,9 @@ export function GrievancesTable() {
   }, [reload]);
 
   const loading = loaded?.reload !== reload;
-  const all = loaded?.rows ?? [];
+  const fetched = loaded?.rows ?? [];
+  // The table only lists the statuses that have a card / filter option; anything else the service returns stays out.
+  const all = [DUMMY_GRIEVANCE, ...fetched].filter((g) => (GRIEVANCE_BUCKETS as string[]).includes(g.status));
   const options = grievanceFilterOptions(all);
   const refresh = () => setReload((r) => r + 1);
 
@@ -93,11 +94,10 @@ export function GrievancesTable() {
     (g) =>
       (raisedBy === "All" || g.raisedBy === raisedBy) &&
       (filters.category.size === 0 || filters.category.has(g.category)) &&
-      (filters.priority.size === 0 || filters.priority.has(g.priority)) &&
       (filters.region.size === 0 || filters.region.has(g.region)) &&
       matchesQuery(query, g),
   );
-  const rows = scoped.filter((g) => filters.status.size === 0 || filters.status.has(bucketOf(g.status)));
+  const rows = scoped.filter((g) => filters.status.size === 0 || filters.status.has(g.status));
   const stats = grievanceStatsFor(scoped);
   // The cards and the Status filter share one selection; a multi-status filter highlights no single card.
   const activeCard: StatKey = filters.status.size === 0 ? "All" : filters.status.size === 1 ? ([...filters.status][0] as StatKey) : "All";
@@ -121,7 +121,7 @@ export function GrievancesTable() {
         description="Raise and track grievances for yourself or on behalf of a farmer. Triage and resolution happen in the external Grievance Service - this surface is read-only for case handling."
         actions={<RaiseGrievanceButton onSubmitted={refresh} className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md bg-brand-green px-5 text-[14px] font-semibold text-white transition-colors hover:bg-brand-green-dark" />}
       />
-      <ServiceStatusBanner loading={loading} error={loaded?.error ?? null} lastLoaded={loaded?.at ?? null} total={loaded?.total ?? 0} shown={all.length} onRetry={refresh} />
+      <ServiceStatusBanner loading={loading} error={loaded?.error ?? null} lastLoaded={loaded?.at ?? null} total={loaded?.total ?? 0} shown={fetched.length} onRetry={refresh} />
       <GrievanceStats
         active={activeCard}
         counts={stats}
@@ -148,12 +148,12 @@ export function GrievancesTable() {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1080px] table-fixed border-collapse text-left">
+          <table className="w-full min-w-[1120px] table-fixed border-collapse text-left">
             <colgroup>
               <col className="w-[180px]" />
               <col />
               <col className="w-[120px]" />
-              <col className="w-[110px]" />
+              <col className="w-[150px]" />
               <col className="w-[135px]" />
               <col className="w-[160px]" />
               <col className="w-[110px]" />
@@ -165,9 +165,7 @@ export function GrievancesTable() {
                 <th className="px-4 py-3 font-semibold">
                   <FilterDropdown label="Category" allLabel="All categories" options={options.category} selected={filters.category} onApply={setFilter("category")} />
                 </th>
-                <th className="px-4 py-3 font-semibold">
-                  <FilterDropdown label="Priority" allLabel="All priorities" options={options.priority} selected={filters.priority} onApply={setFilter("priority")} />
-                </th>
+                <th className="px-4 py-3 font-semibold">Location</th>
                 <th className="px-4 py-3 font-semibold">Submitted</th>
                 <th className="px-4 py-3 font-semibold">
                   <FilterDropdown label="Status" allLabel="All statuses" options={options.status} selected={filters.status} onApply={setFilter("status")} />
@@ -216,16 +214,23 @@ export function GrievancesTable() {
                     </p>
                   </td>
                   <td className="px-4 py-4 text-[13.5px]">{g.category}</td>
-                  <td className="px-4 py-4"><GrievancePriorityPill priority={g.priority} /></td>
+                  <td className="px-4 py-4 text-[13px] leading-snug">
+                    {g.woreda || g.region ? (
+                      <>
+                        {g.woreda && <p className="text-slate-700">{g.woreda}</p>}
+                        {g.region && <p className="text-muted">{g.region}</p>}
+                      </>
+                    ) : (
+                      <span className="text-muted">-</span>
+                    )}
+                  </td>
                   <td className="whitespace-nowrap px-4 py-4 text-[13px] leading-snug text-slate-700">
                     {g.submittedAt.split(", ").slice(0, 2).join(", ")},
                     <br />
                     {g.submittedAt.split(", ")[2]}
                   </td>
                   <td className="px-4 py-4">
-                    <GrievanceBucketPill bucket={bucketOf(g.status)} />
-                    {/* Service sub-status (e.g. Submitted, Assigned) when it differs from the card bucket */}
-                    {g.status !== bucketOf(g.status) && <p className="mt-1 text-[12px] text-muted">{g.status}</p>}
+                    <GrievanceStatusPill status={g.status} />
                   </td>
                   <td className="px-4 py-4 text-center">
                     <RowAction onClick={() => setSelected(g)} icon="view">View</RowAction>
@@ -258,7 +263,6 @@ export function GrievancesTable() {
           setFilters({
             category: next.category ?? new Set(),
             status: next.status ?? new Set(),
-            priority: next.priority ?? new Set(),
             region: next.region ?? new Set(),
           });
           setPage(1);

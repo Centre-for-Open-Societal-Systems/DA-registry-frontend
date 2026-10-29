@@ -34,8 +34,8 @@ export interface Grievance {
   fromApi?: boolean;
 }
 
-/** Stat-card buckets derived from record statuses. */
-export type GrievanceBucket = "Pending" | "In Progress" | "Under Review" | "Resolved" | "Rejected";
+/** Statuses the table, its filter and the stat cards work with. */
+export type GrievanceBucket = Extract<GrievanceStatus, "Assigned" | "In Progress" | "More Info Needed" | "Rejected" | "Resolved" | "Closed">;
 
 /** One entry in a grievance's communication thread. */
 export type ThreadMessage =

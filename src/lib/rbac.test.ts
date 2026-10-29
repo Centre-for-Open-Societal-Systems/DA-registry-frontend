@@ -87,6 +87,7 @@ describe("pageTitleFor", () => {
     ["/performance/kpi-entry", "KPI Entry"],
     ["/admin/users", "Users & Roles"],
     ["/my-teams", "My Teams"],
+    ["/performance/teams", "My Teams"],
     ["/nowhere", "Dashboard"],
   ])("%s → %s", (path, title) => {
     expect(pageTitleFor(path)).toBe(title);
