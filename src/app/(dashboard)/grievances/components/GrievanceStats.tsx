@@ -26,12 +26,12 @@ const STATS: StatDef[] = [
     ),
   },
   {
-    key: "Pending",
-    accent: "border-l-orange-500",
-    tile: "bg-orange-50 text-orange-600",
+    key: "Assigned",
+    accent: "border-l-violet-600",
+    tile: "bg-violet-tint text-violet-600",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 2h12M6 22h12M8 2v4l4 5 4-5V2M8 22v-4l4-5 4 5v4" />
+        <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM17 11l2 2 4-4" />
       </svg>
     ),
   },
@@ -48,23 +48,13 @@ const STATS: StatDef[] = [
     ),
   },
   {
-    key: "Under Review",
-    accent: "border-l-violet-600",
-    tile: "bg-violet-tint text-violet-600",
+    key: "More Info Needed",
+    accent: "border-l-orange-500",
+    tile: "bg-orange-50 text-orange-600",
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="7" />
-        <path d="M20 20l-3.5-3.5" />
-      </svg>
-    ),
-  },
-  {
-    key: "Resolved",
-    accent: "border-l-brand-green",
-    tile: "bg-green-100 text-brand-green",
-    icon: (
-      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.2 14.2l-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4-6 6z" />
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 16v-4M12 8h.01" />
       </svg>
     ),
   },
@@ -79,6 +69,27 @@ const STATS: StatDef[] = [
       </svg>
     ),
   },
+  {
+    key: "Resolved",
+    accent: "border-l-brand-green",
+    tile: "bg-green-100 text-brand-green",
+    icon: (
+      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.2 14.2l-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4-6 6z" />
+      </svg>
+    ),
+  },
+  {
+    key: "Closed",
+    accent: "border-l-slate-500",
+    tile: "bg-slate-100 text-slate-600",
+    icon: (
+      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <rect x="5" y="11" width="14" height="10" rx="2" />
+        <path d="M8 11V7a4 4 0 018 0v4" />
+      </svg>
+    ),
+  },
 ];
 
 interface GrievanceStatsProps {
@@ -88,10 +99,10 @@ interface GrievanceStatsProps {
   onSelect: (key: StatKey) => void;
 }
 
-// Clicking a card filters the table to that bucket; "All" clears it.
+// Clicking a card filters the table to that status; "All" clears it.
 export function GrievanceStats({ active, counts, onSelect }: GrievanceStatsProps) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
       {STATS.map((stat) => {
         const isActive = active === stat.key;
         return (
