@@ -3,7 +3,10 @@
 import { useState, type ReactNode } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { Dropdown } from "@/components/ui/Dropdown";
+import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import {
@@ -14,6 +17,7 @@ import {
   GEOGRAPHY,
   KEBELES,
   REGISTRIES,
+  REGISTRY_ENTITIES,
   SERVICES,
   type DepartmentType,
   type RoleName,
@@ -31,7 +35,7 @@ interface SuperAdminUserFormModalProps {
   onSave: (values: UserFormValues) => void;
 }
 
-type Field = "name" | "dob" | "gender" | "email" | "mobile" | "department" | "departmentType" | "role" | "region" | "zone" | "woreda" | "kebele" | "service" | "registry";
+type Field = "name" | "dob" | "gender" | "email" | "mobile" | "department" | "departmentType" | "role" | "region" | "zone" | "woreda" | "kebele" | "service" | "registry" | "entities";
 type Errors = Partial<Record<Field, string>>;
 
 const TITLES = { add: "Add User", edit: "Edit User" };
@@ -52,6 +56,21 @@ function Section({ title, first, children }: { title: string; first?: boolean; c
   );
 }
 
+function CheckGroup({ idPrefix, options, selected, onToggle, className }: { idPrefix: string; options: string[]; selected: string[]; onToggle: (value: string) => void; className?: string }) {
+  return (
+    <div role="group" className={cn("grid grid-cols-1 gap-x-4 gap-y-2.5", className)}>
+      {options.map((option, i) => (
+        <label key={option} htmlFor={`${idPrefix}-${i}`} className="flex cursor-pointer items-center gap-2.5 text-[14px] text-ink">
+          <Checkbox id={`${idPrefix}-${i}`} checked={selected.includes(option)} onChange={() => onToggle(option)} />
+          {option}
+        </label>
+      ))}
+    </div>
+  );
+}
+
+const toggleIn = (list: string[], value: string) => (list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+
 // One form for Add and Edit, so both always show the same fields. The code is generated, never typed.
 export function SuperAdminUserFormModal({ mode, initial, suggestedCode, onClose, onSave }: SuperAdminUserFormModalProps) {
   const [name, setName] = useState(initial?.name ?? "");
@@ -67,8 +86,9 @@ export function SuperAdminUserFormModal({ mode, initial, suggestedCode, onClose,
   const [zone, setZone] = useState(initial?.zone ?? "");
   const [woreda, setWoreda] = useState(initial?.woreda ?? "");
   const [kebele, setKebele] = useState(initial?.kebele ?? "");
-  const [service, setService] = useState(initial?.service ?? "");
-  const [registry, setRegistry] = useState(initial?.registry ?? "");
+  const [service, setService] = useState<string[]>(initial?.service ?? []);
+  const [registry, setRegistry] = useState<string[]>(initial?.registry ?? []);
+  const [entities, setEntities] = useState<string[]>(initial?.entities ?? []);
   const [errors, setErrors] = useState<Errors>({});
 
   const clear = (key: Field) => setErrors((e) => ({ ...e, [key]: undefined }));
@@ -88,6 +108,25 @@ export function SuperAdminUserFormModal({ mode, initial, suggestedCode, onClose,
   const pickZone = (value: string) => { setZone(value); setWoreda(""); setKebele(""); clear("zone"); };
   const pickWoreda = (value: string) => { setWoreda(value); setKebele(""); clear("woreda"); };
 
+  const toggleService = (value: string) => { setService((s) => toggleIn(s, value)); clear("service"); };
+  // Ticking a registry adds its Entities field; unticking it drops the field and whatever was picked in it.
+  const toggleRegistry = (value: string) => {
+    if (registry.includes(value)) {
+      const entitiesOf = REGISTRY_ENTITIES[value] ?? [];
+      setRegistry((r) => r.filter((v) => v !== value));
+      setEntities((e) => e.filter((v) => !entitiesOf.includes(v)));
+    } else {
+      setRegistry((r) => [...r, value]);
+    }
+    clear("registry");
+    clear("entities");
+  };
+  const setEntitiesFor = (registryName: string, picked: string[]) => {
+    const entitiesOf = REGISTRY_ENTITIES[registryName] ?? [];
+    setEntities((e) => [...e.filter((v) => !entitiesOf.includes(v)), ...picked]);
+    clear("entities");
+  };
+
   const submit = () => {
     const next: Errors = {};
     if (name.trim().length < 3) next.name = "Enter the user's full name";
@@ -104,8 +143,9 @@ export function SuperAdminUserFormModal({ mode, initial, suggestedCode, onClose,
     if (!zone) next.zone = REQUIRED;
     if (!woreda) next.woreda = REQUIRED;
     if (!kebele) next.kebele = REQUIRED;
-    if (!service) next.service = REQUIRED;
-    if (!registry) next.registry = REQUIRED;
+    if (service.length === 0) next.service = "Select at least one service";
+    if (registry.length === 0) next.registry = "Select at least one registry or catalogue";
+    else if (registry.some((r) => !(REGISTRY_ENTITIES[r] ?? []).some((e) => entities.includes(e)))) next.entities = "Select at least one entity under each registry";
     setErrors(next);
     if (Object.keys(next).length > 0) return;
     onSave({
@@ -125,6 +165,7 @@ export function SuperAdminUserFormModal({ mode, initial, suggestedCode, onClose,
       departmentType: departmentType as DepartmentType,
       service,
       registry,
+      entities,
     });
   };
 
@@ -208,11 +249,36 @@ export function SuperAdminUserFormModal({ mode, initial, suggestedCode, onClose,
       </Section>
 
       <Section title="Services and registries">
-        <FormField label="Service" htmlFor="su-service" required {...err("service")} className={FIELD}>
-          <Dropdown id="su-service" value={service} placeholder="Select service" options={SERVICES} onChange={(v) => { setService(v); clear("service"); }} />
+        {/* Service takes the full row, Registry and Catalogue the one below. */}
+        <FormField label="Service" htmlFor="su-service-0" required {...err("service")} className={cn(FIELD, "sm:col-span-2 lg:col-span-4")}>
+          <CheckGroup idPrefix="su-service" options={SERVICES} selected={service} onToggle={toggleService} className="sm:grid-cols-2 lg:grid-cols-4" />
         </FormField>
-        <FormField label="Registry and Catalogue" htmlFor="su-registry" required {...err("registry")} className={FIELD}>
-          <Dropdown id="su-registry" value={registry} placeholder="Select registry or catalogue" options={REGISTRIES} onChange={(v) => { setRegistry(v); clear("registry"); }} />
+        {/* Each registry is a row: its checkbox on the left; once ticked, its Entities multi-select appears on the right. */}
+        <FormField label="Registry and Catalogue" htmlFor="su-registry-0" required hint={errors.registry ?? errors.entities} hintTone="error" className={cn(FIELD, "sm:col-span-2 lg:col-span-4")}>
+          <div role="group" className="flex flex-col gap-2">
+            {REGISTRIES.map((r, i) => {
+              const checked = registry.includes(r);
+              const options = REGISTRY_ENTITIES[r] ?? [];
+              return (
+                <div key={r} className="grid min-h-9 grid-cols-1 items-center gap-x-6 gap-y-1.5 sm:grid-cols-[190px_minmax(0,260px)]">
+                  <label htmlFor={`su-registry-${i}`} className="flex cursor-pointer items-center gap-2.5 text-[14px] text-ink">
+                    <Checkbox id={`su-registry-${i}`} checked={checked} onChange={() => toggleRegistry(r)} />
+                    {r}
+                  </label>
+                  {checked && (
+                    <MultiSelectDropdown
+                      id={`su-entity-${r}`}
+                      placeholder="Select entities"
+                      options={options}
+                      selected={entities.filter((e) => options.includes(e))}
+                      onChange={(picked) => setEntitiesFor(r, picked)}
+                      className="h-9"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </FormField>
       </Section>
     </Modal>
