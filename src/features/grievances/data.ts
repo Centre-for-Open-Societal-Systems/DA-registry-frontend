@@ -43,23 +43,6 @@ const CATEGORY_CODES: Record<GrievanceCategory, string> = {
   Inputs: "INP", Schemes: "SCH", Payments: "PAY", Markets: "MKT", Extension: "EXT", Land: "LND",
 };
 
-/** Temporary preview row for the View dialog; not from the Grievance Service. */
-export const DUMMY_GRIEVANCE: Grievance = {
-  ticketId: "DUMMY-0001",
-  title: "Certified maize seed supplied with poor germination rate",
-  submitter: "Abebe Bekele",
-  region: "Oromia",
-  woreda: "Bishoftu",
-  type: "Seed quality / germination failure",
-  category: "Inputs",
-  status: "Resolved",
-  priority: "High",
-  submittedAt: "Oct 29, 2026, 4:10 PM",
-  attachments: 3,
-  responses: 1,
-  raisedBy: "Farmer",
-};
-
 export const GRIEVANCES: Grievance[] = RECORDS.map((r, i) => {
   const woredaCode = r.woreda.replace(/[^A-Za-z]/g, "").slice(0, 4).toUpperCase();
   return {
