@@ -4,6 +4,7 @@ import {
   apiFarmerToFarmer,
   apiPlotToPlot,
   apiVisitToVisit,
+  describeFarmerError,
   fetchFarmerPlots,
   fetchFarmerProfile,
   fetchFarmerVisits,
@@ -12,6 +13,7 @@ import {
   toFarmerStatus,
   type ApiFarmer,
 } from "./farmersApi";
+import { ApiError } from "@/lib/api";
 import { registryCode } from "./components/planVisit";
 import { FARMERS } from "./data";
 
@@ -38,6 +40,8 @@ const row: ApiFarmer = {
   woreda: "ET04-W01",
   region: "ET04",
   total_land_hectares: 1.2,
+  total_plots: 2,
+  photo_url: "https://storage.example/photo.jpg",
   registration_state: "APPROVED",
   registered_at: "2026-05-12 08:20:00",
   visit_count: 9,
@@ -53,11 +57,18 @@ beforeEach(() => {
 });
 
 describe("farmer calls", () => {
-  it("lists farmers with filters and paging", async () => {
-    fetchMock.mockResolvedValueOnce(json({ data: { farmers: [row], total: 1, page: { limit: 20, start: 0 } } }));
+  it("lists farmers by search text and page", async () => {
+    fetchMock.mockResolvedValueOnce(json({ data: { farmers: [row], total: 1 } }));
 
-    await expect(listFarmers({ kebele: "Bako Tibe", limit: 20 })).resolves.toEqual({ items: [row], total: 1 });
-    expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/da-services/farmers?kebele=Bako+Tibe&limit=20");
+    await expect(listFarmers({ searchText: "Lelise", page: 2, pageSize: 20 })).resolves.toEqual({ items: [row], total: 1 });
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/da-services/farmers?search_text=Lelise&page=2&page_size=20");
+  });
+
+  it("searches for FR- (every farmer) when the search box is empty", async () => {
+    fetchMock.mockResolvedValueOnce(json({ data: { farmers: [], total: 0 } }));
+
+    await listFarmers({ searchText: "  " });
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/da-services/farmers?search_text=FR-&page=1&page_size=50");
   });
 
   it("reads the profile, visits and plots of one farmer", async () => {
@@ -82,6 +93,9 @@ describe("mapping", () => {
   it("turns a list row into a table farmer", () => {
     expect(apiFarmerToFarmer(row)).toMatchObject({
       id: "FRM-000103",
+      regId: "FR-88341",
+      avatar: "https://storage.example/photo.jpg",
+      totalPlots: 2,
       name: "Lelise Gudeta",
       kebele: "Bako Tibe",
       crop: "—",
@@ -92,6 +106,13 @@ describe("mapping", () => {
       visits: 9,
       lastVisit: "12 Jun 2026",
     });
+  });
+
+  it("words farmer errors as the backend error table says", () => {
+    expect(describeFarmerError(new ApiError("x", 403))).toBe("You don't have access to this farmer.");
+    expect(describeFarmerError(new ApiError("x", 404))).toBe("Farmer not found.");
+    expect(describeFarmerError(new ApiError("x", 502))).toBe("Registry unavailable, try again.");
+    expect(describeFarmerError(new ApiError("usr: Field required", 400))).toBe("usr: Field required");
   });
 
   it("maps registry states onto the status pill", () => {
