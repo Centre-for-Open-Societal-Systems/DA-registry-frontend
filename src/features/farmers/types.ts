@@ -2,6 +2,8 @@ export type FarmerStatus = "Verified" | "Pending" | "Flagged";
 
 export interface Farmer {
   id: string;
+  /** Farmer-ID shown to people ("FR-675618129549"); also works in every farmer URL. Absent on sample farmers. */
+  regId?: string;
   name: string;
   email: string;
   phone: string;
